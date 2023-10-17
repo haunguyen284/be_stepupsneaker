@@ -35,10 +35,10 @@
         }
 
         //sever
-        @ExceptionHandler(Exception.class)
-        public ResponseEntity<?> handlerGlobalException(Exception exception, WebRequest request) {
-            return ResponseHelper.getErrorResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+//        @ExceptionHandler(Exception.class)
+//        public ResponseEntity<?> handlerGlobalException(Exception exception, WebRequest request) {
+//            return ResponseHelper.getErrorResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
 
         //as AccessDeniedException and ...
 
