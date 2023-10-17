@@ -24,8 +24,6 @@ public class AdminVoucherController {
     @GetMapping("")
     public Object findAllVoucher(AdminVoucherRequest voucherRequest) {
         PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllEntity(voucherRequest);
-        System.out.println(voucherRequest.getStatus());
-        System.out.println("======="+voucherRequest.getStartDate());
         return ResponseHelper.getResponse(listVoucher, HttpStatus.OK);
     }
 
@@ -39,7 +37,6 @@ public class AdminVoucherController {
     public Object create(@RequestBody @Valid AdminVoucherRequest voucherRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-
         return ResponseHelper.getResponse(adminVoucherService.create(voucherRequest), HttpStatus.OK);
     }
 
@@ -48,7 +45,6 @@ public class AdminVoucherController {
         voucherRequest.setId(UUID.fromString(id));
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-
         return ResponseHelper.getResponse(adminVoucherService.update(voucherRequest), HttpStatus.OK);
     }
 
