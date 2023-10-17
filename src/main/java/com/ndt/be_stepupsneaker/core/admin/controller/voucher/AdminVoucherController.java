@@ -52,7 +52,7 @@ public class AdminVoucherController {
         return ResponseHelper.getResponse(adminVoucherService.update(voucherRequest), HttpStatus.OK);
     }
 
-    @PutMapping("delete/{id}")
+    @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
