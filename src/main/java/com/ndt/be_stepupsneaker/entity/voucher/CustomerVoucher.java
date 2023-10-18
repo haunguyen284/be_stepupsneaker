@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.entity.voucher;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import jakarta.persistence.Entity;

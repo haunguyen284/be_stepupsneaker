@@ -1,14 +1,15 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.CustomerIdRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
-@Controller
+@RestController
 @RequestMapping("/admin/vouchers")
 public class AdminVoucherController {
     @Autowired
@@ -59,9 +62,31 @@ public class AdminVoucherController {
         return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
 
-    @GetMapping("/getAllCustomerByVoucherId/{id}")
-    public Object findAllCustomerVoucherByVoucherId(@PathVariable("id") String id, AdminCustomerVoucherRequest customerVoucherReq) {
-        PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService.getAllCustomerByVoucherId(UUID.fromString(id), customerVoucherReq);
+    @GetMapping("/getAllCustomerByVoucherId/{voucherId}/search")
+    public Object findAllCustomerVoucherByVoucherId(@PathVariable("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
+        PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService.getAllCustomerByVoucherId(UUID.fromString(voucherId), customerRequest);
         return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
+
+    @GetMapping("/getAllCustomerNotInVoucherId/{voucherId}/search")
+    public Object findAllCustomerVoucherNotInVoucherId(@PathVariable("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
+        PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService
+                .getAllCustomerNotInVoucherId(UUID.fromString(voucherId), customerRequest);
+        return ResponseHelper.getResponse(customerList, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/deleteAllCustomerBy/{voucherId}")
+    public Object removeCustomersFromVoucher(
+            @PathVariable("voucherId") String voucherId,
+            @RequestBody List<CustomerIdRequest> customerIdsToRemove) {
+        List<UUID> customerIds = customerIdsToRemove.stream()
+                .map(customerIdRequest -> UUID.fromString(customerIdRequest.getId()))
+                .collect(Collectors.toList());
+
+        UUID convertedVoucherId = UUID.fromString(voucherId);
+
+        return ResponseHelper.getResponse(adminVoucherService.removeCustomersFromVoucher(convertedVoucherId, customerIds), HttpStatus.OK);
+    }
+    
+
 }

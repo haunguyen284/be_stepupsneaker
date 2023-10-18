@@ -6,6 +6,8 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherReque
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.product.Color;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.repository.product.ColorRepository;
 import com.ndt.be_stepupsneaker.repository.voucher.VoucherRepository;
 import org.springframework.data.domain.Page;
@@ -25,9 +27,9 @@ public interface AdminVoucherRepository extends VoucherRepository {
             AND
             (:#{#request.code} IS NULL OR :#{#request.code} LIKE '' OR x.code LIKE  CONCAT('%', :#{#request.code}, '%'))
              AND
-            (:#{#request.status} IS NULL OR x.status = :#{#request.status})
+            (:status IS NULL OR x.status = :status)
              AND
-            (:#{#request.type} IS NULL OR x.type = :#{#request.type})
+            (:type IS NULL OR x.type = :type)
              AND
             (:#{#request.quantity} = 0 OR x.quantity = :#{#request.quantity})
              AND
@@ -37,7 +39,7 @@ public interface AdminVoucherRepository extends VoucherRepository {
              AND
             (x.deleted = false)
              """)
-    Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable);
+    Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable, @Param("status")VoucherStatus voucherStatus,@Param("type") VoucherType voucherType);
 
 
     @Query("""

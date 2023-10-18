@@ -31,7 +31,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     public PageableObject<AdminSizeResponse> findAllEntity(AdminSizeRequest adminSizeRequest) {
 
         Pageable pageable = paginationUtil.pageable(adminSizeRequest);
-        Page<Size> resp = adminSizeRepository.findAllSize(adminSizeRequest, pageable);
+        Page<Size> resp = adminSizeRepository.findAllSize(adminSizeRequest, adminSizeRequest.getStatus(), pageable);
         Page<AdminSizeResponse> adminSizeResponses = resp.map(AdminSizeMapper.INSTANCE::sizeToAdminSizeResponse);
         return new PageableObject<>(adminSizeResponses);
     }

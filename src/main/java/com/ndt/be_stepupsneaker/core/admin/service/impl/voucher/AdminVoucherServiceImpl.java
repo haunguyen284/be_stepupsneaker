@@ -50,7 +50,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public PageableObject<AdminVoucherResponse> findAllEntity(AdminVoucherRequest voucherRequest) {
 
         Pageable pageable = paginationUtil.pageable(voucherRequest);
-        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherRequest, pageable);
+        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherRequest, pageable,voucherRequest.getStatus(),voucherRequest.getType());
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);
         return new PageableObject<>(adminVoucherResponsePage);
     }
@@ -120,6 +120,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         List<CustomerVoucher> customerVoucherList = voucher.getCustomerVoucherList();
         List<CustomerVoucher> customerVouchersToRemove = new ArrayList<>();
         for (CustomerVoucher customerVoucher : customerVoucherList) {
+            System.out.println("1==:"+customerVoucher.getVoucher().getName());
             if (customerIdToRemove.contains(customerVoucher)) {
                 customerVouchersToRemove.add(customerVoucher);
             }
