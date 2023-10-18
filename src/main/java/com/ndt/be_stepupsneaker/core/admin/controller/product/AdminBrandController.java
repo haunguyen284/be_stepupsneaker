@@ -1,12 +1,10 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.product;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminColorResponse;
-import com.ndt.be_stepupsneaker.core.admin.service.product.AdminColorService;
+import com.ndt.be_stepupsneaker.core.admin.service.product.AdminBrandService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.product.Color;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,52 +20,49 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin/colors")
-public class AdminColorController {
+@RequestMapping("/admin/brands")
+public class AdminBrandController {
     @Autowired
-    private AdminColorService adminColorService;
+    private AdminBrandService adminBrandService;
 
     @GetMapping("")
-    public Object findAllColor(AdminColorRequest colorDTO){
-        PageableObject<AdminColorResponse> listColor = adminColorService.findAllEntity(colorDTO);
+    public Object findAllBrand(AdminBrandRequest colorDTO){
+        PageableObject<AdminBrandResponse> listBrand = adminBrandService.findAllEntity(colorDTO);
 
-        return ResponseHelper.getResponse(listColor, HttpStatus.OK);
+        return ResponseHelper.getResponse(listBrand, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminColorResponse adminColorResponse = adminColorService.findById(UUID.fromString(id));
+        AdminBrandResponse adminBrandResponse = adminBrandService.findById(UUID.fromString(id));
 
-        return ResponseHelper.getResponse(adminColorResponse, HttpStatus.OK);
+        return ResponseHelper.getResponse(adminBrandResponse, HttpStatus.OK);
     }
 
-
     @PostMapping("")
-    public Object create(@RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
+    public Object create(@RequestBody @Valid AdminBrandRequest colorDTO, BindingResult bindingResult){
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
-        return ResponseHelper.getResponse(adminColorService.create(colorDTO), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminBrandService.create(colorDTO), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
+    public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminBrandRequest colorDTO, BindingResult bindingResult){
         colorDTO.setId(UUID.fromString(id));
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
-        return ResponseHelper.getResponse(adminColorService.update(colorDTO), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminBrandService.update(colorDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminColorService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminBrandService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
 }

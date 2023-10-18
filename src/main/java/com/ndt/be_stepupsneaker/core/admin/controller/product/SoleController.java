@@ -1,12 +1,10 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.product;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminColorResponse;
-import com.ndt.be_stepupsneaker.core.admin.service.product.AdminColorService;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminSoleRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminSoleResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminTradeMarkResponse;
+import com.ndt.be_stepupsneaker.core.admin.service.product.AdminSoleService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.product.Color;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,52 +20,50 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 
+
 @RestController
-@RequestMapping("/admin/colors")
-public class AdminColorController {
+@RequestMapping("/admin/soles")
+public class SoleController {
     @Autowired
-    private AdminColorService adminColorService;
+    private AdminSoleService adminSoleService;
 
     @GetMapping("")
-    public Object findAllColor(AdminColorRequest colorDTO){
-        PageableObject<AdminColorResponse> listColor = adminColorService.findAllEntity(colorDTO);
+    public Object findAllSole(AdminSoleRequest colorDTO){
+        PageableObject<AdminSoleResponse> listSole = adminSoleService.findAllEntity(colorDTO);
 
-        return ResponseHelper.getResponse(listColor, HttpStatus.OK);
+        return ResponseHelper.getResponse(listSole, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminColorResponse adminColorResponse = adminColorService.findById(UUID.fromString(id));
+        AdminSoleResponse adminSoleResponse = adminSoleService.findById(UUID.fromString(id));
 
-        return ResponseHelper.getResponse(adminColorResponse, HttpStatus.OK);
+        return ResponseHelper.getResponse(adminSoleResponse, HttpStatus.OK);
     }
 
-
     @PostMapping("")
-    public Object create(@RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
+    public Object create(@RequestBody @Valid AdminSoleRequest colorDTO, BindingResult bindingResult){
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
-        return ResponseHelper.getResponse(adminColorService.create(colorDTO), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminSoleService.create(colorDTO), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
+    public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminSoleRequest colorDTO, BindingResult bindingResult){
         colorDTO.setId(UUID.fromString(id));
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
-        return ResponseHelper.getResponse(adminColorService.update(colorDTO), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminSoleService.update(colorDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminColorService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminSoleService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
 }

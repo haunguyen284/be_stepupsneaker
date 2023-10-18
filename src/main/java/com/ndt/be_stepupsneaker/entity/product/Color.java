@@ -5,6 +5,8 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;

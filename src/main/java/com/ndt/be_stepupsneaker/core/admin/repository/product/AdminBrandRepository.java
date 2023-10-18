@@ -1,19 +1,34 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.product;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
 import com.ndt.be_stepupsneaker.entity.product.Brand;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import com.ndt.be_stepupsneaker.repository.product.BrandRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface AdminBrandRepository extends BrandRepository {
-//    @Query(value = """
-//    SELECT c.id, c.name, c.status, c.created_at, c.updated_at, c.created_by, c.updated_by, c.deleted FROM brand as c
-//    WHERE ( :#{#req.name} IS NULL OR :#{#req.name} LIKE '' OR c.name LIKE %:#{#req.name}% )
-//    ORDER BY c.created_at
-//    """, nativeQuery = true)
-//    Page<Brand> findAllBrand(@Param("req") AdminBrandRequest request, Pageable pageable);
+    @Query("""
+    SELECT x FROM Brand x 
+    WHERE (:#{#request.name} IS NULL OR :#{#request.name} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.name}, '%'))
+     AND 
+     ((:status IS NULL) OR (x.status = :status)) 
+     AND
+     x.deleted=false
+    """)
+    Page<Brand> findAllBrand(@Param("request") AdminBrandRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
     Optional<Brand> findByName(String name);
+
+    @Query("""
+    SELECT x FROM Brand x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Brand y WHERE y.id != :id))
+    """)
+    Optional<Brand> findByName(@Param("id") UUID id, @Param("name") String name);
 }
