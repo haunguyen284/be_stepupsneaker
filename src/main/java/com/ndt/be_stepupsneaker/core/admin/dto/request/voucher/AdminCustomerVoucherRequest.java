@@ -1,5 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.voucher;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
@@ -23,7 +25,7 @@ import java.util.UUID;
 public class AdminCustomerVoucherRequest extends PageableRequest {
     private UUID id;
 
-    private Voucher voucher;
+    private AdminVoucherRequest voucherRequest;
 
-    private Customer customer;
+    private AdminCustomerRequest customerRequest;
 }

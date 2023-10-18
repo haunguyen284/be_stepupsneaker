@@ -1,10 +1,14 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
+import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,8 @@ import java.util.UUID;
 public class AdminVoucherController {
     @Autowired
     private AdminVoucherService adminVoucherService;
+    @Autowired
+    private AdminCustomerVoucherService adminCustomerVoucherService;
 
     @GetMapping("")
     public Object findAllVoucher(AdminVoucherRequest voucherRequest) {
@@ -51,5 +57,11 @@ public class AdminVoucherController {
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
+    }
+
+    @GetMapping("/getAllCustomerByVoucherId/{id}")
+    public Object findAllCustomerVoucherByVoucherId(@PathVariable("id") String id, AdminCustomerVoucherRequest customerVoucherReq) {
+        PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService.getAllCustomerByVoucherId(UUID.fromString(id), customerVoucherReq);
+        return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
 }

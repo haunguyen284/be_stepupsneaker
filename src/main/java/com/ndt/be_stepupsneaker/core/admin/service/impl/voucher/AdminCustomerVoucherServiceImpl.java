@@ -1,12 +1,19 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
+
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminCustomerVoucherMapper;
+import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
-import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +21,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +30,9 @@ import java.util.UUID;
 public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherService {
     @Autowired
     private AdminCustomerVoucherRepository adminCustomerVoucherRepository;
+
+//    @Autowired
+//    private AdminVoucherRepository adminVoucherRepository;
 
     @Autowired
     private PaginationUtil paginationUtil;
@@ -64,6 +76,28 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
         newCustomerVoucher.setDeleted(true);
         adminCustomerVoucherRepository.save(newCustomerVoucher);
         return true;
+    }
+
+    @Override
+    public List<AdminCustomerVoucherResponse> create(List<AdminVoucherRequest> voucherRequestList, List<AdminCustomerRequest> adminCustomerRequests) {
+        List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
+        for (AdminVoucherRequest voucherRequest : voucherRequestList) {
+            for (AdminCustomerRequest adminCustomerRequest : adminCustomerRequests) {
+                CustomerVoucher newCustomerVoucher = null;
+                newCustomerVoucher.setCustomer(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(adminCustomerRequest));
+                newCustomerVoucher.setVoucher(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
+                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(newCustomerVoucher));
+            }
+        }
+        return adminCustomerVoucherResponseList;
+    }
+
+    @Override
+    public PageableObject<AdminCustomerResponse> getAllCustomerByVoucherId(UUID id, AdminCustomerVoucherRequest customerVoucherReq) {
+        Pageable pageable = paginationUtil.pageable(customerVoucherReq);
+        Page<Customer> resp = adminCustomerVoucherRepository.getAllCustomerByVoucherId(id, customerVoucherReq, pageable);
+        Page<AdminCustomerResponse> adminCustomerVoucherRespPage = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
+        return new PageableObject<>(adminCustomerVoucherRespPage);
     }
 
 }

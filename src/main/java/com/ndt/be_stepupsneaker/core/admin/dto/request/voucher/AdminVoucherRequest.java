@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.voucher;
 
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -39,4 +41,6 @@ public class AdminVoucherRequest extends PageableRequest {
     private Long endDate;
 
     private String image;
+
+    List<AdminCustomerVoucherRequest> adminCustomerVoucherRequests;
 }

@@ -10,6 +10,8 @@ import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.List;
+
 @Getter
 @Setter
 @DynamicUpdate
@@ -46,5 +48,8 @@ public class Voucher extends PrimaryEntity {
 
     @Column(name = "url_image")
     private String image;
+
+    @OneToMany(mappedBy = "voucher")
+    List<CustomerVoucher> customerVoucherList;
 }
 

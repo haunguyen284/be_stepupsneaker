@@ -1,7 +1,9 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.voucher;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.product.Color;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.repository.product.ColorRepository;
@@ -39,9 +41,13 @@ public interface AdminVoucherRepository extends VoucherRepository {
 
 
     @Query("""
-            SELECT x FROM Voucher x WHERE x.code = :code AND :code IN (SELECT y.code FROM Voucher y WHERE y.id != :id)
+            SELECT x FROM Voucher x 
+            WHERE x.code = :code AND :code IN (SELECT y.code FROM Voucher y WHERE y.id != :id)
             """)
     Optional<Voucher> findByCode(@Param("id") UUID id, @Param("code") String code);
 
     Optional<Voucher> findByCode(String code);
+
+
+
 }
