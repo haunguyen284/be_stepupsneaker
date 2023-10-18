@@ -14,6 +14,7 @@ import org.hibernate.annotations.Nationalized;
 @Setter
 @Table(name = "customer")
 @Entity
+
 public class Customer extends PrimaryEntity {
     @Column(name = "full_name", length = EntityProperties.LENGTH_NAME)
     @Nationalized
@@ -30,7 +31,6 @@ public class Customer extends PrimaryEntity {
 
     @Column(name = "status")
     private CustomerStatus status;
-
 
     @Column(name = "gender", length = EntityProperties.LENGTH_GENDER)
     @Nationalized
