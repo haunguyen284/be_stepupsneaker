@@ -28,12 +28,16 @@ public interface AdminCustomerRepository extends CustomerRepository {
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request, Pageable pageable);
 
     Optional<Customer> findByFullName(String fullName);
+
     Optional<Customer> findByEmail(String email);
 
     @Query("""
-    SELECT x FROM Customer x WHERE (x.fullName = :fullName AND :fullName IN (SELECT y.fullName FROM Customer y WHERE y.id != :id))
-    """)
-    Optional<Customer> findByFullName(@Param("id")UUID id, @Param("fullName") String fullName);
+            SELECT x FROM Customer x WHERE (x.fullName = :fullName AND :fullName IN ('SELECT y.fullName FROM Customer y WHERE y.id != :id'))
+            """)
+    Optional<Customer> findByFullName(@Param("id") UUID id, @Param("fullName") String fullName);
 
-
+    @Query("""
+            SELECT x FROM Customer x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id'))
+            """)
+    Optional<Customer> findByEmail(@Param("id") UUID id, @Param("email") String email);
 }
