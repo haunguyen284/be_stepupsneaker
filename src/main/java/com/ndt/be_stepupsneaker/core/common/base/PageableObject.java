@@ -11,12 +11,12 @@ public class PageableObject<T> {
     private final List<T> data;
     private final long totalPages;
     private final int currentPage;
-    private final long totalRecords;
+    private final long totalElements;
 
     public PageableObject(Page<T> page) {
         this.data = page.getContent();
         this.totalPages = page.getTotalPages();
         this.currentPage = page.getNumber();
-        this.totalRecords = page.getTotalElements();
+        this.totalElements = page.getTotalElements();
     }
 }
