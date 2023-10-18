@@ -58,10 +58,6 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         if (employeeOptional.isPresent()) {
             throw new ApiException("Email is exit");
         }
-        employeeOptional = adminEmployeeRepository.findByPhoneNumber(employeeDTO.getPhoneNumber());
-        if (employeeOptional.isPresent()) {
-            throw new ApiException("Phone number is exit");
-        }
         employeeOptional = adminEmployeeRepository.findById(employeeDTO.getId());
         if (employeeOptional.isEmpty()) {
             throw new ResourceNotFoundException("Employee not exit");

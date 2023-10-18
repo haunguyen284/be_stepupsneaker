@@ -22,10 +22,10 @@ public interface AdminCustomerRepository extends CustomerRepository {
     AND
     (:#{#request.email} IS NULL OR :#{#request.email} LIKE '' OR x.email LIKE CONCAT('%', :#{#request.email}, '%'))
     AND
-    (:#{#request.status} IS NULL OR x.status = :#{#request.status})
+    (:status IS NULL OR x.status = :status)
     AND
     (:#{#request.gender} IS NULL OR x.gender = :#{#request.gender})
-    AND
+     AND
     (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
     """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request, @Param("status")CustomerStatus status, Pageable pageable);

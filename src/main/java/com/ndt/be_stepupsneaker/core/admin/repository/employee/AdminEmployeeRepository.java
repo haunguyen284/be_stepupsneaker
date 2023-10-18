@@ -28,7 +28,7 @@ public interface AdminEmployeeRepository extends EmployeeRepository {
     AND
     (:#{#request.phoneNumber} IS NULL OR :#{#request.phoneNumber} LIKE '' OR x.phoneNumber LIKE CONCAT('%', :#{#request.phoneNumber}, '%'))
     AND
-    (:#{#request.status} IS NULL OR x.status = :#{#request.status})
+    (:status IS NULL OR x.status = :status)
 """)
 
     Page<Employee> findAllEmployee(@Param("request")AdminEmployeeRequest request, @Param("status")EmployeeStatus status, Pageable pageable);
