@@ -31,7 +31,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     @Override
     public PageableObject<AdminEmployeeResponse> findAllEntity(AdminEmployeeRequest employeeRequest) {
         Pageable pageable = paginationUtil.pageable(employeeRequest);
-        Page<Employee> resp = adminEmployeeRepository.findAllEmployee(employeeRequest, pageable);
+        Page<Employee> resp = adminEmployeeRepository.findAllEmployee(employeeRequest, employeeRequest.getStatus(), pageable);
         Page<AdminEmployeeResponse> adminEmployeeResponses = resp.map(AdminEmployeeMapper.INSTANCE::employeeToAdminEmpolyeeResponse);
         return new PageableObject<>(adminEmployeeResponses);
 

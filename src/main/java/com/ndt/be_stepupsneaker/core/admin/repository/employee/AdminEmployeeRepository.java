@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.repository.employee;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EmployeeStatus;
 import com.ndt.be_stepupsneaker.repository.employee.EmployeeRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,19 +16,22 @@ import java.util.UUID;
 @Repository
 public interface AdminEmployeeRepository extends EmployeeRepository {
     @Query("""
-                SELECT x FROM Employee x 
-                WHERE
-                (:#{#request.fullName} IS NULL OR :#{#request.fullName} LIKE '' OR x.fullName LIKE CONCAT('%', :#{#request.fullName}, '%'))
-                AND
-                (:#{#request.email} IS NULL OR :#{#request.email} LIKE '' OR x.email LIKE CONCAT('%', :#{#request.email}, '%'))
-                AND
-                (:#{#request.address} IS NULL OR :#{#request.address} LIKE '' OR x.address LIKE CONCAT('%', :#{#request.address}, '%'))
-                AND
-                (:#{#request.gender} IS NULL OR x.gender = :#{#request.gender})
-                AND
-                (:#{#request.phoneNumber} IS NULL OR :#{#request.phoneNumber} LIKE '' OR x.phoneNumber LIKE CONCAT('%', :#{#request.phoneNumber}, '%'))
-            """)
-    Page<Employee> findAllEmployee(@Param("request")AdminEmployeeRequest request, Pageable pageable);
+    SELECT x FROM Employee x 
+    WHERE
+    (:#{#request.fullName} IS NULL OR :#{#request.fullName} LIKE '' OR x.fullName LIKE CONCAT('%', :#{#request.fullName}, '%'))
+    AND
+    (:#{#request.email} IS NULL OR :#{#request.email} LIKE '' OR x.email LIKE CONCAT('%', :#{#request.email}, '%'))
+    AND
+    (:#{#request.address} IS NULL OR :#{#request.address} LIKE '' OR x.address LIKE CONCAT('%', :#{#request.address}, '%'))
+    AND
+    (:#{#request.gender} IS NULL OR x.gender = :#{#request.gender})
+    AND
+    (:#{#request.phoneNumber} IS NULL OR :#{#request.phoneNumber} LIKE '' OR x.phoneNumber LIKE CONCAT('%', :#{#request.phoneNumber}, '%'))
+    AND
+    (:#{#request.status} IS NULL OR x.status = :#{#request.status})
+""")
+
+    Page<Employee> findAllEmployee(@Param("request")AdminEmployeeRequest request, @Param("status")EmployeeStatus status, Pageable pageable);
 
     Optional<Employee> findByEmail(String email);
 
