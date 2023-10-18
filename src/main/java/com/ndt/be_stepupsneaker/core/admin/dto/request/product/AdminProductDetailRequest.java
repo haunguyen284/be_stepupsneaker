@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class AdminProductRequest extends PageableRequest {
+public class AdminProductDetailRequest extends PageableRequest {
     private UUID id;
 
     @NotBlank(message = "Code must be not null")

@@ -1,8 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminMaterialRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminMaterialResponse;
-import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import com.ndt.be_stepupsneaker.entity.product.Material;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import com.ndt.be_stepupsneaker.repository.product.MaterialRepository;
