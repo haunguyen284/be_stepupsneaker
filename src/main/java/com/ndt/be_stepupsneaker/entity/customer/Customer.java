@@ -6,6 +6,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -41,6 +42,7 @@ public class Customer extends PrimaryEntity {
     private String gender;
 
     @Column(name = "url_image")
+    @Lob
     private String image;
 
     @OneToMany(mappedBy = "customer")

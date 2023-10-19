@@ -39,7 +39,6 @@ public class Product extends PrimaryEntity {
     private ProductStatus status;
 
     @OneToMany(mappedBy="product")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Set<ProductDetail> productDetails;
 }
 

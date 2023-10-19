@@ -26,6 +26,6 @@ public class AdminProductResponse {
 
     private ProductStatus status;
 
-    private Set<ProductDetail> productDetails;
+    private Set<AdminProductDetailResponse> productDetails;
 
 }
