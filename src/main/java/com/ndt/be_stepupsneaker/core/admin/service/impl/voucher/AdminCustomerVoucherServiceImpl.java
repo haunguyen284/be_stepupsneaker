@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,10 +39,10 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public PageableObject<AdminCustomerVoucherResponse> findAllEntity(AdminCustomerVoucherRequest CustomerVoucherRequest) {
+    public PageableObject<AdminCustomerVoucherResponse> findAllEntity(AdminCustomerVoucherRequest customerVoucherRequest) {
 
-        Pageable pageable = paginationUtil.pageable(CustomerVoucherRequest);
-        Page<CustomerVoucher> resp = adminCustomerVoucherRepository.findAllCustomerVoucher(CustomerVoucherRequest, pageable);
+        Pageable pageable = paginationUtil.pageable(customerVoucherRequest);
+        Page<CustomerVoucher> resp = adminCustomerVoucherRepository.findAllCustomerVoucher(customerVoucherRequest, pageable);
         Page<AdminCustomerVoucherResponse> adminCustomerVoucherResponsePage = resp.map(AdminCustomerVoucherMapper.INSTANCE::customerVoucherToAdminCustomerVoucherResponse);
         return new PageableObject<>(adminCustomerVoucherResponsePage);
     }
@@ -86,7 +87,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
                 CustomerVoucher newCustomerVoucher = new CustomerVoucher();
                 newCustomerVoucher.setCustomer(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(adminCustomerRequest));
                 newCustomerVoucher.setVoucher(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
-                System.out.println("========"+newCustomerVoucher);
+                System.out.println("========" + newCustomerVoucher);
                 adminCustomerVoucherRepository.save(newCustomerVoucher);
                 adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(newCustomerVoucher));
 
@@ -110,5 +111,12 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
         Page<AdminCustomerResponse> adminCustomerVoucherRespPage = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
         return new PageableObject<>(adminCustomerVoucherRespPage);
     }
+
+        @Override
+        public Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds) {
+            adminCustomerVoucherRepository.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIds);
+            return true;
+        }
+
 
 }

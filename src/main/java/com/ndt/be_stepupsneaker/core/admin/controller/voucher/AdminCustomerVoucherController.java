@@ -30,12 +30,14 @@ public class AdminCustomerVoucherController {
         this.adminCustomerVoucherService = adminCustomerVoucherService;
     }
 
+    // not use this function
     @GetMapping("")
     public Object findAllCustomerVoucher(AdminCustomerVoucherRequest customerVoucherReq) {
         PageableObject<AdminCustomerVoucherResponse> page = adminCustomerVoucherService.findAllEntity(customerVoucherReq);
         return ResponseHelper.getResponse(page, HttpStatus.OK);
     }
 
+    // not use this function
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
         AdminCustomerVoucherResponse customerVoucherResponse = adminCustomerVoucherService.findById(UUID.fromString(id));
@@ -46,6 +48,6 @@ public class AdminCustomerVoucherController {
     public Object create(@RequestBody @Valid ListCustomerAndVoucher listCustomerAndVoucher, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerAndVoucher.getVoucherRequestList(),listCustomerAndVoucher.getCustomerRequestList()), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerAndVoucher.getVoucherRequestList(), listCustomerAndVoucher.getCustomerRequestList()), HttpStatus.OK);
     }
 }

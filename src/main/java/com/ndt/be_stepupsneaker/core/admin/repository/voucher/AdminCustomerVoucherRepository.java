@@ -9,9 +9,11 @@ import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.repository.voucher.VoucherRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -66,5 +68,9 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
              """)
     Page<Customer> getAllCustomerNotInVoucherId(@Param("voucherId") UUID voucherId, @Param("status") CustomerStatus status, @Param("request") AdminCustomerRequest request, Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM CustomerVoucher x WHERE x.voucher.id = :voucherId AND x.customer.id IN :customerIds")
+    void deleteCustomersByVoucherIdAndCustomerIds(@Param("voucherId") UUID voucherId, @Param("customerIds") List<UUID> customerIds);
 
 }
