@@ -90,8 +90,9 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         if (customerOptional.isEmpty()) {
             throw new ResourceNotFoundException("Customer not found");
         }
-        adminCustomerRepository.delete(customerOptional.get());
-
+        Customer customer = customerOptional.get();
+        customer.setDeleted(true);
+        adminCustomerRepository.save(customer);
         return true;
     }
 }

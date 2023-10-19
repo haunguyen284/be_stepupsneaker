@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepo
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -62,7 +63,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         if (employeeOptional.isEmpty()) {
             throw new ResourceNotFoundException("Employee not exit");
         }
-        Employee employee = new Employee();
+        Employee employee = employeeOptional.get();
         employee.setPassword(employeeDTO.getPassword());
         employee.setGender(employee.getGender());
         employee.setEmail(employeeDTO.getEmail());
@@ -90,7 +91,9 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         if (employeeOptional.isEmpty()) {
             throw new ResourceNotFoundException("Employee is not found");
         }
-        adminEmployeeRepository.delete(employeeOptional.get());
+        Employee employee = employeeOptional.get();
+        employee.setDeleted(true);
+        adminEmployeeRepository.save(employee);
         return true;
     }
 }
