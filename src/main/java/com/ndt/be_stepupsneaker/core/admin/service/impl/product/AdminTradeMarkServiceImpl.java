@@ -5,7 +5,6 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminTradeMarkRe
 import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminTradeMarkMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminTradeMarkRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminTradeMarkService;
-import com.ndt.be_stepupsneaker.core.admin.service.product.AdminTradeMarkService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.TradeMark;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;

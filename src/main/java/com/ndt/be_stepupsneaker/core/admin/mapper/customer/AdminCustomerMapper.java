@@ -8,7 +8,7 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface AdminCustomerMapper {
-    AdminCustomerMapper INSTANCE = Mappers.getMapper((AdminCustomerMapper.class));
+    AdminCustomerMapper INSTANCE = Mappers.getMapper(AdminCustomerMapper.class);
 
     AdminCustomerResponse customerToAdminCustomerResponse(Customer customer);
 

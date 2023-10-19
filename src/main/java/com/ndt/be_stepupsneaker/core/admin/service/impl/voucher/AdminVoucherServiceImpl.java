@@ -36,7 +36,6 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
 
     private PaginationUtil paginationUtil;
 
-
     private CustomerVoucherRepository customerVoucherRepository;
     @Autowired
     public AdminVoucherServiceImpl(AdminVoucherRepository adminVoucherRepository, PaginationUtil paginationUtil, CustomerVoucherRepository customerVoucherRepository) {
@@ -50,7 +49,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public PageableObject<AdminVoucherResponse> findAllEntity(AdminVoucherRequest voucherRequest) {
 
         Pageable pageable = paginationUtil.pageable(voucherRequest);
-        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherRequest, pageable);
+        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherRequest, pageable,voucherRequest.getStatus(),voucherRequest.getType());
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);
         return new PageableObject<>(adminVoucherResponsePage);
     }
@@ -113,26 +112,6 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         return true;
     }
 
-    @Override
-    public Boolean removeCustomersFromVoucher(UUID voucherId, List<UUID> customerIdToRemove) {
-        Voucher voucher = adminVoucherRepository.findById(voucherId)
-                .orElseThrow(() -> new ResourceNotFoundException("VOUCHER NOT FOUND !"));
-        List<CustomerVoucher> customerVoucherList = voucher.getCustomerVoucherList();
-        List<CustomerVoucher> customerVouchersToRemove = new ArrayList<>();
-        for (CustomerVoucher customerVoucher : customerVoucherList) {
-            if (customerIdToRemove.contains(customerVoucher)) {
-                customerVouchersToRemove.add(customerVoucher);
-            }
-
-        }
-        for (CustomerVoucher customerVoucher : customerVouchersToRemove) {
-            customerVoucherList.remove(customerVoucher);
-            customerVoucherRepository.delete(customerVoucher);
-        }
-        voucher.setCustomerVoucherList(customerVoucherList);
-        adminVoucherRepository.save(voucher);
-        return true;
-    }
 
     @Override
     public void updateVoucherStatusAutomatically() {
@@ -152,18 +131,6 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         }
     }
 
-    @Override
-    public List<AdminCustomerResponse> getAllCustomerByVoucherId(UUID voucherId) {
-        Voucher voucher = adminVoucherRepository.findById(voucherId)
-                .orElseThrow(() -> new ResourceNotFoundException("VOUCHER NOT FOUND !"));
-        List<CustomerVoucher> customerVoucherList = voucher.getCustomerVoucherList();
-        List<AdminCustomerResponse> adminCustomerResp = new ArrayList<>();
-        for (CustomerVoucher customerVoucher : customerVoucherList) {
-            adminCustomerResp.add(AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customerVoucher.getCustomer()));
-        }
-        return adminCustomerResp;
-
-    }
 
 
 }

@@ -1,7 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.product;
 
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,7 +28,6 @@ public class AdminProductRequest extends PageableRequest {
 
     private String description;
 
-    @NotBlank(message = "Image must be not null")
     private String image;
 
     @NotNull(message = "Status must be not null")

@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -50,6 +51,7 @@ public class ProductDetail extends PrimaryEntity {
     private Sole sole;
 
     @Column(name = "url_image")
+    @Lob
     private String image;
 
     @Column(name = "price")

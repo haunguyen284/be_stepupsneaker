@@ -3,7 +3,6 @@ package com.ndt.be_stepupsneaker.core.admin.repository.product;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
 import com.ndt.be_stepupsneaker.entity.product.Color;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import com.ndt.be_stepupsneaker.repository.product.ColorRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

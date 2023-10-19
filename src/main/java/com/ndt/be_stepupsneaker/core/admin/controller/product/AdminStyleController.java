@@ -1,7 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminStyleRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminStyleResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminStyleService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -9,7 +8,6 @@ import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

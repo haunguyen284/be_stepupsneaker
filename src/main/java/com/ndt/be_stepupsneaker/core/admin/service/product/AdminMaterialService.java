@@ -1,8 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.service.product;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminMaterialRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminMaterialResponse;
 import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 

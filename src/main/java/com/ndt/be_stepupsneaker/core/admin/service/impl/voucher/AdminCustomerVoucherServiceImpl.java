@@ -9,13 +9,13 @@ import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminCustomerVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
-import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,20 +28,21 @@ import java.util.UUID;
 
 @Service
 public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherService {
-    @Autowired
+
     private AdminCustomerVoucherRepository adminCustomerVoucherRepository;
-
-//    @Autowired
-//    private AdminVoucherRepository adminVoucherRepository;
-
-    @Autowired
     private PaginationUtil paginationUtil;
 
-    @Override
-    public PageableObject<AdminCustomerVoucherResponse> findAllEntity(AdminCustomerVoucherRequest CustomerVoucherRequest) {
+    @Autowired
+    public AdminCustomerVoucherServiceImpl(AdminCustomerVoucherRepository adminCustomerVoucherRepository, PaginationUtil paginationUtil) {
+        this.adminCustomerVoucherRepository = adminCustomerVoucherRepository;
+        this.paginationUtil = paginationUtil;
+    }
 
-        Pageable pageable = paginationUtil.pageable(CustomerVoucherRequest);
-        Page<CustomerVoucher> resp = adminCustomerVoucherRepository.findAllCustomerVoucher(CustomerVoucherRequest, pageable);
+    @Override
+    public PageableObject<AdminCustomerVoucherResponse> findAllEntity(AdminCustomerVoucherRequest customerVoucherRequest) {
+
+        Pageable pageable = paginationUtil.pageable(customerVoucherRequest);
+        Page<CustomerVoucher> resp = adminCustomerVoucherRepository.findAllCustomerVoucher(customerVoucherRequest, pageable);
         Page<AdminCustomerVoucherResponse> adminCustomerVoucherResponsePage = resp.map(AdminCustomerVoucherMapper.INSTANCE::customerVoucherToAdminCustomerVoucherResponse);
         return new PageableObject<>(adminCustomerVoucherResponsePage);
     }
@@ -79,25 +80,43 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public List<AdminCustomerVoucherResponse> create(List<AdminVoucherRequest> voucherRequestList, List<AdminCustomerRequest> adminCustomerRequests) {
+    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<AdminVoucherRequest> voucherRequestList, List<AdminCustomerRequest> adminCustomerRequests) {
         List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
         for (AdminVoucherRequest voucherRequest : voucherRequestList) {
             for (AdminCustomerRequest adminCustomerRequest : adminCustomerRequests) {
-                CustomerVoucher newCustomerVoucher = null;
+                CustomerVoucher newCustomerVoucher = new CustomerVoucher();
                 newCustomerVoucher.setCustomer(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(adminCustomerRequest));
                 newCustomerVoucher.setVoucher(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
+                System.out.println("========" + newCustomerVoucher);
+                adminCustomerVoucherRepository.save(newCustomerVoucher);
                 adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(newCustomerVoucher));
+
             }
         }
         return adminCustomerVoucherResponseList;
     }
 
     @Override
-    public PageableObject<AdminCustomerResponse> getAllCustomerByVoucherId(UUID id, AdminCustomerVoucherRequest customerVoucherReq) {
-        Pageable pageable = paginationUtil.pageable(customerVoucherReq);
-        Page<Customer> resp = adminCustomerVoucherRepository.getAllCustomerByVoucherId(id, customerVoucherReq, pageable);
+    public PageableObject<AdminCustomerResponse> getAllCustomerByVoucherId(UUID id, AdminCustomerRequest customerRequest) {
+        Pageable pageable = paginationUtil.pageable(customerRequest);
+        Page<Customer> resp = adminCustomerVoucherRepository.getAllCustomerByVoucherId(id, customerRequest.getStatus(), customerRequest, pageable);
         Page<AdminCustomerResponse> adminCustomerVoucherRespPage = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
         return new PageableObject<>(adminCustomerVoucherRespPage);
     }
+
+    @Override
+    public PageableObject<AdminCustomerResponse> getAllCustomerNotInVoucherId(UUID id, AdminCustomerRequest customerRequest) {
+        Pageable pageable = paginationUtil.pageable(customerRequest);
+        Page<Customer> resp = adminCustomerVoucherRepository.getAllCustomerNotInVoucherId(id, customerRequest.getStatus(), customerRequest, pageable);
+        Page<AdminCustomerResponse> adminCustomerVoucherRespPage = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
+        return new PageableObject<>(adminCustomerVoucherRespPage);
+    }
+
+        @Override
+        public Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds) {
+            adminCustomerVoucherRepository.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIds);
+            return true;
+        }
+
 
 }
