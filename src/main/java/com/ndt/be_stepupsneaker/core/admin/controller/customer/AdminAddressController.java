@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/admin/address")
+@RequestMapping("/admin/addresses")
 public class AdminAddressController {
 
     @Autowired
