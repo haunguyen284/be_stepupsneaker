@@ -1,7 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.product;
 
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -11,12 +11,13 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class AdminColorRequest extends PageableRequest {
+public class AdminProductRequest extends PageableRequest {
     private UUID id;
 
     @NotBlank(message = "Code must be not null")
@@ -25,6 +26,11 @@ public class AdminColorRequest extends PageableRequest {
     @NotBlank(message = "Name must be not null")
     private String name;
 
+    private String description;
+
+    private String image;
+
     @NotNull(message = "Status must be not null")
-    private ProductPropertiesStatus status;
+    private ProductStatus status;
 }
+

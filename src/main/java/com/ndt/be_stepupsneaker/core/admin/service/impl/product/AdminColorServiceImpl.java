@@ -30,7 +30,7 @@ public class AdminColorServiceImpl implements AdminColorService {
     public PageableObject<AdminColorResponse> findAllEntity(AdminColorRequest colorRequest) {
 
         Pageable pageable = paginationUtil.pageable(colorRequest);
-        Page<Color> resp = adminColorRepository.findAllColor(colorRequest, pageable);
+        Page<Color> resp = adminColorRepository.findAllColor(colorRequest, colorRequest.getStatus(), pageable);
         Page<AdminColorResponse> adminColorResponses = resp.map(AdminColorMapper.INSTANCE::colorToAdminColorResponse);
         return new PageableObject<>(adminColorResponses);
     }
@@ -89,7 +89,9 @@ public class AdminColorServiceImpl implements AdminColorService {
         if (colorOptional.isEmpty()){
             throw new ResourceNotFoundException("COLOR NOT FOUND");
         }
-        adminColorRepository.delete(colorOptional.get());
+        Color color = colorOptional.get();
+        color.setDeleted(true);
+        adminColorRepository.save(color);
         return true;
     }
 }

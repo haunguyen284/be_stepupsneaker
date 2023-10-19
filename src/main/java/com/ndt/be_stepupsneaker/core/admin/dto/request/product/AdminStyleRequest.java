@@ -11,16 +11,14 @@ import lombok.Setter;
 
 import java.util.UUID;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class AdminColorRequest extends PageableRequest {
+public class AdminStyleRequest extends PageableRequest {
     private UUID id;
-
-    @NotBlank(message = "Code must be not null")
-    private String code;
 
     @NotBlank(message = "Name must be not null")
     private String name;

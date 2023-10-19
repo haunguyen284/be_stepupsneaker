@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,6 +28,7 @@ public class Product extends PrimaryEntity {
     private String description;
 
     @Column(name = "url_image")
+    @Lob
     private String image;
 
     @Column(name = "status")

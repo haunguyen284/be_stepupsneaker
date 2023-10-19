@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -33,7 +34,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     public PageableObject<AdminCustomerResponse> findAllEntity(AdminCustomerRequest customerRequest) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest,pageable );
+        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest, customerRequest.getStatus(), pageable);
         Page<AdminCustomerResponse> adminCustomerResponses = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
 
         return new PageableObject<>(adminCustomerResponses);
@@ -41,13 +42,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     @Override
     public AdminCustomerResponse create(AdminCustomerRequest customerDTO) {
-
-        Optional<Customer> customerOptional = adminCustomerRepository.findByFullName(customerDTO.getFullName());
-        if (customerOptional.isPresent()){
-            throw new ApiException(("Name is exits"));
-        }
-        customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
-        if (customerOptional.isPresent()){
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
+        if (customerOptional.isPresent()) {
             throw new ApiException("Email is exit");
         }
 
@@ -58,16 +54,13 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     @Override
     public AdminCustomerResponse update(AdminCustomerRequest customerDTO) {
-        Optional<Customer> customerOptional = adminCustomerRepository.findByFullName(customerDTO.getId(), customerDTO.getFullName());
-        if(customerOptional.isPresent()){
-            throw  new ApiException("Name is exit");
-        }
-        customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
-        if (customerOptional.isPresent()){
-            throw  new ApiException("Email is exit");
+
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
+        if (customerOptional.isPresent()) {
+            throw new ApiException("Email is exit");
         }
         customerOptional = adminCustomerRepository.findById(customerDTO.getId());
-        if (customerOptional.isEmpty()){
+        if (customerOptional.isEmpty()) {
             throw new ResourceNotFoundException("Customer is not exits");
         }
         Customer customer = customerOptional.get();
@@ -85,8 +78,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     public AdminCustomerResponse findById(UUID id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
-        if (customerOptional.isEmpty()){
-            throw  new RuntimeException("LOOI");
+        if (customerOptional.isEmpty()) {
+            throw new RuntimeException("LOOI");
         }
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customerOptional.get());
     }
@@ -94,9 +87,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     public Boolean delete(UUID id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
-        if (customerOptional.isEmpty()){
-            throw  new ResourceNotFoundException("Customer not found");
-
+        if (customerOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Customer not found");
         }
         adminCustomerRepository.delete(customerOptional.get());
 

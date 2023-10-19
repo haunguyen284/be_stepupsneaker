@@ -8,7 +8,6 @@ import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,10 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/admin/colors")
 public class AdminColorController {
     @Autowired
@@ -37,6 +37,14 @@ public class AdminColorController {
         AdminColorResponse adminColorResponse = adminColorService.findById(UUID.fromString(id));
         return ResponseHelper.getResponse(adminColorResponse,HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id")String id){
+        AdminColorResponse adminColorResponse = adminColorService.findById(UUID.fromString(id));
+
+        return ResponseHelper.getResponse(adminColorResponse, HttpStatus.OK);
+    }
+
 
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){

@@ -16,11 +16,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class AdminColorRequest extends PageableRequest {
+public class AdminMaterialRequest extends PageableRequest {
     private UUID id;
-
-    @NotBlank(message = "Code must be not null")
-    private String code;
 
     @NotBlank(message = "Name must be not null")
     private String name;
