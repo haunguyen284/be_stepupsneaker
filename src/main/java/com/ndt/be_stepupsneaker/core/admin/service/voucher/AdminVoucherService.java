@@ -12,12 +12,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AdminVoucherService extends BaseService<AdminVoucherResponse, UUID, AdminVoucherRequest> {
-    Boolean removeCustomersFromVoucher(UUID voucherId, List<UUID> customerIdToRemove);
 
     void updateVoucherStatusAutomatically();
 
-    // Function not user this file
-    List<AdminCustomerResponse> getAllCustomerByVoucherId(UUID voucherId);
 
 
 }

@@ -17,4 +17,6 @@ public interface AdminCustomerVoucherService extends BaseService<AdminCustomerVo
     PageableObject<AdminCustomerResponse> getAllCustomerByVoucherId(UUID id, AdminCustomerRequest customerRequest);
 
     PageableObject<AdminCustomerResponse> getAllCustomerNotInVoucherId(UUID id, AdminCustomerRequest customerRequest);
+
+    Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds);
 }
