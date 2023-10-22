@@ -38,13 +38,6 @@ public class AdminColorController {
         return ResponseHelper.getResponse(adminColorResponse,HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public Object findById(@PathVariable("id")String id){
-        AdminColorResponse adminColorResponse = adminColorService.findById(UUID.fromString(id));
-
-        return ResponseHelper.getResponse(adminColorResponse, HttpStatus.OK);
-    }
-
 
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
