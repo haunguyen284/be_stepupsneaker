@@ -17,9 +17,9 @@ public class PaginationUtil {
     public Pageable pageable(PageableRequest paginationRequest) {
         Pageable pageable = null;
         if (paginationRequest.getOrderBy().equals("asc")) {
-            pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize(), Sort.by(paginationRequest.getSortBy()).ascending());
+            pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getPageSize(), Sort.by(paginationRequest.getSortBy()).ascending());
         }else {
-            pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getSize(), Sort.by(paginationRequest.getSortBy()).descending());
+            pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getPageSize(), Sort.by(paginationRequest.getSortBy()).descending());
         }
         return pageable;
 

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public abstract class PageableRequest {
     private int page = PaginationConstant.DEFAULT_PAGE;
-    private int size = PaginationConstant.DEFAULT_SIZE;
+    private int pageSize = PaginationConstant.DEFAULT_SIZE;
     private String orderBy = PaginationConstant.DEFAULT_ORDER_BY;
     private String sortBy = PaginationConstant.DEFAULT_SORT_BY;
 }

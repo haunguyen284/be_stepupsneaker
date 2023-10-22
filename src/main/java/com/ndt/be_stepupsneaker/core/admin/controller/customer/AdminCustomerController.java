@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/admin/customer")
+@RequestMapping("/admin/customers")
 public class AdminCustomerController {
     @Autowired
     private AdminCustomerService adminCustomerService;
@@ -25,6 +26,13 @@ public class AdminCustomerController {
         PageableObject<AdminCustomerResponse> listCustomer = adminCustomerService.findAllEntity(customerDTO);
         return ResponseHelper.getResponse(listCustomer, HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public Object findAllCustomer(@PathVariable("id")String id){
+        AdminCustomerResponse response = adminCustomerService.findById(UUID.fromString(id));
+        return ResponseHelper.getResponse(response, HttpStatus.OK);
+    }
+
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminCustomerRequest customerDTO, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
