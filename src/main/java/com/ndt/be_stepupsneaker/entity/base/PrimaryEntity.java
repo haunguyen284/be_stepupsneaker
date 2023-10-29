@@ -21,7 +21,7 @@ public abstract class PrimaryEntity extends AuditEntity{
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "deleted", columnDefinition = "bit default 0")
+    @Column(name = "deleted", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean deleted = false;
 
 }

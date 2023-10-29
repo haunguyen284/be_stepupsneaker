@@ -17,7 +17,7 @@ public class Address extends PrimaryEntity {
     @Column(name = "phone_number", length = EntityProperties.LENGTH_PHONE)
     private String phoneNumber;
 
-    @Column(name = "is_default", columnDefinition = "bit default 0")
+    @Column(name = "is_default", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isDefault;
 
     @Column(name = "city", length = EntityProperties.LENGTH_CITY)
