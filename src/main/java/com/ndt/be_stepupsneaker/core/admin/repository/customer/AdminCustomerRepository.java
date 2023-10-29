@@ -19,7 +19,10 @@ public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
     SELECT x FROM Customer x 
     WHERE
-    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.fullName LIKE CONCAT('%', :#{#request.q}, '%')OR x.email LIKE CONCAT('%', :#{#request.q}, '%')OR x.gender LIKE CONCAT('%', :#{#request.q}, '%'))
+    (:#{#request.q} IS NULL OR :#{#request.q} LIKE ''
+     OR x.fullName LIKE CONCAT('%', :#{#request.q}, '%')
+     OR x.email LIKE CONCAT('%', :#{#request.q}, '%')
+     OR x.gender LIKE CONCAT('%', :#{#request.q}, '%'))
     AND
     (:status IS NULL OR x.status = :status)
      AND

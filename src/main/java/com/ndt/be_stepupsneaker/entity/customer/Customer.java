@@ -46,7 +46,7 @@ public class Customer extends PrimaryEntity {
     private String image;
 
     @OneToMany(mappedBy = "customer")
-    List<CustomerVoucher> customerVoucherList;
+    List<Address> customerAddresses;
 
 }
 

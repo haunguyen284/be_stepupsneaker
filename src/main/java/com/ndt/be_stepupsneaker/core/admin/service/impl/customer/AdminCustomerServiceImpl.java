@@ -48,7 +48,6 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         }
 
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
-
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
     }
 
