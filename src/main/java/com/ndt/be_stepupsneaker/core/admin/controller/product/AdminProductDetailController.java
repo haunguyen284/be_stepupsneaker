@@ -46,12 +46,11 @@ public class AdminProductDetailController {
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid AdminProductDetailRequest colorDTO, BindingResult bindingResult){
-
+    public Object create(@RequestBody List<@Valid AdminProductDetailRequest> productDetailRequests, BindingResult bindingResult){
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
-        return ResponseHelper.getResponse(adminProductDetailService.create(colorDTO), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminProductDetailService.create(productDetailRequests), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
