@@ -24,6 +24,7 @@ import java.util.UUID;
 
 @Primary
 @Repository
+@Transactional
 public interface AdminCustomerVoucherRepository extends CustomerVoucherRepository {
     @Query("""
             SELECT x FROM CustomerVoucher x 

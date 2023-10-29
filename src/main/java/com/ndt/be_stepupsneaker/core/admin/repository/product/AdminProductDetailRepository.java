@@ -6,6 +6,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import com.ndt.be_stepupsneaker.repository.product.ProductDetailRepository;
 import com.ndt.be_stepupsneaker.repository.product.ProductDetailRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,7 @@ import java.util.UUID;
 
 
 @Repository
+@Transactional
 public interface AdminProductDetailRepository extends ProductDetailRepository {
     @Query("""
     SELECT x FROM ProductDetail x 

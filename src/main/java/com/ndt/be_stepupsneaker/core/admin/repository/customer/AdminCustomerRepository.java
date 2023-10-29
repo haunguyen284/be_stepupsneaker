@@ -4,6 +4,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerReq
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.repository.customer.CustomerRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
     SELECT x FROM Customer x 

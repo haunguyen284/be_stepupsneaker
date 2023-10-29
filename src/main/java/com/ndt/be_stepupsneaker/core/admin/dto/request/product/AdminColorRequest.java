@@ -19,6 +19,8 @@ import java.util.UUID;
 public class AdminColorRequest extends PageableRequest {
     private UUID id;
 
+    private String q;
+
     @NotBlank(message = "Code must be not null")
     private String code;
 

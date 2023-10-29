@@ -10,6 +10,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.repository.product.ColorRepository;
 import com.ndt.be_stepupsneaker.repository.voucher.VoucherRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public interface AdminVoucherRepository extends VoucherRepository {
     @Query("""
             SELECT x FROM Voucher x 

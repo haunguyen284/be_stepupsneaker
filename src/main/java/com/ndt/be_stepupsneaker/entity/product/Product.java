@@ -31,8 +31,9 @@ public class Product extends PrimaryEntity {
     @Nationalized
     private String description;
 
-    @Column(name = "url_image")
+    @Column(name = "url_image", columnDefinition = "TEXT")
     @Lob
+
     private String image;
 
     @Column(name = "status")
