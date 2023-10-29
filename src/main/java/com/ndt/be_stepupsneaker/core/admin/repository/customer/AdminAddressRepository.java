@@ -17,13 +17,8 @@ public interface AdminAddressRepository extends AddressRepository {
     @Query("""
             SELECT x FROM Address x 
             WHERE
-            (:#{#request.phoneNumber} IS NULL OR :#{#request.phoneNumber} LIKE '' OR x.phoneNumber LIKE CONCAT('%', :#{#request.phoneNumber}, '%'))
-            AND
-            (:#{#request.city} IS NULL OR :#{#request.city} LIKE '' OR x.city LIKE CONCAT('%', :#{#request.city}, '%'))
-            AND
-            (:#{#request.province} IS NULL OR :#{#request.province} LIKE '' OR x.province LIKE CONCAT('%', :#{#request.province}, '%'))
-            AND
-            (:#{#request.country} IS NULL OR :#{#request.country} LIKE '' OR x.country LIKE CONCAT('%', :#{#request.country}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.phoneNumber LIKE CONCAT('%', :#{#request.q}, '%')  OR x.city LIKE CONCAT('%', :#{#request.q}, '%')OR x.province LIKE CONCAT('%', :#{#request.q}, '%')OR x.country LIKE CONCAT('%', :#{#request.q}, '%'))
+            AND(x.deleted=FALSE)
             """)
     Page<Address> findAllAddress(@Param("request") AdminAddressRequest request, Pageable pageable);
 

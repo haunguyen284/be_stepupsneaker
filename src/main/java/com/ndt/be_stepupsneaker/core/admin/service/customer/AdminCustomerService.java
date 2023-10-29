@@ -8,4 +8,5 @@ import org.hibernate.validator.internal.engine.validationcontext.BaseBeanValidat
 import java.util.UUID;
 
 public interface AdminCustomerService extends BaseService<AdminCustomerResponse, UUID, AdminCustomerRequest> {
+
 }

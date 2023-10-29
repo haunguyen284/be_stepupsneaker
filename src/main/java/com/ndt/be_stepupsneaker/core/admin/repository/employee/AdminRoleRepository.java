@@ -1,7 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.employee;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminRoleRequest;
-import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.repository.employee.RoleRepository;
 import org.springframework.data.domain.Page;
@@ -18,7 +17,8 @@ public interface AdminRoleRepository extends RoleRepository {
     @Query("""
     SELECT x FROM Role x 
     WHERE
-    (:#{#request.name} IS NULL OR :#{#request.name} LIKE '' OR x.name LIKE CONCAT('%', :#{#request.name}))
+    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE CONCAT('%', :#{#request.q},'%'))
+    AND(x.deleted=FALSE)
     """)
     Page<Role> findAllRole (@Param("request")AdminRoleRequest request, Pageable pageable);
 
