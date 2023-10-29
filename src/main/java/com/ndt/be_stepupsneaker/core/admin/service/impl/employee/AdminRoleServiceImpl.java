@@ -47,7 +47,6 @@ public class AdminRoleServiceImpl implements AdminRoleService {
 
         return AdminRoleMapper.INSTANCE.roleToAdminRoleResponse(role);
     }
-
     @Override
     public AdminRoleRsponse update(AdminRoleRequest roleDTO) {
         Optional<Role> optionalRole = adminRoleRepository.findByName(roleDTO.getName());
@@ -63,7 +62,6 @@ public class AdminRoleServiceImpl implements AdminRoleService {
 
         return AdminRoleMapper.INSTANCE.roleToAdminRoleResponse(adminRoleRepository.save(role));
     }
-
     @Override
     public AdminRoleRsponse findById(UUID id) {
         Optional<Role> optionalRole = adminRoleRepository.findById(id);

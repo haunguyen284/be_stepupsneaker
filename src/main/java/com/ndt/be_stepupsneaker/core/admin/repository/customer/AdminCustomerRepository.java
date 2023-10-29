@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.customer;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
@@ -18,15 +19,12 @@ public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
     SELECT x FROM Customer x 
     WHERE
-    (:#{#request.fullName} IS NULL OR :#{#request.fullName} LIKE '' OR x.fullName LIKE CONCAT('%', :#{#request.fullName}, '%'))
-    AND
-    (:#{#request.email} IS NULL OR :#{#request.email} LIKE '' OR x.email LIKE CONCAT('%', :#{#request.email}, '%'))
+    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.fullName LIKE CONCAT('%', :#{#request.q}, '%')OR x.email LIKE CONCAT('%', :#{#request.q}, '%')OR x.gender LIKE CONCAT('%', :#{#request.q}, '%'))
     AND
     (:status IS NULL OR x.status = :status)
-    AND
-    (:#{#request.gender} IS NULL OR x.gender = :#{#request.gender})
      AND
     (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
+    AND(x.deleted=FALSE)
     """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request, @Param("status")CustomerStatus status, Pageable pageable);
 
@@ -37,6 +35,5 @@ public interface AdminCustomerRepository extends CustomerRepository {
             SELECT x FROM Customer x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id'))
             """)
     Optional<Customer> findByEmail(@Param("id") UUID id, @Param("email") String email);
-
 
 }

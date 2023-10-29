@@ -11,4 +11,5 @@ public abstract class PageableRequest {
     private int pageSize = PaginationConstant.DEFAULT_SIZE;
     private String orderBy = PaginationConstant.DEFAULT_ORDER_BY;
     private String sortBy = PaginationConstant.DEFAULT_SORT_BY;
+    private String q = PaginationConstant.DEFAULT_Q;
 }

@@ -10,4 +10,5 @@ public final class PaginationConstant {
     public static final String DEFAULT_ORDER_BY = "desc";
 
     public static final String DEFAULT_SORT_BY = "id";
+    public static final String DEFAULT_Q = "";
 }
