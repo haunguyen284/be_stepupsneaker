@@ -39,8 +39,6 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     AND
     (:#{#request.sole} IS NULL OR x.sole = :#{#request.sole}) 
     AND 
-    (:#{#request.priceMin} IS NULL OR :#{#request.priceMax} IS NULL OR x.price BETWEEN :#{#request.priceMin} AND :#{#request.priceMax}) 
-    AND
     ((:status IS NULL) OR (x.status = :status)) 
     AND
     x.deleted=false 
