@@ -27,7 +27,7 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     AND
     (:#{#request.size} IS NULL OR x.size = :#{#request.size})
     AND
-    (:#{#request.product} IS NULL OR x.product = :#{#request.product})
+    (:#{#request.product} IS NULL OR x.product.id = :#{#request.product})
     AND
     (:#{#request.material} IS NULL OR x.material = :#{#request.material})
     AND
