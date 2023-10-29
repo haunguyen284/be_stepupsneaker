@@ -22,8 +22,8 @@ public interface AdminColorRepository extends ColorRepository {
     (:#{#request.code} IS NULL OR :#{#request.code} LIKE '' OR x.code LIKE  CONCAT('%', :#{#request.code}, '%')) 
     AND 
     (
-    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.code LIKE  CONCAT('%', :#{#request.q}, '%')) OR 
-    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.q}, '%'))
+    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.code ILIKE  CONCAT('%', :#{#request.q}, '%')) OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
     )
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
