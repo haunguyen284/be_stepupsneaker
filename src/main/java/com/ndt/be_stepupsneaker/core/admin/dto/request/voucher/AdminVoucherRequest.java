@@ -30,12 +30,12 @@ public class AdminVoucherRequest extends PageableRequest {
 
     private VoucherType type;
 
-
     private float value;
 
     private float constraint;
 
     private int quantity;
+
     private Long startDate;
 
     private Long endDate;

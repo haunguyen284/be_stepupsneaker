@@ -45,7 +45,6 @@ public class AdminEmployeeController {
         return ResponseHelper.getResponse(adminEmployeeService.update(employeeRequest), HttpStatus.OK);
 
     }
-
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id){
         return ResponseHelper.getResponse(adminEmployeeService.delete(UUID.fromString(id)), HttpStatus.OK);
