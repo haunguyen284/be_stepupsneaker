@@ -23,21 +23,21 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     @Query("""
     SELECT x FROM ProductDetail x 
     WHERE (
-    (:#{#request.tradeMark} IS NULL OR :#{#request.tradeMark.toString()} LIKE '' OR x.tradeMark.id = :#{#request.tradeMark})
+    (:#{#request.tradeMark} IS NULL OR x.tradeMark.id = :#{#request.tradeMark})
     AND
-    (:#{#request.style} IS NULL OR :#{#request.style.toString()} LIKE '' OR x.style.id = :#{#request.style})
+    (:#{#request.style} IS NULL OR x.style.id = :#{#request.style})
     AND
-    (:#{#request.size} IS NULL OR :#{#request.size.toString()} LIKE '' OR x.size.id = :#{#request.size})
+    (:#{#request.size} IS NULL OR x.size.id = :#{#request.size})
     AND
-    (:#{#request.product} IS NULL OR :#{#request.product.toString()} LIKE '' OR x.product.id = :#{#request.product})
+    (:#{#request.product} IS NULL OR x.product.id = :#{#request.product})
     AND
-    (:#{#request.material} IS NULL OR :#{#request.material.toString()} LIKE '' OR x.material.id = :#{#request.material})
+    (:#{#request.material} IS NULL OR x.material.id = :#{#request.material})
     AND
-    (:#{#request.color} IS NULL OR :#{#request.color.toString()} LIKE '' OR x.color.id = :#{#request.color})
+    (:#{#request.color} IS NULL OR x.color.id = :#{#request.color})
     AND
-    (:#{#request.brand} IS NULL OR :#{#request.brand.toString()} LIKE '' OR x.brand.id = :#{#request.brand})
+    (:#{#request.brand} IS NULL OR x.brand.id = :#{#request.brand})
     AND
-    (:#{#request.sole} IS NULL OR :#{#request.sole.toString()} LIKE '' OR x.sole.id = :#{#request.sole}) 
+    (:#{#request.sole} IS NULL OR x.sole.id = :#{#request.sole}) 
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND
