@@ -38,7 +38,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     @Override
     public AdminAddressResponse create(AdminAddressRequest addressDTO) {
         Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()){
+        if (addressOptional.isPresent()) {
             throw new ApiException(("Phone is exits"));
         }
         Address address = adminAddressRepository.save(AdminAddressMapper.INSTANCE.adminAddressRequestAddress(addressDTO));
@@ -48,12 +48,12 @@ public class AdminAddressServiceImpl implements AdminAddressService {
 
     @Override
     public AdminAddressResponse update(AdminAddressRequest addressDTO) {
-        Optional<Address> addressOptional= adminAddressRepository.findByPhoneNumber(addressDTO.getId(), addressDTO.getPhoneNumber());
-        if(addressOptional.isPresent()){
+        Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getId(), addressDTO.getPhoneNumber());
+        if (addressOptional.isPresent()) {
             throw new ApiException(("Phone is exit"));
         }
         addressOptional = adminAddressRepository.findById(addressDTO.getId());
-        if (addressOptional.isPresent()){
+        if (addressOptional.isPresent()) {
             throw new ResourceNotFoundException("Phone is not exit");
         }
         Address addressSave = addressOptional.get();
@@ -69,7 +69,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     @Override
     public AdminAddressResponse findById(UUID id) {
         Optional<Address> addressOptional = adminAddressRepository.findById(id);
-        if (addressOptional.isEmpty()){
+        if (addressOptional.isEmpty()) {
             throw new RuntimeException("LOOI");
         }
 
@@ -78,11 +78,14 @@ public class AdminAddressServiceImpl implements AdminAddressService {
 
     @Override
     public Boolean delete(UUID id) {
-        Optional<Address> addressOptional =adminAddressRepository.findById(id);
-        if (addressOptional.isEmpty()){
+        Optional<Address> addressOptional = adminAddressRepository.findById(id);
+        if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Phone Not Found");
         }
-        adminAddressRepository.delete(addressOptional.get());
+
+        Address address = addressOptional.get();
+        address.setDeleted(true);
+        adminAddressRepository.save(address);
         return true;
     }
 }
