@@ -19,8 +19,6 @@ import java.util.UUID;
 public class AdminBrandRequest extends PageableRequest {
     private UUID id;
 
-    private String q;
-
     @NotBlank(message = "Name must be not null")
     private String name;
 

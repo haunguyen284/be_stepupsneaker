@@ -22,7 +22,9 @@ public interface AdminSizeRepository extends SizeRepository {
     @Query("""
             SELECT x FROM Size x 
             WHERE (:#{#request.name} IS NULL OR :#{#request.name} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.name}, '%'))
-            AND
+            AND 
+            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.q}, '%')) 
+            AND 
             (:status IS NULL OR x.status = :status)
             AND
             (x.deleted = FALSE)

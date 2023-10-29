@@ -21,17 +21,14 @@ import java.util.UUID;
 public interface AdminProductRepository extends ProductRepository {
     @Query("""
     SELECT x FROM Product x 
-    WHERE (
-    :#{#request.name} IS NULL OR :#{#request.name} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.name}, '%') 
+    WHERE (:#{#request.name} IS NULL OR :#{#request.name} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.name}, '%')) 
+    AND
+    (:#{#request.code} IS NULL OR :#{#request.code} LIKE '' OR x.code LIKE  CONCAT('%', :#{#request.code}, '%')) 
     AND 
     (
     (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.code LIKE  CONCAT('%', :#{#request.q}, '%')) OR 
-    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.q}, '%')) OR 
-    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.description LIKE  CONCAT('%', :#{#request.q}, '%'))
+    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.q}, '%'))
     )
-    AND 
-    :#{#request.code} IS NULL OR :#{#request.code} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.code}, '%')
-    ) 
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND
