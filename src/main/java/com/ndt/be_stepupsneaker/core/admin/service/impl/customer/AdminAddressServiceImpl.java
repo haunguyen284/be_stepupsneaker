@@ -123,15 +123,15 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     }
 
     @Override
-    public Boolean updateDefaultAddressByCustomer(UUID customerId, UUID addressId) {
-        Address existingDefaultAddress = adminAddressRepository.findDefaultAddressByCustomer(customerId);
-        if (existingDefaultAddress != null) {
-            existingDefaultAddress.setIsDefault(false);
-            adminAddressRepository.save(existingDefaultAddress);
-        }
+    public Boolean updateDefaultAddressByCustomer(UUID addressId) {
         Optional<Address> newDefaultAddressOptional = adminAddressRepository.findById(addressId);
         if (newDefaultAddressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Address Not Found ! TAO QUÁ MỆT MỎI !");
+        }
+        Address existingDefaultAddress = adminAddressRepository.findDefaultAddressByCustomer(newDefaultAddressOptional.get().getCustomer().getId());
+        if (existingDefaultAddress != null) {
+            existingDefaultAddress.setIsDefault(false);
+            adminAddressRepository.save(existingDefaultAddress);
         }
         Address newDefaultAddress = newDefaultAddressOptional.get();
         newDefaultAddress.setIsDefault(true);
