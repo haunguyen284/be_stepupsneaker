@@ -25,5 +25,4 @@ public class AdminCustomerResponse {
     private CustomerStatus status;
     private String gender;
     private String image;
-    List<AdminAddressResponse> adminAddressResponses;
 }

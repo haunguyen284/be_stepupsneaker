@@ -21,8 +21,8 @@ public class AdminAddressController {
     @Autowired
     private AdminAddressService adminAddressService;
 
-    @GetMapping("")
-    public Object findAllAddress(AdminAddressRequest addressDTO) {
+    @GetMapping("/customerByAddressDefault")
+    public Object findAllCustomerAddress(AdminAddressRequest addressDTO) {
         PageableObject<AdminAddressResponse> listAddress = adminAddressService.findAllEntity(addressDTO);
         return ResponseHelper.getResponse(listAddress, HttpStatus.OK);
     }
@@ -38,7 +38,6 @@ public class AdminAddressController {
     @PutMapping("/{id}")
     public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminAddressRequest addressDTO, BindingResult bindingResult) {
         addressDTO.setId(UUID.fromString(id));
-
         if (bindingResult.hasErrors()) {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }

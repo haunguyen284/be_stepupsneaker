@@ -37,9 +37,8 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     @Override
     public PageableObject<AdminAddressResponse> findAllEntity(AdminAddressRequest addressRequest) {
         Pageable pageable = paginationUtil.pageable(addressRequest);
-        Page<Address> resp = adminAddressRepository.findAllAddress(addressRequest, pageable);
+        Page<Address> resp = adminAddressRepository.findAllCustomerByAddress(addressRequest, pageable);
         Page<AdminAddressResponse> adminAddressResponses = resp.map(AdminAddressMapper.INSTANCE::addressToAdminAddressResponse);
-
         return new PageableObject<>(adminAddressResponses);
     }
 

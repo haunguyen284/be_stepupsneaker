@@ -4,6 +4,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequ
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
@@ -11,6 +12,7 @@ public interface AdminAddressMapper {
 
     AdminAddressMapper INSTANCE = Mappers.getMapper(AdminAddressMapper.class);
 
+    @Mapping(target = "customerResponse", source = "customer")
     AdminAddressResponse addressToAdminAddressResponse(Address address);
 
     Address adminAddressRequestAddress(AdminAddressRequest addressDTO);
