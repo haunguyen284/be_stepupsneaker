@@ -46,6 +46,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         if (customerOptional.isPresent()) {
             throw new ApiException("Email is exit");
         }
+        customerDTO.setPassword("admin123");
 
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
