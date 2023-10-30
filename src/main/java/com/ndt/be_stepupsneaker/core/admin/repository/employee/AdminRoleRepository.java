@@ -17,7 +17,7 @@ public interface AdminRoleRepository extends RoleRepository {
     @Query("""
     SELECT x FROM Role x 
     WHERE
-    (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE CONCAT('%', :#{#request.q},'%'))
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE CONCAT('%', :#{#request.q},'%'))
     AND(x.deleted=FALSE)
     """)
     Page<Role> findAllRole (@Param("request")AdminRoleRequest request, Pageable pageable);

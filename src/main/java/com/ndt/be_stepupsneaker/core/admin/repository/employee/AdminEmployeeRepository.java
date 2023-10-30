@@ -18,7 +18,7 @@ public interface AdminEmployeeRepository extends EmployeeRepository {
     @Query("""
                 SELECT x FROM Employee x 
                 WHERE
-                (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.fullName LIKE CONCAT('%', :#{#request.q}, '%')OR x.email LIKE CONCAT('%', :#{#request.q}, '%')OR x.address LIKE CONCAT('%', :#{#request.q}, '%')OR x.gender LIKE CONCAT('%', :#{#request.q}, '%')OR x.phoneNumber LIKE CONCAT('%', :#{#request.q}, '%'))
+                (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')OR x.email ILIKE CONCAT('%', :#{#request.q}, '%')OR x.address ILIKE CONCAT('%', :#{#request.q}, '%')OR x.gender ILIKE CONCAT('%', :#{#request.q}, '%')OR x.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%'))
                 AND
                 (:status IS NULL OR x.status = :status)
                 AND(x.deleted=FALSE)

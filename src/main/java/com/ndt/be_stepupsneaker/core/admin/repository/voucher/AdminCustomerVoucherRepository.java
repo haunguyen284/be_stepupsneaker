@@ -37,11 +37,11 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
             SELECT x.customer FROM CustomerVoucher x 
             WHERE x.voucher.id  = :voucherId 
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.customer.fullName LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.customer.fullName ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.customer.email LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.customer.email ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.customer.gender LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.customer.gender ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
             (:status IS NULL OR  x.customer.status = :status)
             AND
@@ -55,11 +55,11 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
             SELECT x FROM Customer x 
             WHERE x.id NOT IN (SELECT y.id FROM CustomerVoucher y WHERE y.voucher.id = :voucherId)
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.fullName LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.fullName ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.email LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.email ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.gender LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.gender ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
             (:status IS NULL OR  x.status = :status)
             AND
