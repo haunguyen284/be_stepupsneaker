@@ -55,7 +55,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     public AdminCustomerResponse update(AdminCustomerRequest customerDTO) {
 
-        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getId(), customerDTO.getEmail());
         if (customerOptional.isPresent()) {
             throw new ApiException("Email is exit");
         }
@@ -66,7 +66,6 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         Customer customer = customerOptional.get();
         customer.setFullName(customerDTO.getFullName());
         customer.setStatus(customerDTO.getStatus());
-        customer.setPassword(customerDTO.getPassword());
         customer.setGender(customerDTO.getGender());
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
         customer.setEmail(customerDTO.getEmail());
