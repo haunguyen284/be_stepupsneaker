@@ -19,16 +19,19 @@ import java.util.UUID;
 public interface AdminAddressRepository extends AddressRepository {
     @Query("""
             SELECT x FROM Address x 
-            WHERE
+            WHERE x.isDefault= TRUE AND
             (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' 
             OR x.phoneNumber LIKE CONCAT('%', :#{#request.q}, '%')  
             OR x.more LIKE CONCAT('%', :#{#request.q}, '%')
             OR x.province LIKE CONCAT('%', :#{#request.q}, '%')
             OR x.district LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.ward LIKE CONCAT('%', :#{#request.q}, '%'))
+            OR x.ward LIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.customer.email LIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.customer.fullName LIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.customer.gender LIKE CONCAT('%', :#{#request.q}, '%'))
             AND(x.deleted=FALSE)
             """)
-    Page<Address> findAllAddress(@Param("request") AdminAddressRequest request, Pageable pageable);
+    Page<Address> findAllCustomerByAddress(@Param("request") AdminAddressRequest request, Pageable pageable);
 
     Optional<Address> findByPhoneNumber(String phoneNumber);
 
@@ -52,7 +55,7 @@ public interface AdminAddressRepository extends AddressRepository {
             AND
             (x.deleted = FALSE)
              """)
-    Page<Address>findAllAddressByCustomerId(@Param("customerId") UUID customerId, @Param("request") AdminAddressRequest request,Pageable pageable);
+    Page<Address> findAllAddressByCustomerId(@Param("customerId") UUID customerId, @Param("request") AdminAddressRequest request, Pageable pageable);
 
     @Query("SELECT CASE WHEN COUNT(x) > 0 THEN TRUE ELSE FALSE END FROM Address x WHERE x.customer = :customer")
     boolean existsByCustomer(@Param("customer") Customer customer);
@@ -60,5 +63,7 @@ public interface AdminAddressRepository extends AddressRepository {
     @Query("SELECT x FROM Address x WHERE x.customer.id = :customerId AND x.isDefault = TRUE")
     Address findDefaultAddressByCustomer(@Param("customerId") UUID customerId);
 
+
     List<Address> findByCustomer(Customer customer);
+
 }
