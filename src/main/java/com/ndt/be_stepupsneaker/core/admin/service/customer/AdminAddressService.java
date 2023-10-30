@@ -12,5 +12,5 @@ import java.util.UUID;
 public interface AdminAddressService extends BaseService<AdminAddressResponse, UUID, AdminAddressRequest> {
     PageableObject<AdminAddressResponse> findAllAddressByCustomerId(UUID customerId, AdminAddressRequest addressRequest);
 
-    Boolean updateDefaultAddressByCustomer(UUID customerId, UUID addressId);
+    Boolean updateDefaultAddressByCustomer(UUID addressId);
 }

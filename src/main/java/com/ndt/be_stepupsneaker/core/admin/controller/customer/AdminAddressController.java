@@ -55,11 +55,10 @@ public class AdminAddressController {
         return ResponseHelper.getResponse(pageAddress, HttpStatus.OK);
     }
 
-    @PutMapping("/set-default/{customerId}/{addressId}")
+    @PutMapping("/set-default/{addressId}")
     public Object setDefaultAddressByCustomer(
-            @PathVariable("customerId") String customerId,
             @PathVariable("addressId") String addressId) {
-        return ResponseHelper.getResponse(adminAddressService.updateDefaultAddressByCustomer(UUID.fromString(customerId), UUID.fromString(addressId)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminAddressService.updateDefaultAddressByCustomer(UUID.fromString(addressId)), HttpStatus.OK);
     }
 
 }
