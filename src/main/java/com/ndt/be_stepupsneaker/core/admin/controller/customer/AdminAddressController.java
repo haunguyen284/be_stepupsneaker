@@ -43,6 +43,11 @@ public class AdminAddressController {
         }
         return ResponseHelper.getResponse(adminAddressService.update(addressDTO), HttpStatus.OK);
     }
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id") String id) {
+        return ResponseHelper.getResponse(adminAddressService.findById(UUID.fromString(id)), HttpStatus.OK);
+    }
+
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
