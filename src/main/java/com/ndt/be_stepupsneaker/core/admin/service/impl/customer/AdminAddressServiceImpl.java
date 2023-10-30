@@ -77,8 +77,8 @@ public class AdminAddressServiceImpl implements AdminAddressService {
             throw new ApiException(("Phone is exit"));
         }
         addressOptional = adminAddressRepository.findById(addressDTO.getId());
-        if (addressOptional.isPresent()) {
-            throw new ResourceNotFoundException("Phone is not exit");
+        if (addressOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Address is not exit");
         }
         Address addressSave = addressOptional.get();
         addressSave.setDistrict(addressDTO.getDistrict());
