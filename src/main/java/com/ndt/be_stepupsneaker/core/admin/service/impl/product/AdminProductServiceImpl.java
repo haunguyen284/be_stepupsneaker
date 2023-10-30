@@ -71,6 +71,7 @@ public class AdminProductServiceImpl implements AdminProductService {
         productSave.setName(productDTO.getName());
         productSave.setStatus(productDTO.getStatus());
         productSave.setCode(productDTO.getCode());
+        productSave.setDescription(productDTO.getDescription());
         return AdminProductMapper.INSTANCE.productToAdminProductResponse(adminProductRepository.save(productSave));
     }
 
