@@ -45,7 +45,8 @@ public class Customer extends PrimaryEntity {
     @Lob
     private String image;
 
-
+    @OneToMany(mappedBy = "customer")
+    List<Address> customerAddresses;
 
 }
 

@@ -26,5 +26,5 @@ public class AdminCustomerRequest extends PageableRequest {
     private CustomerStatus status;
     private String gender;
     private String image;
-
+    List<AdminAddressRequest> adminAddressRequests;
 }
