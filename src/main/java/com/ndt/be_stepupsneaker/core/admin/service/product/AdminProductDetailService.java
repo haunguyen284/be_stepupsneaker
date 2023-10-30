@@ -13,5 +13,6 @@ import java.util.UUID;
 
 public interface AdminProductDetailService extends BaseService<AdminProductDetailResponse, UUID, AdminProductDetailRequest> {
     List<AdminProductDetailResponse> create(List<AdminProductDetailRequest> productDetailRequests);
+    List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests);
 
 }

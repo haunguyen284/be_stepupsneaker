@@ -63,6 +63,15 @@ public class AdminProductDetailController {
         return ResponseHelper.getResponse(adminProductDetailService.update(colorDTO), HttpStatus.OK);
     }
 
+    @PutMapping("")
+    public Object update(@RequestBody List<@Valid AdminProductDetailRequest> productDetailRequests, BindingResult bindingResult){
+
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+
+        return ResponseHelper.getResponse(adminProductDetailService.update(productDetailRequests), HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
         return ResponseHelper.getResponse(adminProductDetailService.delete(UUID.fromString(id)), HttpStatus.OK);

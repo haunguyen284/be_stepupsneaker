@@ -46,5 +46,4 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     """)
     Page<ProductDetail> findAllProductDetail(@Param("request") AdminProductDetailRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
-
 }

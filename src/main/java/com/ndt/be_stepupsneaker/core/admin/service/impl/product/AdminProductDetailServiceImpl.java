@@ -84,6 +84,12 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
         return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());
     }
 
+    @Override
+    public List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests) {
+        List<ProductDetail> productDetails = productDetailRequests.stream().map(AdminProductDetailMapper.INSTANCE::adminProductDetailRequestToProductDetail).collect(Collectors.toList());
+        return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());
+    }
+
 
     @Override
     public AdminProductDetailResponse update(AdminProductDetailRequest productDetailRequest) {
