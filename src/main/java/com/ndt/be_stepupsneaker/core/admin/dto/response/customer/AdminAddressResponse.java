@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.customer;
 
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,9 @@ public class AdminAddressResponse {
     private UUID id;
     private String phoneNumber;
     private Boolean isDefault;
-    private String city;
+    private String district;
     private String province;
-    private String country;
+    private String ward;
+    private String more;
+    private AdminCustomerResponse customerResponse;
 }

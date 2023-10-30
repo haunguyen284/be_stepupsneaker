@@ -37,7 +37,6 @@ public class AdminProductController {
     @GetMapping("")
     public Object findAllProduct(AdminProductRequest colorDTO){
         PageableObject<AdminProductResponse> listProduct = adminProductService.findAllEntity(colorDTO);
-
         return ResponseHelper.getResponse(listProduct, HttpStatus.OK);
     }
 

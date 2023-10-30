@@ -1,10 +1,9 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.product.Sole;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
@@ -20,17 +19,24 @@ public class Address extends PrimaryEntity {
     @Column(name = "is_default", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isDefault;
 
-    @Column(name = "city", length = EntityProperties.LENGTH_CITY)
+    @Column(name = "district", length = EntityProperties.LENGTH_CITY)
     @Nationalized
-    private String city;
+    private String district;
 
     @Column(name = "province", length = EntityProperties.LENGTH_PROVINCE)
     @Nationalized
     private String province;
 
-    @Column(name = "country", length = EntityProperties.LENGTH_COUNTRY)
+    @Column(name = "ward", length = EntityProperties.LENGTH_COUNTRY)
     @Nationalized
-    private String country;
+    private String ward;
 
+    @Column(name = "more", length = EntityProperties.LENGTH_COUNTRY)
+    @Nationalized
+    private String more;
+
+    @JoinColumn(name = "customer_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Customer customer;
 
 }

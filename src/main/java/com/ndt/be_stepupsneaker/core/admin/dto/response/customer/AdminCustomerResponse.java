@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.customer;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
@@ -24,5 +25,5 @@ public class AdminCustomerResponse {
     private CustomerStatus status;
     private String gender;
     private String image;
-    List<AdminCustomerVoucherResponse> adminCustomerVoucherResp;
+    List<AdminAddressResponse> adminAddressResponses;
 }

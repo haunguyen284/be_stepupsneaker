@@ -25,10 +25,8 @@ import java.util.UUID;
 public interface AdminVoucherRepository extends VoucherRepository {
     @Query("""
             SELECT x FROM Voucher x 
-            WHERE (:#{#request.name} IS NULL OR :#{#request.name} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.name}, '%')) 
+            WHERE (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' OR x.name LIKE  CONCAT('%', :#{#request.q}, '%')OR x.code LIKE  CONCAT('%', :#{#request.q}, '%')) 
             AND
-            (:#{#request.code} IS NULL OR :#{#request.code} LIKE '' OR x.code LIKE  CONCAT('%', :#{#request.code}, '%'))
-             AND
             (:status IS NULL OR x.status = :status)
              AND
             (:type IS NULL OR x.type = :type)
