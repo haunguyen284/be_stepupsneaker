@@ -45,7 +45,6 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     // Tạo address bắt buộc phải cho id customer
     @Override
     public AdminAddressResponse create(AdminAddressRequest addressDTO) {
-        AdminCustomerResponse adminCustomerResponse;
         Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
         if (addressOptional.isPresent()) {
             throw new ResourceNotFoundException("PHONE IS EXISTS ! TAO QUÁ BUỒN ....");
@@ -67,9 +66,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
         }
         address.setCustomer(customerOptional.get());
         address = adminAddressRepository.save(address);
-        adminCustomerResponse = AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customerOptional.get());
         AdminAddressResponse adminAddressResponse = AdminAddressMapper.INSTANCE.addressToAdminAddressResponse(address);
-        adminAddressResponse.setCustomerResponse(adminCustomerResponse);
         return adminAddressResponse;
     }
 
