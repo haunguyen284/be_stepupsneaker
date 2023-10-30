@@ -20,15 +20,15 @@ public interface AdminAddressRepository extends AddressRepository {
     @Query("""
             SELECT x FROM Address x 
             WHERE x.isDefault= TRUE AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' 
-            OR x.phoneNumber LIKE CONCAT('%', :#{#request.q}, '%')  
-            OR x.more LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.province LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.district LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.ward LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.email LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.fullName LIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.gender LIKE CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
+            OR x.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%')  
+            OR x.more ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.province ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.district ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.ward ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.customer.email ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.customer.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.customer.gender ILIKE CONCAT('%', :#{#request.q}, '%'))
             AND(x.deleted=FALSE)
             """)
     Page<Address> findAllCustomerByAddress(@Param("request") AdminAddressRequest request, Pageable pageable);
@@ -46,12 +46,12 @@ public interface AdminAddressRepository extends AddressRepository {
             SELECT x FROM Address x 
             WHERE x.customer.id  = :customerId 
             AND
-            (:#{#request.q} IS NULL OR :#{#request.q} LIKE '' 
-            OR x.ward LIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.province LIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.district LIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.more LIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.phoneNumber LIKE  CONCAT('%', :#{#request.q}, '%'))
+            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
+            OR x.ward ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.province ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.district ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.more ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.phoneNumber ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
             (x.deleted = FALSE)
              """)
