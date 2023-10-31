@@ -63,7 +63,7 @@ public class AdminVoucherController {
         return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
 
-    @GetMapping("/customers-not-in-VoucherId")
+    @GetMapping("/customers-not-in-voucherId")
     public Object findAllCustomerVoucherNotInVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
         PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService
                 .getAllCustomerNotInVoucherId(UUID.fromString(voucherId), customerRequest);
