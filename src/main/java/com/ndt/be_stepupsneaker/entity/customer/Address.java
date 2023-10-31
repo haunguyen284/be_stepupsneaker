@@ -19,17 +19,26 @@ public class Address extends PrimaryEntity {
     @Column(name = "is_default", columnDefinition = "BOOLEAN DEFAULT false")
     private Boolean isDefault;
 
-    @Column(name = "district", length = EntityProperties.LENGTH_CITY)
+    @Column(name = "district_name", length = EntityProperties.LENGTH_CITY)
     @Nationalized
-    private String district;
+    private String districtName;
 
-    @Column(name = "province", length = EntityProperties.LENGTH_PROVINCE)
+    @Column(name = "province_name", length = EntityProperties.LENGTH_PROVINCE)
     @Nationalized
-    private String province;
+    private String provinceName;
 
-    @Column(name = "ward", length = EntityProperties.LENGTH_COUNTRY)
+    @Column(name = "ward_name", length = EntityProperties.LENGTH_COUNTRY)
     @Nationalized
-    private String ward;
+    private String wardName;
+
+    @Column(name = "district_id", length = EntityProperties.LENGTH_CITY)
+    private String districtId;
+
+    @Column(name = "province_id", length = EntityProperties.LENGTH_PROVINCE)
+    private String provinceId;
+
+    @Column(name = "ward_code", length = EntityProperties.LENGTH_COUNTRY)
+    private String wardCode;
 
     @Column(name = "more", length = EntityProperties.LENGTH_COUNTRY)
     @Nationalized
