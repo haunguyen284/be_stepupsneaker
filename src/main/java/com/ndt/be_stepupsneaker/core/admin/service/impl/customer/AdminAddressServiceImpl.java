@@ -34,6 +34,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    // Not user funciton
     @Override
     public PageableObject<AdminAddressResponse> findAllEntity(AdminAddressRequest addressRequest) {
         Pageable pageable = paginationUtil.pageable(addressRequest);

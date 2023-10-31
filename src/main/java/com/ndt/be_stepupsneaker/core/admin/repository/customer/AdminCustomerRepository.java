@@ -32,22 +32,6 @@ public interface AdminCustomerRepository extends CustomerRepository {
     AND
     (x.customerAddresses is empty OR x.customerAddresses is not empty AND EXISTS (SELECT a FROM Address a WHERE a.customer = x AND a.isDefault = TRUE))
     """)
-
-//    @Query("SELECT c, CASE WHEN MAX(a.isDefault) = true THEN true ELSE false END as maxIsDefault " +
-//            "FROM Customer c " +
-//            "LEFT JOIN c.customerAddresses a " +
-//            "WHERE " +
-//            "(:#{#request.q} IS NULL OR :#{#request.q} LIKE '' " +
-//            " OR c.fullName LIKE CONCAT('%', :#{#request.q}, '%') " +
-//            " OR c.email LIKE CONCAT('%', :#{#request.q}, '%') " +
-//            " OR c.gender LIKE CONCAT('%', :#{#request.q}, '%')) " +
-//            "AND " +
-//            "(:status IS NULL OR c.status = :status) " +
-//            "AND " +
-//            "(:#{#request.dateOfBirth} IS NULL OR c.dateOfBirth = :#{#request.dateOfBirth}) " +
-//            "AND " +
-//            "(c.deleted = FALSE) " +
-//            "GROUP BY c")
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request, @Param("status")CustomerStatus status, Pageable pageable);
 
 

@@ -2,7 +2,6 @@ package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.CustomerIdRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
@@ -10,12 +9,10 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResp
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,22 +73,6 @@ public class AdminVoucherController {
         return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete-customers/{voucherId}")
-    public Object deleteCustomersByVoucherAndCustomerIds(
-            @PathVariable String voucherId,
-            @RequestBody CustomerIdRequest customerIdRequest) {
-        // Chuyển đổi voucherId và danh sách customerIds thành UUID
-        UUID voucherUUID = UUID.fromString(voucherId);
-        List<UUID> customerIds = customerIdRequest.getCustomerIds().stream()
-                .map(UUID::fromString)
-                .collect(Collectors.toList());
-        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherUUID, customerIds);
-        if (deleted) {
-            return ResponseHelper.getResponse("CUSTOMERS DELETED SUCCESSFULLY.", HttpStatus.OK);
-        } else {
-            return ResponseHelper.getResponse("NO CUSTOMERS WERE DELETED", HttpStatus.NOT_FOUND);
-        }
-    }
 
 
 }
