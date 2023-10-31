@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/vouchers")
@@ -60,19 +57,16 @@ public class AdminVoucherController {
         return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
 
-    @GetMapping("/getAllCustomerByVoucherId/{voucherId}/search")
-    public Object findAllCustomerVoucherByVoucherId(@PathVariable("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
+    @GetMapping("/customers-by-voucherId")
+    public Object findAllCustomerVoucherByVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
         PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService.getAllCustomerByVoucherId(UUID.fromString(voucherId), customerRequest);
         return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
 
-    @GetMapping("/getAllCustomerNotInVoucherId/{voucherId}/search")
-    public Object findAllCustomerVoucherNotInVoucherId(@PathVariable("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
+    @GetMapping("/customers-not-in-VoucherId")
+    public Object findAllCustomerVoucherNotInVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
         PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService
                 .getAllCustomerNotInVoucherId(UUID.fromString(voucherId), customerRequest);
         return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
-
-
-
 }
