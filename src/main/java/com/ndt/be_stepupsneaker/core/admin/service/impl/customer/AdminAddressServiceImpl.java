@@ -81,11 +81,14 @@ public class AdminAddressServiceImpl implements AdminAddressService {
             throw new ResourceNotFoundException("Address is not exit");
         }
         Address addressSave = addressOptional.get();
-        addressSave.setDistrict(addressDTO.getDistrict());
-        addressSave.setWard(addressDTO.getWard());
+        addressSave.setDistrictId(addressDTO.getDistrictId());
+        addressSave.setWardCode(addressDTO.getWardCode());
+        addressSave.setProvinceId(addressDTO.getProvinceId());
+        addressSave.setDistrictName(addressDTO.getDistrictName());
+        addressSave.setWardName(addressDTO.getWardName());
+        addressSave.setProvinceName(addressDTO.getProvinceName());
+
         addressSave.setMore(addressDTO.getMore());
-//        addressSave.setIsDefault(addressDTO.getIsDefault());
-        addressSave.setProvince(addressDTO.getProvince());
         addressSave.setPhoneNumber(addressDTO.getPhoneNumber());
 
         return AdminAddressMapper.INSTANCE.addressToAdminAddressResponse(adminAddressRepository.save(addressSave));
