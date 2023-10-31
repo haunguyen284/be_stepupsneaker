@@ -53,7 +53,7 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
 
     @Query("""
             SELECT x FROM Customer x 
-            WHERE x.id NOT IN (SELECT y.id FROM CustomerVoucher y WHERE y.voucher.id = :voucherId)
+            WHERE x.id NOT IN (SELECT y.customer.id FROM CustomerVoucher y WHERE y.voucher.id = :voucherId)
             AND
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.fullName ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND

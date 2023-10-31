@@ -9,8 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
@@ -19,6 +18,8 @@ import java.util.List;
 @Setter
 @Table(name = "customer")
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 
 public class Customer extends PrimaryEntity {
     @Column(name = "full_name", length = EntityProperties.LENGTH_NAME)

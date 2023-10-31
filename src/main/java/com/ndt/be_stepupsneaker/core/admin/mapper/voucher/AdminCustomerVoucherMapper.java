@@ -15,7 +15,8 @@ public interface AdminCustomerVoucherMapper {
 
     AdminCustomerVoucherMapper INSTANCE = Mappers.getMapper( AdminCustomerVoucherMapper.class );
 
-
+    @Mapping(target = "voucherResponse", source = "voucher")
+    @Mapping(target = "customerResponse", source = "customer")
     AdminCustomerVoucherResponse customerVoucherToAdminCustomerVoucherResponse(CustomerVoucher customerVoucher);
 
     CustomerVoucher adminCustomerVoucherRequestToCustomerVoucher(AdminCustomerVoucherRequest customerVoucherRequest);
