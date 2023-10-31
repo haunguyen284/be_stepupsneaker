@@ -23,7 +23,6 @@ public class AdminAddressRequest extends PageableRequest {
     private String districtId;
     private String provinceId;
     private String wardCode;
-
     private String districtName;
     private String provinceName;
     private String wardName;
