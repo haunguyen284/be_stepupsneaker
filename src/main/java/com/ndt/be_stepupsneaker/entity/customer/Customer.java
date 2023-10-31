@@ -49,5 +49,8 @@ public class Customer extends PrimaryEntity {
     @OneToMany(mappedBy = "customer")
     List<Address> customerAddresses;
 
+    @OneToMany(mappedBy = "customer")
+    List<CustomerVoucher> customerVoucherList;
+
 }
 
