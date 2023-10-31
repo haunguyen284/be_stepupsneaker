@@ -46,8 +46,8 @@ public class Voucher extends PrimaryEntity {
     @Column(name = "end_date", nullable = false)
     private Long endDate;
 
-    @Column(name = "url_image")
-//    @Lob
+    @Column(name = "url_image", columnDefinition = "TEXT")
+    @Lob
     private String image;
 
     @OneToMany(mappedBy = "voucher")

@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.CustomerIdRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.ListCustomerAndVoucher;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/customerVoucher")
@@ -49,5 +51,21 @@ public class AdminCustomerVoucherController {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerAndVoucher.getVoucherRequestList(), listCustomerAndVoucher.getCustomerRequestList()), HttpStatus.OK);
+    }
+
+    @DeleteMapping("")
+    public Object deleteCustomersByVoucherAndCustomerIds(
+            @RequestParam String voucherId,
+            @RequestBody CustomerIdRequest customerIdRequest) {
+        UUID voucherUUID = UUID.fromString(voucherId);
+        List<UUID> customerIds = customerIdRequest.getCustomerIds().stream()
+                .map(UUID::fromString)
+                .collect(Collectors.toList());
+        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherUUID, customerIds);
+        if (deleted) {
+            return ResponseHelper.getResponse("CUSTOMERS DELETED SUCCESSFULLY.", HttpStatus.OK);
+        } else {
+            return ResponseHelper.getResponse("NO CUSTOMERS WERE DELETED", HttpStatus.NOT_FOUND);
+        }
     }
 }

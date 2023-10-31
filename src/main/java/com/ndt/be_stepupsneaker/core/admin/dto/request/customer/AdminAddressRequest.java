@@ -20,9 +20,12 @@ public class AdminAddressRequest extends PageableRequest {
     private UUID id;
     private String phoneNumber;
     private Boolean isDefault;
-    private String district;
-    private String province;
-    private String ward;
+    private String districtId;
+    private String provinceId;
+    private String wardCode;
+    private String districtName;
+    private String provinceName;
+    private String wardName;
     private String more;
     private AdminCustomerRequest customerRequest;
 }

@@ -21,6 +21,7 @@ public class AdminAddressController {
     @Autowired
     private AdminAddressService adminAddressService;
 
+    // Not user function
     @GetMapping("/customerByAddressDefault")
     public Object findAllCustomerAddress(AdminAddressRequest addressDTO) {
         PageableObject<AdminAddressResponse> listAddress = adminAddressService.findAllEntity(addressDTO);

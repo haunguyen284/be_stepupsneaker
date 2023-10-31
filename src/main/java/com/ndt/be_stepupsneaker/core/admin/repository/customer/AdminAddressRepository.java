@@ -23,9 +23,9 @@ public interface AdminAddressRepository extends AddressRepository {
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
             OR x.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%')  
             OR x.more ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.province ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.district ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.ward ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.provinceName ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.districtName ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR x.wardName ILIKE CONCAT('%', :#{#request.q}, '%')
             OR x.customer.email ILIKE CONCAT('%', :#{#request.q}, '%')
             OR x.customer.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
             OR x.customer.gender ILIKE CONCAT('%', :#{#request.q}, '%'))
@@ -47,9 +47,9 @@ public interface AdminAddressRepository extends AddressRepository {
             WHERE x.customer.id  = :customerId 
             AND
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
-            OR x.ward ILIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.province ILIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.district ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.wardName ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.provinceName ILIKE  CONCAT('%', :#{#request.q}, '%')
+            OR x.districtName ILIKE  CONCAT('%', :#{#request.q}, '%')
             OR x.more ILIKE  CONCAT('%', :#{#request.q}, '%')
             OR x.phoneNumber ILIKE  CONCAT('%', :#{#request.q}, '%'))
             AND
