@@ -17,22 +17,6 @@ import java.util.UUID;
 
 @Repository
 public interface AdminAddressRepository extends AddressRepository {
-    @Query("""
-            SELECT x FROM Address x 
-            WHERE x.isDefault= TRUE AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
-            OR x.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%')  
-            OR x.more ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.provinceName ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.districtName ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.wardName ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.email ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.gender ILIKE CONCAT('%', :#{#request.q}, '%'))
-            AND(x.deleted=FALSE)
-            """)
-    Page<Address> findAllCustomerByAddress(@Param("request") AdminAddressRequest request, Pageable pageable);
-
     Optional<Address> findByPhoneNumber(String phoneNumber);
 
     @Query("""
@@ -44,7 +28,7 @@ public interface AdminAddressRepository extends AddressRepository {
 
     @Query("""
             SELECT x FROM Address x 
-            WHERE x.customer.id  = :customerId 
+            WHERE (CAST(:customerId as java.util.UUID) IS NULL OR x.customer.id  = CAST(:customerId as java.util.UUID) )
             AND
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
             OR x.wardName ILIKE  CONCAT('%', :#{#request.q}, '%')
@@ -55,7 +39,7 @@ public interface AdminAddressRepository extends AddressRepository {
             AND
             (x.deleted = FALSE)
              """)
-    Page<Address> findAllAddressByCustomerId(@Param("customerId") UUID customerId, @Param("request") AdminAddressRequest request, Pageable pageable);
+    Page<Address> findAllAddress(@Param("customerId") UUID customerId, @Param("request") AdminAddressRequest request, Pageable pageable);
 
     @Query("SELECT CASE WHEN COUNT(x) > 0 THEN TRUE ELSE FALSE END FROM Address x WHERE x.customer = :customer")
     boolean existsByCustomer(@Param("customer") Customer customer);

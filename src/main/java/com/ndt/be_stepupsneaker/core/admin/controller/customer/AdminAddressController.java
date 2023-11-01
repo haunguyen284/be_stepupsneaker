@@ -56,8 +56,8 @@ public class AdminAddressController {
     }
 
     @GetMapping("")
-    public Object findAllAddressByCustomerId(@RequestParam("customerId") String customerId, AdminAddressRequest addressDTO) {
-        PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddressByCustomerId(UUID.fromString(customerId), addressDTO);
+    public Object findAllAddressByCustomerId(@RequestParam(name = "customerId",required = false,defaultValue = "") UUID customerId, AdminAddressRequest addressDTO) {
+        PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddress(customerId, addressDTO);
         return ResponseHelper.getResponse(pageAddress, HttpStatus.OK);
     }
 

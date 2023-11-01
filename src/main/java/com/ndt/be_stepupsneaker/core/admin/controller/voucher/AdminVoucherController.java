@@ -56,13 +56,13 @@ public class AdminVoucherController {
     public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
-
+    // this function not use
     @GetMapping("/customers-by-voucherId")
     public Object findAllCustomerVoucherByVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
         PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService.getAllCustomerByVoucherId(UUID.fromString(voucherId), customerRequest);
         return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
-
+    // this function not use
     @GetMapping("/customers-not-in-voucherId")
     public Object findAllCustomerVoucherNotInVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
         PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService
