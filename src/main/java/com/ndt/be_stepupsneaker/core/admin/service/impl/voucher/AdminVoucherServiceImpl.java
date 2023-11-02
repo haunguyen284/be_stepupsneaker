@@ -3,23 +3,29 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.ConvertTime;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,14 +35,22 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     @Qualifier("adminVoucherRepository")
     private AdminVoucherRepository adminVoucherRepository;
 
+    private AdminOrderRepository adminOrderRepository;
+
     private PaginationUtil paginationUtil;
 
     private CustomerVoucherRepository customerVoucherRepository;
     @Autowired
-    public AdminVoucherServiceImpl(AdminVoucherRepository adminVoucherRepository, PaginationUtil paginationUtil, CustomerVoucherRepository customerVoucherRepository) {
+    public AdminVoucherServiceImpl(
+            AdminVoucherRepository adminVoucherRepository,
+            CustomerVoucherRepository customerVoucherRepository,
+            AdminOrderRepository adminOrderRepository,
+            PaginationUtil paginationUtil
+    ) {
         this.adminVoucherRepository = adminVoucherRepository;
-        this.paginationUtil = paginationUtil;
         this.customerVoucherRepository = customerVoucherRepository;
+        this.adminOrderRepository = adminOrderRepository;
+        this.paginationUtil = paginationUtil;
     }
 
 
@@ -126,6 +140,19 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         }
     }
 
+    @Override
+    public void updateOrderAutomatically() {
+
+        long currentMillis = Instant.now().toEpochMilli();
+        // Calculate the time 30 minutes ago in milliseconds
+        long thirtyMinutesAgo = currentMillis - (30 * 60 * 1000); // 30 minutes * 60 seconds/minute * 1000 milliseconds/second
+
+        List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBefore(OrderStatus.PENDING, thirtyMinutesAgo);
+
+        if (!expiredOrders.isEmpty()){
+            adminOrderRepository.deleteAllInBatch(expiredOrders);
+        }
+    }
 
 
 }

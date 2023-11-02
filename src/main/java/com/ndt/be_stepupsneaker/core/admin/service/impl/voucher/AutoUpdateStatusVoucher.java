@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
 
+import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,5 +14,7 @@ public class AutoUpdateStatusVoucher {
     @Scheduled(cron = "0 * * * * ?") // chạy 1 phút 1 lần...
     public void updateDiscountStatusDaily() {
         adminVoucherService.updateVoucherStatusAutomatically();
+        adminVoucherService.updateOrderAutomatically();
     }
+
 }

@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.entity.order;
 
-import com.ndt.be_stepupsneaker.entity.base.OrderPrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
@@ -9,24 +8,23 @@ import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
+import com.ndt.be_stepupsneaker.util.RandomStringUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
-
-import java.io.Serializable;
 
 @Getter
 @Setter
 @Table(name = "shop_order")
 @Entity
-public class Order extends OrderPrimaryEntity implements Serializable {
+public class Order extends PrimaryEntity {
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,5 +76,15 @@ public class Order extends OrderPrimaryEntity implements Serializable {
 
     @Column(name = "status")
     private OrderStatus status;
+
+    @Column(name = "code", updatable = false, length = EntityProperties.LENGTH_CODE, unique = true)
+    private String code;
+
+    @PrePersist
+    private void generateCode() {
+        int codeLength = 5;
+        String randomPart = RandomStringUtil.randomAlphaNumeric(codeLength);
+        this.code = "SUS" + "-" + randomPart;
+    }
 
 }

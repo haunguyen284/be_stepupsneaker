@@ -10,6 +10,6 @@ public interface AdminVoucherService extends BaseService<AdminVoucherResponse, U
 
     void updateVoucherStatusAutomatically();
 
-
+    void updateOrderAutomatically();
 
 }

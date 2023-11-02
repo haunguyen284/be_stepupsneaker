@@ -16,7 +16,7 @@ public class AdminOrderHistoryRequest extends PageableRequest {
     private UUID id;
 
     @NotBlank(message = "Order must be not null")
-    private String order;
+    private UUID order;
 
     @NotBlank(message = "Action description must be not null")
     private String actionDescription;

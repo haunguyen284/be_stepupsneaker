@@ -12,6 +12,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 public interface AdminOrderRepository extends OrderRepository {
 
@@ -36,6 +39,7 @@ public interface AdminOrderRepository extends OrderRepository {
             Pageable pageable
     );
 
+    List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, Long cutoffTime);
 
     Integer countAllByStatus(OrderStatus status);
 

@@ -54,6 +54,8 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String note;
 
+    private String orderHistoryNote;
+
     private OrderStatus status;
 
 }
