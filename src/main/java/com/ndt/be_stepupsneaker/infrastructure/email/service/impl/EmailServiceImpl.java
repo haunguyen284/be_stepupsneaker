@@ -28,7 +28,7 @@ public class EmailServiceImpl implements EmailService {
     public void sendEmail(Email details) {
         String htmlBody = MailConstant.BODY_STARTS +
                 details.getTitleEmail() +
-                MailConstant.BODY_BODY +
+//                MailConstant.BODY_BODY +
                 details.getBody() +
                 MailConstant.BODY_END;
         sendSimpleMail(details.getToEmail(), htmlBody, details.getSubject());
@@ -48,7 +48,7 @@ public class EmailServiceImpl implements EmailService {
             mimeMessageHelper.setBcc(recipients);
             mimeMessageHelper.setText(msgBody, true);
             mimeMessageHelper.setSubject(subject);
-            mimeMessageHelper.addInline("logoImage", resource);
+//            mimeMessageHelper.addInline("logoImage", resource);
             javaMailSender.send(mimeMessage);
         } catch (Exception e) {
             log.error("ERROR WHILE SENDING MAIL: {}", e.getMessage());
