@@ -17,4 +17,5 @@ public final class EntityProperties {
     public static final byte LENGTH_CITY = 50;
     public static final byte LENGTH_PROVINCE = 50;
     public static final byte LENGTH_COUNTRY = 50;
+    public static final byte LENGTH_PENDING_ORDER = 5;
 }

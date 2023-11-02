@@ -2,9 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.customer;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminAddressMapper;
-import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminAddressService;

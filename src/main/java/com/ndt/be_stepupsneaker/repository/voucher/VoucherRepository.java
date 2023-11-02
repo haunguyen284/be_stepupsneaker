@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.repository.voucher;
 
-import com.ndt.be_stepupsneaker.entity.product.Color;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

@@ -1,7 +1,6 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
-import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import jakarta.persistence.Column;
@@ -9,7 +8,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;

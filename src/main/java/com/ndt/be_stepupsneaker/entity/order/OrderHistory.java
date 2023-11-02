@@ -17,6 +17,7 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "order_history")
 @Entity
 public class OrderHistory extends PrimaryEntity {
+
     @JoinColumn(name = "shop_order_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Order order;

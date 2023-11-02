@@ -13,10 +13,8 @@ import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminSoleRepositor
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminStyleRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminTradeMarkRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductDetailService;
-import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductDetailService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
-import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.entity.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;

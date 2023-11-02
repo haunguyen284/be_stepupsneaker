@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.product;
 
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

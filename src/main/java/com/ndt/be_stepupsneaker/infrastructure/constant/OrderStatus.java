@@ -10,4 +10,5 @@ public enum OrderStatus {
     EXPIRED,
     RETURN,
     EXCHANGE,
+    PENDING,
 }

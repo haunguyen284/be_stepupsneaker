@@ -1,6 +1,8 @@
 package com.ndt.be_stepupsneaker.entity.order;
 
+import com.ndt.be_stepupsneaker.entity.base.OrderPrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
@@ -13,15 +15,19 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+
+import java.io.Serializable;
 
 @Getter
 @Setter
 @Table(name = "shop_order")
 @Entity
-public class Order extends PrimaryEntity {
+public class Order extends OrderPrimaryEntity implements Serializable {
+
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
@@ -34,12 +40,12 @@ public class Order extends PrimaryEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Voucher voucher;
 
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Address address;
+
     @Column(name = "phone_number", length = EntityProperties.LENGTH_PHONE)
     private String phoneNumber;
-
-    @Column(name = "address", length = EntityProperties.LENGTH_ADDRESS)
-    @Nationalized
-    private String address;
 
     @Column(name = "full_name", length = EntityProperties.LENGTH_NAME)
     @Nationalized

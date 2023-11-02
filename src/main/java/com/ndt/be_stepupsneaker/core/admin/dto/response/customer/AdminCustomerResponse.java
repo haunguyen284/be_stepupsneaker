@@ -1,8 +1,5 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.customer;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
-import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

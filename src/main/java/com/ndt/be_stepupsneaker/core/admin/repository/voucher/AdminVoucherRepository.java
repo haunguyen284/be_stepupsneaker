@@ -1,14 +1,9 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.voucher;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
-import com.ndt.be_stepupsneaker.entity.product.Color;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
-import com.ndt.be_stepupsneaker.repository.product.ColorRepository;
 import com.ndt.be_stepupsneaker.repository.voucher.VoucherRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;

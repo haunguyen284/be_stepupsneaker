@@ -4,9 +4,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequ
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
 import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import org.springframework.data.domain.Page;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface AdminAddressService extends BaseService<AdminAddressResponse, UUID, AdminAddressRequest> {

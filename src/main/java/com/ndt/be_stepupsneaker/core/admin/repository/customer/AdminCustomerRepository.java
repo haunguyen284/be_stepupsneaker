@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.customer;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;

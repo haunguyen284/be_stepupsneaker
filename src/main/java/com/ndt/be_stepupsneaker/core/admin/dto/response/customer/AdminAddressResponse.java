@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.customer;
 
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
