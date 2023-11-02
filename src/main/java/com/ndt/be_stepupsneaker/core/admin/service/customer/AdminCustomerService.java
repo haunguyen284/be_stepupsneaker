@@ -1,14 +1,21 @@
 package com.ndt.be_stepupsneaker.core.admin.service.customer;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.core.common.base.BaseService;
+import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import org.hibernate.validator.internal.engine.validationcontext.BaseBeanValidationContext;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface AdminCustomerService extends BaseService<AdminCustomerResponse, UUID, AdminCustomerRequest> {
 
-//    AdminCustomerResponse createAddressForCustomer(List<AdminAddressRequest> voucherRequestList, List<AdminCustomerRequest> adminCustomerRequests);
+    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucherId,UUID noVoucherId);
 
 
 }

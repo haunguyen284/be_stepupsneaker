@@ -35,10 +35,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     // Not user funciton
     @Override
     public PageableObject<AdminAddressResponse> findAllEntity(AdminAddressRequest addressRequest) {
-        Pageable pageable = paginationUtil.pageable(addressRequest);
-        Page<Address> resp = adminAddressRepository.findAllCustomerByAddress(addressRequest, pageable);
-        Page<AdminAddressResponse> adminAddressResponses = resp.map(AdminAddressMapper.INSTANCE::addressToAdminAddressResponse);
-        return new PageableObject<>(adminAddressResponses);
+       return null;
     }
 
     // Tạo address bắt buộc phải cho id customer
@@ -117,9 +114,9 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     }
 
     @Override
-    public PageableObject<AdminAddressResponse> findAllAddressByCustomerId(UUID customerId, AdminAddressRequest addressRequest) {
+    public PageableObject<AdminAddressResponse> findAllAddress(UUID customerId, AdminAddressRequest addressRequest) {
         Pageable pageable = paginationUtil.pageable(addressRequest);
-        Page<Address> addressPage = adminAddressRepository.findAllAddressByCustomerId(customerId, addressRequest, pageable);
+        Page<Address> addressPage = adminAddressRepository.findAllAddress(customerId, addressRequest, pageable);
         Page<AdminAddressResponse> adminAddressRespPage = addressPage.map(AdminAddressMapper.INSTANCE::addressToAdminAddressResponse);
         return new PageableObject<>(adminAddressRespPage);
     }

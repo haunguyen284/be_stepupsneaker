@@ -111,11 +111,11 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
         return new PageableObject<>(adminCustomerVoucherRespPage);
     }
 
-        @Override
-        public Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds) {
-            adminCustomerVoucherRepository.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIds);
-            return true;
-        }
+    @Override
+    public Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds) {
+        adminCustomerVoucherRepository.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIds);
+        return true;
+    }
 
 
 }

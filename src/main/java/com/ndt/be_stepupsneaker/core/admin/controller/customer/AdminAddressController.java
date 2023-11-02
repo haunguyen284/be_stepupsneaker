@@ -28,7 +28,7 @@ public class AdminAddressController {
     private AdminAddressService adminAddressService;
 
     // Not user function
-    @GetMapping("/customerByAddressDefault")
+    @GetMapping("/get-all")
     public Object findAllCustomerAddress(AdminAddressRequest addressDTO) {
         PageableObject<AdminAddressResponse> listAddress = adminAddressService.findAllEntity(addressDTO);
         return ResponseHelper.getResponse(listAddress, HttpStatus.OK);
@@ -61,15 +61,15 @@ public class AdminAddressController {
         return ResponseHelper.getResponse(adminAddressService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
 
-    @GetMapping("findAllAddressBy/{customerId}")
-    public Object findAllAddressByCustomerId(@PathVariable("customerId") String customerId, AdminAddressRequest addressDTO) {
-        PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddressByCustomerId(UUID.fromString(customerId), addressDTO);
+    @GetMapping("")
+    public Object findAllAddressByCustomerId(@RequestParam(name = "customerId",required = false,defaultValue = "") UUID customerId, AdminAddressRequest addressDTO) {
+        PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddress(customerId, addressDTO);
         return ResponseHelper.getResponse(pageAddress, HttpStatus.OK);
     }
 
-    @PutMapping("/set-default/{addressId}")
+    @PutMapping("/set-default-address")
     public Object setDefaultAddressByCustomer(
-            @PathVariable("addressId") String addressId) {
+            @RequestParam("addressId") String addressId) {
         return ResponseHelper.getResponse(adminAddressService.updateDefaultAddressByCustomer(UUID.fromString(addressId)), HttpStatus.OK);
     }
 

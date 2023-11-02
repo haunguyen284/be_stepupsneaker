@@ -27,13 +27,15 @@ public class AdminCustomerController {
     private AdminCustomerService adminCustomerService;
 
     @GetMapping("")
-    public Object findAllCustomer(AdminCustomerRequest customerDTO){
-        PageableObject<AdminCustomerResponse> listCustomer = adminCustomerService.findAllEntity(customerDTO);
+    public Object findAllCustomer(AdminCustomerRequest customerDTO,
+                                  @RequestParam(name = "voucherId",required = false,defaultValue = "") UUID voucherId,
+                                  @RequestParam(name = "noVoucherId",required = false,defaultValue = "") UUID noVoucherId){
+        PageableObject<AdminCustomerResponse> listCustomer = adminCustomerService.findAllCustomer(customerDTO,voucherId,noVoucherId);
         return ResponseHelper.getResponse(listCustomer, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Object findAllCustomer(@PathVariable("id")String id){
+    public Object findAllCustomerById(@PathVariable("id")String id){
         AdminCustomerResponse response = adminCustomerService.findById(UUID.fromString(id));
         return ResponseHelper.getResponse(response, HttpStatus.OK);
     }

@@ -1,7 +1,11 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.voucher;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,4 +43,6 @@ public class AdminVoucherResponse {
     private String image;
 
     List<AdminCustomerVoucherResponse> adminCustomerVoucherResponses;
+
+    List<AdminCustomerResponse> adminCustomerResponses;
 }

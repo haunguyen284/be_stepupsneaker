@@ -27,6 +27,7 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
             WHERE (x.voucher.deleted = FALSE )
             AND (x.customer.deleted =FALSE )
              """)
+        // this function not use
     Page<CustomerVoucher> findAllCustomerVoucher(@Param("request") AdminCustomerVoucherRequest request, Pageable pageable);
 
     @Query("""
@@ -45,6 +46,7 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
             AND
             (x.deleted = FALSE)
              """)
+        // this function not use
     Page<Customer> getAllCustomerByVoucherId(@Param("voucherId") UUID voucherId, @Param("status") CustomerStatus status, @Param("request") AdminCustomerRequest request, Pageable pageable);
 
     @Query("""
@@ -63,6 +65,7 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
             AND
             (x.deleted = FALSE)
              """)
+        // this function not use
     Page<Customer> getAllCustomerNotInVoucherId(@Param("voucherId") UUID voucherId, @Param("status") CustomerStatus status, @Param("request") AdminCustomerRequest request, Pageable pageable);
 
     @Modifying
