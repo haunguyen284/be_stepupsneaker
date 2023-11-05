@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import jakarta.persistence.Column;

@@ -30,6 +30,10 @@ public class AdminProductRequest extends PageableRequest {
 
     private String image;
 
+    private String minQuantity;
+
+    private String maxQuantity;
+
     @NotNull(message = "Status must be not null")
     private ProductStatus status;
 }
