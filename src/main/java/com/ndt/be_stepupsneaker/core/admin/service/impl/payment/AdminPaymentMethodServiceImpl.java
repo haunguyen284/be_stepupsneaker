@@ -82,9 +82,9 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
         if(paymentMethodOptional.isEmpty()){
             throw new ApiException("PAYMENT METHOD IS NOT EXIST");
         }
-        PaymentMethod paymentMethod = paymentMethodOptional.get();
-        paymentMethod.setDeleted(true);
-        adminPaymentMethodRepository.save(paymentMethod);
+//        PaymentMethod paymentMethod = paymentMethodOptional.get();
+//        paymentMethod.setDeleted(true);
+        adminPaymentMethodRepository.deleteById(id);
         return true;
     }
 }
