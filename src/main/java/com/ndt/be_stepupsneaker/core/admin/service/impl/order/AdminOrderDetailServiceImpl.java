@@ -75,7 +75,9 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
         orderDetail.setQuantity(orderDetailRequest.getQuantity());
         orderDetail.setPrice(orderDetailRequest.getPrice());
         orderDetail.setStatus(orderDetailRequest.getStatus());
-        return null;
+        adminOrderDetailRepository.save(orderDetail);
+
+        return AdminOrderDetailMapper.INSTANCE.orderDetailToAdminOrderDetailResponse(orderDetail);
     }
 
     @Override
@@ -110,7 +112,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
 
         OrderDetail orderDetail = orderDetailOptional.get();
         orderDetail.setDeleted(true);
-        adminOrderDetailRepository.save(orderDetail);
+        adminOrderDetailRepository.delete(orderDetail);
         return true;
     }
 

@@ -1,11 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.payment;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.payment.AdminPaymentRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminColorResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.payment.AdminPaymentService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;

@@ -8,8 +8,8 @@ public enum OrderStatus {
     COMPLETED("Order completed"),
     CANCELED("Order is cancelled"),
     EXPIRED("Order is expired"),
-    RETURN("Order is returned"),
-    EXCHANGE("Order is exchanged");
+    RETURNED("Order is returned"),
+    EXCHANGED("Order is exchanged");
 
     public final String action_description;
 

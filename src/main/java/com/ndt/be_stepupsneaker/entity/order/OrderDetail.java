@@ -17,6 +17,7 @@ import lombok.Setter;
 @Table(name = "order_detail")
 @Entity
 public class OrderDetail extends PrimaryEntity {
+
     @JoinColumn(name = "product_detail_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private ProductDetail productDetail;

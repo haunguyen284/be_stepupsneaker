@@ -16,25 +16,24 @@ public interface AdminOrderDetailRepository extends OrderDetailRepository {
 
     @Query("""
     SELECT od FROM OrderDetail od
-    LEFT JOIN od.productDetail pd
     WHERE (
     (:#{#request.order} IS NULL OR od.order.id = :#{#request.order}) 
     AND 
-    (:#{#request.product} IS NULL OR pd.product.id = :#{#request.product}) 
+    (:#{#request.product} IS NULL OR od.productDetail.product.id = :#{#request.product}) 
     AND 
-    (:#{#request.brand} IS NULL OR pd.brand.id = :#{#request.brand}) 
+    (:#{#request.brand} IS NULL OR od.productDetail.brand.id = :#{#request.brand}) 
     AND 
-    (:#{#request.color} IS NULL OR pd.color.id = :#{#request.color}) 
+    (:#{#request.color} IS NULL OR od.productDetail.color.id = :#{#request.color}) 
     AND 
-    (:#{#request.material} IS NULL OR pd.material.id = :#{#request.material}) 
+    (:#{#request.material} IS NULL OR od.productDetail.material.id = :#{#request.material}) 
     AND 
-    (:#{#request.size} IS NULL OR pd.size.id = :#{#request.size}) 
+    (:#{#request.size} IS NULL OR od.productDetail.size.id = :#{#request.size}) 
     AND 
-    (:#{#request.sole} IS NULL OR pd.sole.id = :#{#request.sole}) 
+    (:#{#request.sole} IS NULL OR od.productDetail.sole.id = :#{#request.sole}) 
     AND 
-    (:#{#request.style} IS NULL OR pd.style.id = :#{#request.style}) 
+    (:#{#request.style} IS NULL OR od.productDetail.style.id = :#{#request.style}) 
     AND 
-    (:#{#request.tradeMark} IS NULL OR pd.tradeMark.id = :#{#request.tradeMark}) 
+    (:#{#request.tradeMark} IS NULL OR od.productDetail.tradeMark.id = :#{#request.tradeMark}) 
     AND 
     ((:status IS NULL) OR (od.status = :status)) 
     AND

@@ -19,7 +19,7 @@ public class AdminOrderDetailResponse {
 
     private AdminProductDetailResponse productDetail;
 
-    private AdminOrderResponse order;
+    private AdminOrderNoOrderDetailResponse order;
 
     private int quantity;
 

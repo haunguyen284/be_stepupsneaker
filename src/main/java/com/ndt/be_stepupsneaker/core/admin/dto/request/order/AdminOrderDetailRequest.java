@@ -26,7 +26,7 @@ public class AdminOrderDetailRequest extends PageableRequest {
     @NotNull(message = "Quantity must be not null")
     private int quantity;
 
-    @NotNull(message = "Rrice must be not null")
+    @NotNull(message = "Price must be not null")
     private float price;
 
     @NotNull(message = "Total price must be not null")

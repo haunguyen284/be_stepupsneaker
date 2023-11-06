@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRep
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderHistoryService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -16,21 +17,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
 
-    private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final PaginationUtil paginationUtil;
 
     public AdminOrderHistoryServiceImpl(
-            AdminOrderRepository adminOrderRepository,
             AdminOrderHistoryRepository adminOrderHistoryRepository,
             PaginationUtil paginationUtil
     ) {
-        this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.paginationUtil = paginationUtil;
     }
@@ -56,7 +55,11 @@ public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
 
     @Override
     public AdminOrderHistoryResponse findById(UUID id) {
-        return null;
+        Optional<OrderHistory> orderHistory = adminOrderHistoryRepository.findById(id);
+        if(orderHistory.isEmpty()){
+            throw new RuntimeException("ORDER HISTORY IS NOT EXIST");
+        }
+        return AdminOrderHistoryMapper.INSTANCE.orderHistoryToAdminOrderHistoryResponse(orderHistory.get());
     }
 
     @Override
