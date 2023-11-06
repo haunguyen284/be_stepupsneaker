@@ -3,7 +3,6 @@ package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.CustomerIdRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
@@ -22,12 +21,11 @@ import java.util.UUID;
 public class AdminVoucherController {
     @Autowired
     private AdminVoucherService adminVoucherService;
-    @Autowired
-    private AdminCustomerVoucherService adminCustomerVoucherService;
+
 
     @GetMapping("")
-    public Object findAllVoucher(AdminVoucherRequest voucherRequest) {
-        PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllEntity(voucherRequest);
+    public Object findAllVoucher(AdminVoucherRequest voucherRequest,@RequestParam(value = "customer",required = false,defaultValue = "")UUID customerId) {
+        PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllVoucher(voucherRequest,customerId);
         return ResponseHelper.getResponse(listVoucher, HttpStatus.OK);
     }
 
@@ -55,18 +53,5 @@ public class AdminVoucherController {
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
-    }
-    // this function not use
-    @GetMapping("/customers-by-voucherId")
-    public Object findAllCustomerVoucherByVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
-        PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService.getAllCustomerByVoucherId(UUID.fromString(voucherId), customerRequest);
-        return ResponseHelper.getResponse(customerList, HttpStatus.OK);
-    }
-    // this function not use
-    @GetMapping("/customers-not-in-voucherId")
-    public Object findAllCustomerVoucherNotInVoucherId(@RequestParam("voucherId") String voucherId, AdminCustomerRequest customerRequest) {
-        PageableObject<AdminCustomerResponse> customerList = adminCustomerVoucherService
-                .getAllCustomerNotInVoucherId(UUID.fromString(voucherId), customerRequest);
-        return ResponseHelper.getResponse(customerList, HttpStatus.OK);
     }
 }

@@ -5,9 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
+
 @Getter
 @Setter
-public class ListCustomerAndVoucher {
-    private List<AdminVoucherRequest> voucherRequestList;
-    private List<AdminCustomerRequest> customerRequestList;
+public class ListCustomerIdAndVoucherIdRequest {
+    private List<UUID> voucher;
+    private List<UUID> customer;
 }

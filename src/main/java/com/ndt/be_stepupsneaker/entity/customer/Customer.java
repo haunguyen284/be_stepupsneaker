@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -49,7 +50,7 @@ public class Customer extends PrimaryEntity {
     private String image;
 
     @OneToMany(mappedBy = "customer")
-    List<Address> customerAddresses;
+    List<Address> addressList;
 
     @OneToMany(mappedBy = "customer")
     List<CustomerVoucher> customerVoucherList;

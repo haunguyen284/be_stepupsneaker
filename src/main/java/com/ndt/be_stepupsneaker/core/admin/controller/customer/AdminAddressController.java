@@ -9,15 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -28,11 +20,10 @@ public class AdminAddressController {
     @Autowired
     private AdminAddressService adminAddressService;
 
-    // Not user function
-    @GetMapping("/get-all")
-    public Object findAllCustomerAddress(AdminAddressRequest addressDTO) {
-        PageableObject<AdminAddressResponse> listAddress = adminAddressService.findAllEntity(addressDTO);
-        return ResponseHelper.getResponse(listAddress, HttpStatus.OK);
+    @GetMapping("")
+    public Object findAllAddress(@RequestParam(name = "customer",required = false,defaultValue = "") UUID customerId, AdminAddressRequest addressDTO) {
+        PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddress(customerId, addressDTO);
+        return ResponseHelper.getResponse(pageAddress, HttpStatus.OK);
     }
 
     @PostMapping("")
@@ -62,15 +53,9 @@ public class AdminAddressController {
         return ResponseHelper.getResponse(adminAddressService.delete(UUID.fromString(id)), HttpStatus.OK);
     }
 
-    @GetMapping("")
-    public Object findAllAddress(@RequestParam(name = "customerId",required = false,defaultValue = "") UUID customerId, AdminAddressRequest addressDTO) {
-        PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddress(customerId, addressDTO);
-        return ResponseHelper.getResponse(pageAddress, HttpStatus.OK);
-    }
-
     @PutMapping("/set-default-address")
     public Object setDefaultAddressByCustomer(
-            @RequestParam("addressId") String addressId) {
+            @RequestParam("address") String addressId) {
         return ResponseHelper.getResponse(adminAddressService.updateDefaultAddressByCustomer(UUID.fromString(addressId)), HttpStatus.OK);
     }
 

@@ -36,7 +36,7 @@ public class MailConstant {
             "                              <td>\n" +
             "                                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border:none;border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;\" width=\"100%\" class=\"wrapper\" bgcolor=\"#ffffff\">\n" +
             "                                  <tr>\n" +
-            "                                    <td width=\"173\"><a href=\"https://www.fitbit.com/home?utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=HeaderLink&utm_medium=EM&utm_source=ET\"><img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/1/2016_Large_logo.gif\" width=\"175\" height=\"80\" style=\"display:block; border:none;\" alt=\"Fitbit\" class=\"logoimage\"></a></td>\n" +
+            "                                    <td width=\"173\"><a href=\"https://www.fitbit.com/home?utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=HeaderLink&utm_medium=EM&utm_source=ET\"><img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/1/2016_Large_logo.gif\" width=\"175\" height=\"80\" style=\"display:block; border:none;\" alt=\"Step Up Sneaker\" class=\"logoimage\"></a></td>\n" +
             "                                    <td width=\"242\" class=\"hidden\"><img src=\"http://image.e.fitbit.com/lib/fe9413727564027a70/m/1/header_spacer.jpg\" width=\"200\" height=\"80\" style=\"display:block; border:none;\" alt=\"Share\"></td>\n" +
             "                                    <td width=\"104\" class=\"hidden\"><a href=\"https://www.fitbit.com/store?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=CartLink\"><img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/2/ShoppingCart_US.gif\" height=\"60\" style=\"display:block; border:none;\" alt=\"Store\"></a></td>\n" +
             "                                  </tr>\n" +
@@ -55,7 +55,7 @@ public class MailConstant {
             "                          <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
             "                            <!-- headline -->\n" +
             "                            <tr>\n" +
-            "                              <td bgcolor=\"#4D7268\" class=\"headline\" style=\"padding: 50px 135px 0px 135px;color:#FFFFFF; font-family: 'Proxima Nova Bold', Arial,sans-serif; font-size:36px; line-height:56px; font-weight: Bold; text-align:center; letter-spacing: .01em\">Steal this deal</td>\n" +
+            "                              <td bgcolor=\"#4D7268\" class=\"headline\" style=\"padding: 50px 135px 0px 135px;color:#FFFFFF; font-family: 'Proxima Nova Bold', Arial,sans-serif; font-size:36px; line-height:56px; font-weight: Bold; text-align:center; letter-spacing: .01em\">Every Step Tells a Story</td>\n" +
             "                            </tr>\n" +
             "                            <tr>\n" +
             "                              <td bgcolor=\"#4D7268\" align=\"center\" class=\"fallback-font btn-pb\" style=\"padding-bottom: 45px\">\n" +
@@ -73,35 +73,12 @@ public class MailConstant {
             "                      </tr>\n" +
             "                    </table>\n" +
             "                    <!-- HERO Images-->\n" +
-            "                    <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
+                "                    <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
             "                      <tr>\n" +
-            "                        <td width=\"300\" bgcolor=\"#4D7268\" style=\"width:300px;\">\n" +
-            "                          <div class=\"mobile-only\" style=\"text-indent: -99999em; display: none; height: 0; width: 0; overflow: hidden; max-height: 0;\">\n" +
-            "                            <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=BlackV2Link&utm_medium=EM&utm_source=ET\">\n" +
-            "                              <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/5572463d-1c53-47dd-8312-4a9b5dd9ce60.png\" border=\"0\" style=\"display: block; width: 100%;\" align=\"bottom\" alt=\"\" />\n" +
-            "                            </a>\n" +
-            "                          </div>\n" +
-            "                        </td>\n" +
-            "                        <td width=\"300\" bgcolor=\"#4D7268\" style=\"width:300px;\">\n" +
-            "                          <div class=\"mobile-only\" style=\"text-indent: -99999em; display: none; height: 0; width: 0; overflow: hidden; max-height: 0;\">\n" +
-            "                            <a href=\"https://www.fitbit.com/shop/versa?color=bordeaux&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=BordeauxV2Link&utm_medium=EM&utm_source=ET\">\n" +
-            "                              <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/a0b26e32-ee2f-4d5e-9b06-fd2efbcfa106.png\" border=\"0\" style=\"display: block; width: 100%;\" align=\"bottom\" alt=\"\" />\n" +
-            "                            </a>\n" +
-            "                          </div>\n" +
-            "                        </td>\n" +
-            "                      </tr>\n" +
-            "                      <tr>\n" +
-            "                        <td width=\"300\" bgcolor=\"#4D7268\" style=\"width:300px;\">\n" +
+            "                        <td width=\"100%\" bgcolor=\"#4D7268\" style=\"width:100%;\">\n" +
             "                          <div class=\"no-mobile\">\n" +
             "                            <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=BlackV2Link&utm_medium=EM&utm_source=ET\">\n" +
-            "                              <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/219ed5c7-c6f0-4a7d-995e-3f8b289cd60b.png\" border=\"0\" width=\"300\" height=\"560\" style=\"display: block; width: 300px; height:560px;border: none;\" align=\"top\" alt=\"\" />\n" +
-            "                            </a>\n" +
-            "                          </div>\n" +
-            "                        </td>\n" +
-            "                        <td width=\"300\" bgcolor=\"#4D7268\" style=\"width:300px;\">\n" +
-            "                          <div class=\"no-mobile\">\n" +
-            "                            <a href=\"https://www.fitbit.com/shop/versa?color=bordeaux&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=BordeauxV2Link&utm_medium=EM&utm_source=ET\">\n" +
-            "<img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/67eef073-8216-494f-9f19-66911dbb7ad4.png\" border=\"0\" width=\"300\" height=\"560\" style=\"display: block; width: 300px; height:560px;border: none;\" align=\"top\" alt=\"\" />\n" +
+            "                              <img src=\"https://minhphusport.com.vn/wp-content/uploads/2019/10/giay-the-thao-nam-525-1.jpg\" border=\"0\" width=\"600\" height=\"auto\" style=\"display: block; width: 600px; height:560px;border: none;\" align=\"top\" alt=\"\" />\n" +
             "                            </a>\n" +
             "                          </div>\n" +
             "                        </td>\n" +

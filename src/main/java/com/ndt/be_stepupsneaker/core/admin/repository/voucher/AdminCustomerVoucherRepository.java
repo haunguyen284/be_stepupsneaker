@@ -30,44 +30,6 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
         // this function not use
     Page<CustomerVoucher> findAllCustomerVoucher(@Param("request") AdminCustomerVoucherRequest request, Pageable pageable);
 
-    @Query("""
-            SELECT x.customer FROM CustomerVoucher x 
-            WHERE x.voucher.id  = :voucherId 
-            AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.customer.fullName ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.customer.email ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.customer.gender ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:status IS NULL OR  x.customer.status = :status)
-            AND
-            (:#{#request.dateOfBirth} IS NULL OR x.customer.dateOfBirth = :#{#request.dateOfBirth})
-            AND
-            (x.deleted = FALSE)
-             """)
-        // this function not use
-    Page<Customer> getAllCustomerByVoucherId(@Param("voucherId") UUID voucherId, @Param("status") CustomerStatus status, @Param("request") AdminCustomerRequest request, Pageable pageable);
-
-    @Query("""
-            SELECT x FROM Customer x 
-            WHERE x.id NOT IN (SELECT y.customer.id FROM CustomerVoucher y WHERE y.voucher.id = :voucherId)
-            AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.fullName ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.email ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.gender ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:status IS NULL OR  x.status = :status)
-            AND
-            (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
-            AND
-            (x.deleted = FALSE)
-             """)
-        // this function not use
-    Page<Customer> getAllCustomerNotInVoucherId(@Param("voucherId") UUID voucherId, @Param("status") CustomerStatus status, @Param("request") AdminCustomerRequest request, Pageable pageable);
-
     @Modifying
     @Transactional
     @Query("DELETE FROM CustomerVoucher x WHERE x.voucher.id = :voucherId AND x.customer.id IN :customerIds")

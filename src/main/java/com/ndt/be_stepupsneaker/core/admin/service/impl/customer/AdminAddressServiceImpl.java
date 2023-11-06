@@ -45,7 +45,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
         if (addressOptional.isPresent()) {
             throw new ResourceNotFoundException("PHONE IS EXISTS ! TAO QUÁ BUỒN ....");
         }
-        Optional<Customer> customerOptional = adminCustomerRepository.findById(addressDTO.getCustomerRequest().getId());
+        Optional<Customer> customerOptional = adminCustomerRepository.findById(addressDTO.getCustomer());
         if (!customerOptional.isPresent()) {
             throw new ResourceNotFoundException("CUSTOMER NOT FOUND ! TAO QUÁ BUỒN ....");
         }

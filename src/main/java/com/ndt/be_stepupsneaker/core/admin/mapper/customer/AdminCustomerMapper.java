@@ -11,7 +11,7 @@ import org.mapstruct.factory.Mappers;
 public interface AdminCustomerMapper {
     AdminCustomerMapper INSTANCE = Mappers.getMapper(AdminCustomerMapper.class);
 
-    @Mapping(target = "adminAddressResponses", source = "customerAddresses")
+
     AdminCustomerResponse customerToAdminCustomerResponse(Customer customer);
 
     Customer adminCustomerRequestToCustomer(AdminCustomerRequest customerDTO);
