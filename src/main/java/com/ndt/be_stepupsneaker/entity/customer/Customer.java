@@ -23,7 +23,6 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-
 public class Customer extends PrimaryEntity {
     @Column(name = "full_name", length = EntityProperties.LENGTH_NAME)
     @Nationalized

@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.entity.order;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -25,6 +26,10 @@ public class OrderHistory extends PrimaryEntity {
     @Column(name = "action_description", length = EntityProperties.LENGTH_NAME)
     @Nationalized
     private String actionDescription;
+
+    @Column(name = "action_status", length = EntityProperties.LENGTH_NAME)
+    @Nationalized
+    private OrderStatus actionStatus;
 
     @Column(name = "note", length = EntityProperties.LENGTH_NAME)
     @Nationalized

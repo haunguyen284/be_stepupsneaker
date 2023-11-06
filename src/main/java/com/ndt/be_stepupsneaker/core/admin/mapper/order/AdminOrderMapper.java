@@ -5,9 +5,10 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper()
 public interface AdminOrderMapper {
     AdminOrderMapper INSTANCE = Mappers.getMapper( AdminOrderMapper.class );
 

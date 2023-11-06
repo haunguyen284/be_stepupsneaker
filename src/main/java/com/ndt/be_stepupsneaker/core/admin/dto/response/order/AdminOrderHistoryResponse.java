@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.order;
 
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,10 @@ public class AdminOrderHistoryResponse {
 
     private String actionDescription;
 
+    private OrderStatus actionStatus;
+
     private String note;
+
+    private Long createdAt;
 
 }

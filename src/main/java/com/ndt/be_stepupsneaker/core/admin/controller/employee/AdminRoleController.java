@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("/admin/role")
+@RequestMapping("/admin/roles")
 public class AdminRoleController {
     @Autowired
     private AdminRoleService adminRoleService;

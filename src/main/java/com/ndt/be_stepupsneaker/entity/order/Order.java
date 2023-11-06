@@ -4,26 +4,34 @@ import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
+
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 @Table(name = "shop_order")
 @Entity
+@ToString
 public class Order extends PrimaryEntity {
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
@@ -76,6 +84,9 @@ public class Order extends PrimaryEntity {
 
     @Column(name = "status")
     private OrderStatus status;
+
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<OrderDetail> orderDetails;
 
     @Column(name = "code", updatable = false, length = EntityProperties.LENGTH_CODE, unique = true)
     private String code;

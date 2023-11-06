@@ -3,8 +3,12 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.Order;
@@ -20,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,16 +33,25 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
+    private final AdminCustomerRepository adminCustomerRepository;
+    private final AdminAddressRepository adminAddressRepository;
+    private final AdminEmployeeRepository adminEmployeeRepository;
     private final PaginationUtil paginationUtil;
 
     @Autowired
     public AdminOrderServiceImpl(
             AdminOrderRepository adminOrderRepository,
             AdminOrderHistoryRepository adminOrderHistoryRepository,
+            AdminCustomerRepository adminCustomerRepository,
+            AdminAddressRepository adminAddressRepository,
+            AdminEmployeeRepository adminEmployeeRepository,
             PaginationUtil paginationUtil
     ) {
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
+        this.adminCustomerRepository = adminCustomerRepository;
+        this.adminAddressRepository = adminAddressRepository;
+        this.adminEmployeeRepository = adminEmployeeRepository;
         this.paginationUtil = paginationUtil;
     }
 
@@ -57,15 +71,28 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
 
         orderRequest.setType(OrderType.OFFLINE);
-        Order order = adminOrderRepository.save(AdminOrderMapper.INSTANCE.adminOrderRequestToOrder(orderRequest));
+        Order orderSave = AdminOrderMapper.INSTANCE.adminOrderRequestToOrder(orderRequest);
+        if (orderRequest.getCustomer() == null) {
+            orderSave.setCustomer(null);
+        }
+        if (orderRequest.getEmployee() == null) {
+            orderSave.setEmployee(null);
+        }
+        if (orderRequest.getVoucher() == null) {
+            orderSave.setVoucher(null);
+        }
+        if (orderRequest.getAddress() == null) {
+            orderSave.setAddress(null);
+        }
+        Order orderResult = adminOrderRepository.save(orderSave);
 
         OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setOrder(order);
-        orderHistory.setNote(order.getNote());
+        orderHistory.setOrder(orderResult);
+        orderHistory.setNote(orderResult.getNote());
         orderHistory.setActionDescription(OrderStatus.PENDING.action_description);
         adminOrderHistoryRepository.save(orderHistory);
 
-        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderResult);
     }
 
     @Override
@@ -81,15 +108,39 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
         orderSave.setExpectedDeliveryDate(orderRequest.getExpectedDeliveryDate());
+        orderSave.setConfirmationDate(orderRequest.getConfirmationDate());
+        orderSave.setReceivedDate(orderRequest.getReceivedDate());
+        orderSave.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
+        orderSave.setStatus(orderRequest.getStatus());
+        orderSave.setTotalMoney(orderRequest.getTotalMoney());
+        if (orderRequest.getCustomer() != null) {
+            orderSave.setCustomer(adminCustomerRepository.findById(orderRequest.getCustomer()).orElse(null));
+        } else {
+            orderSave.setCustomer(null);
+        }
+        if (orderRequest.getEmployee() != null) {
+            orderSave.setEmployee(adminEmployeeRepository.findById(orderRequest.getEmployee()).orElse(null));
+        } else {
+            orderSave.setEmployee(null);
+        }
+        if (orderRequest.getAddress() != null) {
+            orderSave.setAddress(adminAddressRepository.findById(orderRequest.getAddress()).orElse(null));
+        } else {
+            orderSave.setAddress(null);
+        }
 
         Order order = adminOrderRepository.save(orderSave);
 
-        OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setOrder(order);
-        orderHistory.setNote(orderRequest.getOrderHistoryNote());
-        orderHistory.setActionDescription(order.getStatus().action_description);
-        adminOrderHistoryRepository.save(orderHistory);
+        Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
 
+        if (existingOrderHistoryOptional.isEmpty()) {
+            OrderHistory orderHistory = new OrderHistory();
+            orderHistory.setOrder(order);
+            orderHistory.setActionStatus(order.getStatus());
+            orderHistory.setNote(orderRequest.getOrderHistoryNote());
+            orderHistory.setActionDescription(order.getStatus().action_description);
+            adminOrderHistoryRepository.save(orderHistory);
+        }
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderSave);
     }
 
@@ -109,14 +160,19 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ResourceNotFoundException("ORDER IS NOT EXIST");
         }
         Order order = orderOptional.get();
-        order.setDeleted(true);
-        adminOrderRepository.save(order);
+        if(order.getStatus() == OrderStatus.PENDING){
+            adminOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
+            adminOrderRepository.delete(order);
+        }else {
+            order.setDeleted(true);
+            adminOrderRepository.save(order);
 
-        OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setOrder(order);
-        orderHistory.setNote(order.getNote());
-        orderHistory.setActionDescription("Order is deleted");
-        adminOrderHistoryRepository.save(orderHistory);
+            OrderHistory orderHistory = new OrderHistory();
+            orderHistory.setOrder(order);
+            orderHistory.setNote(order.getNote());
+            orderHistory.setActionDescription("Order is deleted");
+            adminOrderHistoryRepository.save(orderHistory);
+        }
 
         return true;
     }

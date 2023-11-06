@@ -3,7 +3,6 @@ package com.ndt.be_stepupsneaker.core.admin.dto.response.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
@@ -13,14 +12,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminOrderResponse {
+public class AdminOrderNoOrderDetailResponse {
 
     private UUID id;
 
@@ -48,8 +46,6 @@ public class AdminOrderResponse {
 
     private Long receivedDate;
 
-    private Long createdAt;
-
     private OrderType type;
 
     private String note;
@@ -57,7 +53,5 @@ public class AdminOrderResponse {
     private String code;
 
     private OrderStatus status;
-
-    private List<AdminOrderDetailResponse> orderDetails;
 
 }
