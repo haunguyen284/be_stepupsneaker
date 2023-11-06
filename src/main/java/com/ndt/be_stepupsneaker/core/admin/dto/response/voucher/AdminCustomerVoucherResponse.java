@@ -16,8 +16,8 @@ import java.util.UUID;
 
 public class AdminCustomerVoucherResponse extends PageableRequest {
     private UUID id;
-
-    private AdminVoucherResponse voucherResponse;
-
-    private AdminCustomerResponse customerResponse;
+//
+//    private AdminVoucherResponse voucher;
+//
+//    private AdminCustomerResponse customer;
 }

@@ -12,8 +12,8 @@ public interface AdminAddressMapper {
 
     AdminAddressMapper INSTANCE = Mappers.getMapper(AdminAddressMapper.class);
 
-    @Mapping(target = "customerResponse", source = "customer")
     AdminAddressResponse addressToAdminAddressResponse(Address address);
 
+    @Mapping(target = "customer.id", source = "customer")
     Address adminAddressRequestAddress(AdminAddressRequest addressDTO);
 }

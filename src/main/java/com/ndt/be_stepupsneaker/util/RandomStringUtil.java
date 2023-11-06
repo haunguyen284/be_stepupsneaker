@@ -30,22 +30,14 @@ public class RandomStringUtil {
         return sb.toString();
     }
 
-    /**
-     * Random string password with at least 1 digit and 1 special character
-     */
-    public static String randomPassword(int numberOfCharacters) {
-        List<String> result = new ArrayList<>();
-        Consumer<String> appendChar = s -> {
-            int number = randomNumber(0, s.length() - 1);
-            result.add("" + s.charAt(number));
-        };
-        appendChar.accept(digits);
-        appendChar.accept(specials);
-        while (result.size() < numberOfCharacters) {
-            appendChar.accept(ALL);
+    public static String generateRandomPassword(int length) {
+        Random random = new Random();
+        StringBuilder password = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(ALPHA_NUMERIC.length());
+            password.append(ALPHA_NUMERIC.charAt(index));
         }
-        Collections.shuffle(result, generator);
-        return String.join("", result);
+        return password.toString();
     }
 
     public static int randomNumber(int min, int max) {

@@ -22,5 +22,5 @@ public class AdminAddressResponse {
     private String provinceName;
     private String wardName;
     private String more;
-    private AdminCustomerResponse customerResponse;
+//    private AdminCustomerResponse customer;
 }

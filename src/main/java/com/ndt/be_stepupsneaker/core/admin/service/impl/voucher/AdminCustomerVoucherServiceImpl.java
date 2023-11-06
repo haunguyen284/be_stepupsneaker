@@ -8,11 +8,14 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVou
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminCustomerVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +33,18 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
 
     private AdminCustomerVoucherRepository adminCustomerVoucherRepository;
     private PaginationUtil paginationUtil;
+    private AdminCustomerRepository adminCustomerRepository;
+    private AdminVoucherRepository adminVoucherRepository;
 
     @Autowired
-    public AdminCustomerVoucherServiceImpl(AdminCustomerVoucherRepository adminCustomerVoucherRepository, PaginationUtil paginationUtil) {
+    public AdminCustomerVoucherServiceImpl(AdminCustomerVoucherRepository adminCustomerVoucherRepository,
+                                           PaginationUtil paginationUtil,
+                                           AdminCustomerRepository adminCustomerRepository,
+                                           AdminVoucherRepository adminVoucherRepository) {
         this.adminCustomerVoucherRepository = adminCustomerVoucherRepository;
         this.paginationUtil = paginationUtil;
+        this.adminCustomerRepository = adminCustomerRepository;
+        this.adminVoucherRepository = adminVoucherRepository;
     }
 
     @Override
@@ -62,7 +72,6 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
         if (optionalCustomerVoucher.isEmpty()) {
             throw new ResourceNotFoundException("CustomerVoucher IS NOT EXIST :" + id);
         }
-
         return AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(optionalCustomerVoucher.get());
     }
 
@@ -79,36 +88,24 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<AdminVoucherRequest> voucherRequestList, List<AdminCustomerRequest> adminCustomerRequests) {
+    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<UUID> voucherIds, List<UUID> customerIds) {
         List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
-        for (AdminVoucherRequest voucherRequest : voucherRequestList) {
-            for (AdminCustomerRequest adminCustomerRequest : adminCustomerRequests) {
+        for (UUID voucherId : voucherIds) {
+            for (UUID customerId : customerIds) {
+                Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
+                Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
+                if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
+                    throw new ResourceNotFoundException("VOUCHER OR CUSTOMER NOT FOUND !");
+                }
                 CustomerVoucher newCustomerVoucher = new CustomerVoucher();
-                newCustomerVoucher.setCustomer(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(adminCustomerRequest));
-                newCustomerVoucher.setVoucher(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
-                System.out.println("========" + newCustomerVoucher);
-                adminCustomerVoucherRepository.save(newCustomerVoucher);
-                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(newCustomerVoucher));
+                newCustomerVoucher.setVoucher(optionalVoucher.get());
+                newCustomerVoucher.setCustomer(optionalCustomer.get());
+                CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
+                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
 
             }
         }
         return adminCustomerVoucherResponseList;
-    }
-
-    @Override
-    public PageableObject<AdminCustomerResponse> getAllCustomerByVoucherId(UUID id, AdminCustomerRequest customerRequest) {
-        Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = adminCustomerVoucherRepository.getAllCustomerByVoucherId(id, customerRequest.getStatus(), customerRequest, pageable);
-        Page<AdminCustomerResponse> adminCustomerVoucherRespPage = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
-        return new PageableObject<>(adminCustomerVoucherRespPage);
-    }
-
-    @Override
-    public PageableObject<AdminCustomerResponse> getAllCustomerNotInVoucherId(UUID id, AdminCustomerRequest customerRequest) {
-        Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = adminCustomerVoucherRepository.getAllCustomerNotInVoucherId(id, customerRequest.getStatus(), customerRequest, pageable);
-        Page<AdminCustomerResponse> adminCustomerVoucherRespPage = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
-        return new PageableObject<>(adminCustomerVoucherRespPage);
     }
 
     @Override

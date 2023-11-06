@@ -1,8 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.CustomerIdRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.ListCustomerAndVoucher;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.ListCustomerIdAndVoucherIdRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -20,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin/customerVoucher")
@@ -50,21 +47,18 @@ public class AdminCustomerVoucherController {
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid ListCustomerAndVoucher listCustomerAndVoucher, BindingResult bindingResult) {
+    public Object create(@RequestBody @Valid ListCustomerIdAndVoucherIdRequest listCustomerIdAndVoucherIdRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerAndVoucher.getVoucherRequestList(), listCustomerAndVoucher.getCustomerRequestList()), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerIdAndVoucherIdRequest.getVoucher(), listCustomerIdAndVoucherIdRequest.getCustomer()), HttpStatus.OK);
     }
 
     @DeleteMapping("")
     public Object deleteCustomersByVoucherAndCustomerIds(
-            @RequestParam String voucherId,
-            @RequestBody CustomerIdRequest customerIdRequest) {
+            @RequestParam("voucher") String voucherId,
+            @RequestBody ListCustomerIdAndVoucherIdRequest customerIdRequest) {
         UUID voucherUUID = UUID.fromString(voucherId);
-        List<UUID> customerIds = customerIdRequest.getCustomerIds().stream()
-                .map(UUID::fromString)
-                .collect(Collectors.toList());
-        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherUUID, customerIds);
+        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherUUID, customerIdRequest.getCustomer());
         if (deleted) {
             return ResponseHelper.getResponse("CUSTOMERS DELETED SUCCESSFULLY.", HttpStatus.OK);
         } else {

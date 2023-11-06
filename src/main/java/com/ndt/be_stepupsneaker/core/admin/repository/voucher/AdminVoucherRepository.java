@@ -19,7 +19,7 @@ import java.util.UUID;
 @Transactional
 public interface AdminVoucherRepository extends VoucherRepository {
     @Query("""
-            SELECT x FROM Voucher x 
+            SELECT x FROM Voucher x LEFT JOIN x.customerVoucherList y
             WHERE (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.q}, '%')OR x.code ILIKE  CONCAT('%', :#{#request.q}, '%')) 
             AND
             (:status IS NULL OR x.status = :status)
@@ -32,9 +32,14 @@ public interface AdminVoucherRepository extends VoucherRepository {
              AND
             (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
              AND
+            (CAST(:customerId AS java.util.UUID) IS NULL OR CAST(:customerId AS java.util.UUID)  = y.customer.id)
+             AND
             (x.deleted = false)
              """)
-    Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable, @Param("status")VoucherStatus voucherStatus,@Param("type") VoucherType voucherType);
+    Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable,
+                                 @Param("status")VoucherStatus voucherStatus,
+                                 @Param("type") VoucherType voucherType,
+                                 @Param("customerId") UUID customerId);
 
 
     @Query("""

@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import jakarta.persistence.Column;
@@ -15,6 +16,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -49,7 +51,7 @@ public class Customer extends PrimaryEntity {
     private String image;
 
     @OneToMany(mappedBy = "customer")
-    List<Address> customerAddresses;
+    List<Address> addressList;
 
     @OneToMany(mappedBy = "customer")
     List<CustomerVoucher> customerVoucherList;

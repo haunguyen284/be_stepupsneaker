@@ -23,5 +23,6 @@ public class AdminAddressRequest extends PageableRequest {
     private String provinceName;
     private String wardName;
     private String more;
-    private AdminCustomerRequest customerRequest;
+
+    private UUID customer;
 }

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -39,5 +40,4 @@ public class AdminVoucherRequest extends PageableRequest {
 
     private String image;
 
-    List<AdminCustomerVoucherRequest> adminCustomerVoucherRequests;
 }

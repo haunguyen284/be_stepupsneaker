@@ -18,7 +18,7 @@ import java.util.UUID;
 @Transactional
 public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
-            SELECT x FROM Customer x LEFT JOIN x.customerAddresses y LEFT JOIN x.customerVoucherList z
+            SELECT x FROM Customer x LEFT JOIN x.addressList y LEFT JOIN x.customerVoucherList z
             WHERE
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE ''
              OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
@@ -41,7 +41,7 @@ public interface AdminCustomerRepository extends CustomerRepository {
             AND
             (x.deleted = FALSE)
             AND
-            (x.customerAddresses is empty OR x.customerAddresses is not empty AND EXISTS (SELECT a FROM Address a WHERE a.customer = x AND a.isDefault = TRUE))
+            (x.addressList IS EMPTY OR x.addressList  IS NOT EMPTY AND EXISTS (SELECT a FROM Address a WHERE a.customer = x AND a.isDefault = TRUE))
             """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request,
                                    @Param("voucherId") UUID voucherId,

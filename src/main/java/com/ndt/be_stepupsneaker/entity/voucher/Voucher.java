@@ -15,6 +15,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
