@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -47,7 +48,8 @@ public class Employee extends PrimaryEntity {
     @Column(name = "phone_number", length = EntityProperties.LENGTH_PHONE)
     private String phoneNumber;
 
-    @Column(name = "url_image")
+    @Column(name = "url_image", columnDefinition = "TEXT")
+    @Lob
     private String image;
 
 }
