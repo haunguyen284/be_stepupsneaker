@@ -34,12 +34,15 @@ public interface AdminVoucherRepository extends VoucherRepository {
              AND
             (CAST(:customerId AS java.util.UUID) IS NULL OR CAST(:customerId AS java.util.UUID)  = y.customer.id)
              AND
+            (CAST(:noCustomerId AS java.util.UUID) IS NULL OR x.id NOT IN (SELECT z.voucher FROM CustomerVoucher z WHERE z.customer.id = CAST(:noCustomerId AS java.util.UUID) ))
+             AND
             (x.deleted = false)
              """)
     Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable,
                                  @Param("status")VoucherStatus voucherStatus,
                                  @Param("type") VoucherType voucherType,
-                                 @Param("customerId") UUID customerId);
+                                 @Param("customerId") UUID customerId,
+                                 @Param("noCustomerId") UUID noCustomerId);
 
 
     @Query("""

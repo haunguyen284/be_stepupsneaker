@@ -26,7 +26,6 @@ public class AdminVoucherResponse {
 
     private VoucherType type;
 
-
     private float value;
 
     private float constraint;
