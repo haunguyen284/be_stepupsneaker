@@ -51,8 +51,8 @@ public class AutoScheduledServiceImpl implements AutoScheduledService{
         }
     }
 
-    @Override
     @Transactional
+    @Override
     public void updateOrderAutomatically() {
         long currentMillis = Instant.now().toEpochMilli();
         // Calculate the time 30 minutes ago in milliseconds

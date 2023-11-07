@@ -23,5 +23,5 @@ public class AdminEmployeeRequest extends PageableRequest {
     private String gender;
     private String phoneNumber;
     private String image;
-
+    private UUID role;
 }
