@@ -4,9 +4,11 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeReq
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.empolyee.AdminEmployeeMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminRoleRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -23,6 +25,9 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     @Autowired
     private AdminEmployeeRepository adminEmployeeRepository;
+
+    @Autowired
+    private AdminRoleRepository adminRoleRepository;
 
     @Autowired
     private PaginationUtil paginationUtil;
@@ -61,15 +66,21 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         if (employeeOptional.isEmpty()) {
             throw new ResourceNotFoundException("Employee not exist");
         }
+
+        Optional<Role> roleOptional = adminRoleRepository.findById(employeeDTO.getRole());
+        if (roleOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Role not exist");
+        }
         Employee employee = employeeOptional.get();
         employee.setPassword(employeeDTO.getPassword());
-        employee.setGender(employee.getGender());
+        employee.setGender(employeeDTO.getGender());
         employee.setEmail(employeeDTO.getEmail());
         employee.setStatus(employeeDTO.getStatus());
         employee.setAddress(employeeDTO.getAddress());
         employee.setPhoneNumber(employeeDTO.getPhoneNumber());
         employee.setFullName(employeeDTO.getFullName());
         employee.setImage(employeeDTO.getImage());
+        employee.setRole(roleOptional.get());
 
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(adminEmployeeRepository.save(employee));
     }
