@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.controller.employee;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
@@ -30,6 +31,13 @@ public class AdminEmployeeController {
     public Object findAllEmployee(AdminEmployeeRequest employeeDTO){
         PageableObject<AdminEmployeeResponse> listEmplouyee = adminEmployeeService.findAllEntity(employeeDTO);
         return ResponseHelper.getResponse(listEmplouyee, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id")String id){
+        AdminEmployeeResponse employeeResponse = adminEmployeeService.findById(UUID.fromString(id));
+
+        return ResponseHelper.getResponse(employeeResponse, HttpStatus.OK);
     }
 
     @PostMapping("")

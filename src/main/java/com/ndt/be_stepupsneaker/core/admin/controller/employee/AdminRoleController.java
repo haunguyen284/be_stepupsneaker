@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.employee;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminRoleRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminRoleRsponse;
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminRoleService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -32,6 +33,14 @@ public class AdminRoleController {
         return ResponseHelper.getResponse(listRole, HttpStatus.OK);
 
     }
+
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id")String id){
+        AdminRoleRsponse adminRoleRsponse = adminRoleService.findById(UUID.fromString(id));
+
+        return ResponseHelper.getResponse(adminRoleRsponse, HttpStatus.OK);
+    }
+
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminRoleRequest roleDTO, BindingResult bindingResult){
         if (bindingResult.hasErrors()){
