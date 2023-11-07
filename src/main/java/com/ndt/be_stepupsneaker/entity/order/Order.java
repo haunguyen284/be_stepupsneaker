@@ -87,7 +87,7 @@ public class Order extends PrimaryEntity {
     @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<OrderHistory> orderHistories;
 
     @Column(name = "code", updatable = false, length = EntityProperties.LENGTH_CODE, unique = true)
