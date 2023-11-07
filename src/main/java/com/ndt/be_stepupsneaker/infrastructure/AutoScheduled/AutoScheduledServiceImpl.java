@@ -28,6 +28,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService{
 
     @Override
     public void updateVoucherStatusAutomatically() {
+        System.out.println("========================== AUTO UPDATE VOUCHER =======================");
         LocalDateTime currentDateTime = LocalDateTime.now();
         List<Voucher> voucherList = adminVoucherRepository.findAll();
 
@@ -46,7 +47,6 @@ public class AutoScheduledServiceImpl implements AutoScheduledService{
 
     @Override
     public void updateOrderAutomatically() {
-
         long currentMillis = Instant.now().toEpochMilli();
         // Calculate the time 30 minutes ago in milliseconds
         long thirtyMinutesAgo = currentMillis - (30 * 60 * 1000); // 30 minutes * 60 seconds/minute * 1000 milliseconds/second
@@ -54,6 +54,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService{
         List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBefore(OrderStatus.PENDING, thirtyMinutesAgo);
 
         if (!expiredOrders.isEmpty()){
+            System.out.println("========================== AUTO UPDATE ORDER =======================");
             adminOrderRepository.deleteAllInBatch(expiredOrders);
         }
     }
