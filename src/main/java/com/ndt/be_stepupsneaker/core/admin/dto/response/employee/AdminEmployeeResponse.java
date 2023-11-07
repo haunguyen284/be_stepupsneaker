@@ -15,6 +15,7 @@ import java.util.UUID;
 public class AdminEmployeeResponse {
     private UUID id;
     private String fullName;
+    private AdminRoleRsponse role;
     private String email;
     private String password;
     private EmployeeStatus status;
