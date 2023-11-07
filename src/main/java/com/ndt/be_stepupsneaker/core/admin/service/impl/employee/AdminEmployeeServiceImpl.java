@@ -40,11 +40,11 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     public AdminEmployeeResponse create(AdminEmployeeRequest employeeDTO) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("Email is exit");
+            throw new ApiException("Email is exist");
         }
         employeeOptional = adminEmployeeRepository.findByPhoneNumber(employeeDTO.getPhoneNumber());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("phoneNumer is exit");
+            throw new ApiException("PhoneNumber is exist");
         }
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
 
@@ -53,13 +53,13 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     @Override
     public AdminEmployeeResponse update(AdminEmployeeRequest employeeDTO) {
-        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getId(), employeeDTO.getEmail());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("Email is exit");
+            throw new ApiException("Email is exist");
         }
         employeeOptional = adminEmployeeRepository.findById(employeeDTO.getId());
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee not exit");
+            throw new ResourceNotFoundException("Employee not exist");
         }
         Employee employee = employeeOptional.get();
         employee.setPassword(employeeDTO.getPassword());
