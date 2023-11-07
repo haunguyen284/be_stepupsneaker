@@ -31,7 +31,6 @@ import java.util.Set;
 @Setter
 @Table(name = "shop_order")
 @Entity
-@ToString
 public class Order extends PrimaryEntity {
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
@@ -87,6 +86,9 @@ public class Order extends PrimaryEntity {
 
     @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<OrderDetail> orderDetails;
+
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<OrderHistory> orderHistories;
 
     @Column(name = "code", updatable = false, length = EntityProperties.LENGTH_CODE, unique = true)
     private String code;
