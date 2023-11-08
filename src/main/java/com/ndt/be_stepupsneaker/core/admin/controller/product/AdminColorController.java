@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminColorRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminColorResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminColorService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -33,6 +34,12 @@ public class AdminColorController {
         return ResponseHelper.getResponse(listColor, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id")String id){
+        AdminColorResponse adminBrandResponse = adminColorService.findById(UUID.fromString(id));
+
+        return ResponseHelper.getResponse(adminBrandResponse, HttpStatus.OK);
+    }
 
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
