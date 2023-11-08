@@ -1,11 +1,8 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
-import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
@@ -13,7 +10,16 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.UUID;
 
 @RestController
@@ -24,8 +30,8 @@ public class AdminVoucherController {
 
 
     @GetMapping("")
-    public Object findAllVoucher(AdminVoucherRequest voucherRequest,@RequestParam(value = "customer",required = false,defaultValue = "")UUID customerId) {
-        PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllVoucher(voucherRequest,customerId);
+    public Object findAllVoucher(AdminVoucherRequest voucherRequest, @RequestParam(value = "customer", required = false, defaultValue = "") UUID customerId, @RequestParam(value = "noCustomer", required = false, defaultValue = "") UUID noCustomerId) {
+        PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllVoucher(voucherRequest, customerId, noCustomerId);
         return ResponseHelper.getResponse(listVoucher, HttpStatus.OK);
     }
 

@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.infrastructure.AutoScheduled;
 
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
@@ -19,17 +20,24 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class AutoScheduledServiceImpl implements AutoScheduledService{
-    private AdminVoucherRepository adminVoucherRepository;
-    private AdminOrderRepository adminOrderRepository;
-    private AdminOrderHistoryRepository adminOrderHistoryRepository;
+public class AutoScheduledServiceImpl implements AutoScheduledService {
+    private final AdminVoucherRepository adminVoucherRepository;
+    private final AdminOrderRepository adminOrderRepository;
+    private final AdminOrderHistoryRepository adminOrderHistoryRepository;
+    private final AdminOrderDetailRepository adminOrderDetailRepository;
 
 
     @Autowired
-    public AutoScheduledServiceImpl(AdminVoucherRepository adminVoucherRepository, AdminOrderRepository adminOrderRepository, AdminOrderHistoryRepository adminOrderHistoryRepository) {
+    public AutoScheduledServiceImpl(
+            AdminVoucherRepository adminVoucherRepository,
+            AdminOrderRepository adminOrderRepository,
+            AdminOrderHistoryRepository adminOrderHistoryRepository,
+            AdminOrderDetailRepository adminOrderDetailRepository
+    ) {
         this.adminVoucherRepository = adminVoucherRepository;
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
+        this.adminOrderDetailRepository = adminOrderDetailRepository;
     }
 
     @Override
@@ -60,13 +68,14 @@ public class AutoScheduledServiceImpl implements AutoScheduledService{
 
         List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBefore(OrderStatus.PENDING, thirtyMinutesAgo);
 
-        if (!expiredOrders.isEmpty()){
+        if (!expiredOrders.isEmpty()) {
             System.out.println("========================== AUTO UPDATE ORDER =======================");
             List<UUID> expiredOrderIds = expiredOrders.stream()
                     .map(Order::getId)
                     .collect(Collectors.toList());
 
             adminOrderHistoryRepository.deleteAllByOrder(expiredOrderIds);
+            adminOrderDetailRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderRepository.deleteAllInBatch(expiredOrders);
         }
     }

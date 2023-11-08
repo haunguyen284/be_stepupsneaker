@@ -53,9 +53,9 @@ public class AdminCustomerVoucherController {
         return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerIdAndVoucherIdRequest.getVoucher(), listCustomerIdAndVoucherIdRequest.getCustomer()), HttpStatus.OK);
     }
 
-    @DeleteMapping("")
+    @DeleteMapping("/{id}")
     public Object deleteCustomersByVoucherAndCustomerIds(
-            @RequestParam("voucher") String voucherId,
+            @PathVariable("id") String voucherId,
             @RequestBody ListCustomerIdAndVoucherIdRequest customerIdRequest) {
         UUID voucherUUID = UUID.fromString(voucherId);
         Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherUUID, customerIdRequest.getCustomer());

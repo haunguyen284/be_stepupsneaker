@@ -117,9 +117,9 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
 
 
     @Override
-    public PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, UUID customerId) {
+    public PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, UUID customerId, UUID noCustomerId) {
         Pageable pageable = paginationUtil.pageable(voucherReq);
-        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherReq, pageable,voucherReq.getStatus(),voucherReq.getType(),customerId);
+        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherReq, pageable,voucherReq.getStatus(),voucherReq.getType(),customerId, noCustomerId);
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);
         return new PageableObject<>(adminVoucherResponsePage);
     }

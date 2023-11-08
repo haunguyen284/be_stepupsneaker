@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -24,7 +25,7 @@ public class Payment extends PrimaryEntity {
     private Order order;
 
     @JoinColumn(name = "payment_method_id", referencedColumnName = "id")
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private PaymentMethod paymentMethod;
 
     @Column(name = "transaction_code", nullable = false, length = EntityProperties.LENGTH_NAME_SHORT)

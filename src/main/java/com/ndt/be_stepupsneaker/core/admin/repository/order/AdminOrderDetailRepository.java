@@ -5,11 +5,16 @@ import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import com.ndt.be_stepupsneaker.repository.order.OrderDetailRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface AdminOrderDetailRepository extends OrderDetailRepository {
@@ -42,4 +47,8 @@ public interface AdminOrderDetailRepository extends OrderDetailRepository {
     """)
     Page<OrderDetail> findAllOrderDetail(@Param("request")AdminOrderDetailRequest request, @Param("status") OrderStatus status, Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM OrderDetail x WHERE x.order.id IN :orderIds")
+    void deleteAllByOrder(List<UUID> orderIds);
 }
