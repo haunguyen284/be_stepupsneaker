@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.voucher;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderNoOrderDetailResponse;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import lombok.AllArgsConstructor;
@@ -12,13 +13,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminVoucherHistoryResponse {
-    private Order order;
+    private AdminOrderNoOrderDetailResponse order;
 
-    private Voucher voucher;
+    private AdminVoucherResponse voucher;
 
     private float moneyBeforeReduction;
 
     private float moneyAfterReduction;
 
     private float moneyReduction;
+
+    private Long createdAt;
 }
