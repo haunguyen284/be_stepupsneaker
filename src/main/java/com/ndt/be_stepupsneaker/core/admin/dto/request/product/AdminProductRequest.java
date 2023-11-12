@@ -36,5 +36,21 @@ public class AdminProductRequest extends PageableRequest {
 
     @NotNull(message = "Status must be not null")
     private ProductStatus status;
+
+    private String tradeMark;
+
+    private String style;
+
+    private String size;
+
+    private String product;
+
+    private String material;
+
+    private String color;
+
+    private String brand;
+
+    private String sole;
 }
 

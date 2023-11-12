@@ -32,6 +32,22 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND 
+    (:#{#request.tradeMark} IS NULL OR :#{#request.tradeMark} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.tradeMark.id = CAST(:#{#request.tradeMark} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.style} IS NULL OR :#{#request.style} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.style.id = CAST(:#{#request.style} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.size} IS NULL OR :#{#request.size} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id = CAST(:#{#request.size} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.product} IS NULL OR :#{#request.product} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.product.id = CAST(:#{#request.product} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.material} IS NULL OR :#{#request.material} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id = CAST(:#{#request.material} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.color} IS NULL OR :#{#request.color} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.color.id = CAST(:#{#request.color} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.brand} IS NULL OR :#{#request.brand} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.brand.id = CAST(:#{#request.brand} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.sole} IS NULL OR :#{#request.sole} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id = CAST(:#{#request.sole} as java.util.UUID) GROUP BY pd.product.id)) 
+    AND 
     (:#{#request.minQuantity} IS NULL OR :#{#request.minQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) >= CAST(:#{#request.minQuantity} AS int)))
     AND 
     (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.maxQuantity} AS int))) 
