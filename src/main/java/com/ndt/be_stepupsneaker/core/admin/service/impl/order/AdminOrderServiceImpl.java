@@ -36,6 +36,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminCustomerRepository adminCustomerRepository;
     private final AdminAddressRepository adminAddressRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
+    private final AdminVoucherRepository adminVoucherRepository;
     private final PaginationUtil paginationUtil;
 
     @Autowired
@@ -45,6 +46,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminCustomerRepository adminCustomerRepository,
             AdminAddressRepository adminAddressRepository,
             AdminEmployeeRepository adminEmployeeRepository,
+            AdminVoucherRepository adminVoucherRepository,
             PaginationUtil paginationUtil
     ) {
         this.adminOrderRepository = adminOrderRepository;
@@ -52,6 +54,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         this.adminCustomerRepository = adminCustomerRepository;
         this.adminAddressRepository = adminAddressRepository;
         this.adminEmployeeRepository = adminEmployeeRepository;
+        this.adminVoucherRepository = adminVoucherRepository;
         this.paginationUtil = paginationUtil;
     }
 
@@ -113,6 +116,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
         orderSave.setStatus(orderRequest.getStatus());
         orderSave.setTotalMoney(orderRequest.getTotalMoney());
+        if (orderRequest.getVoucher() != null) {
+            orderSave.setVoucher(adminVoucherRepository.findById(orderRequest.getVoucher()).orElse(null));
+        } else {
+            orderSave.setVoucher(null);
+        }
         if (orderRequest.getCustomer() != null) {
             orderSave.setCustomer(adminCustomerRepository.findById(orderRequest.getCustomer()).orElse(null));
         } else {
