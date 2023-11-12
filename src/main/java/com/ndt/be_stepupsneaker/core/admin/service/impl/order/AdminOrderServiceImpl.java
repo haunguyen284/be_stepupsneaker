@@ -8,14 +8,17 @@ import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepo
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
+import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +41,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminAddressRepository adminAddressRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final AdminVoucherRepository adminVoucherRepository;
+
+    private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
     private final PaginationUtil paginationUtil;
 
     @Autowired
@@ -47,6 +53,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminAddressRepository adminAddressRepository,
             AdminEmployeeRepository adminEmployeeRepository,
             AdminVoucherRepository adminVoucherRepository,
+            AdminVoucherHistoryRepository adminVoucherHistoryRepository,
             PaginationUtil paginationUtil
     ) {
         this.adminOrderRepository = adminOrderRepository;
@@ -55,6 +62,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         this.adminAddressRepository = adminAddressRepository;
         this.adminEmployeeRepository = adminEmployeeRepository;
         this.adminVoucherRepository = adminVoucherRepository;
+        this.adminVoucherHistoryRepository = adminVoucherHistoryRepository;
         this.paginationUtil = paginationUtil;
     }
 
@@ -148,6 +156,20 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderHistory.setNote(orderRequest.getOrderHistoryNote());
             orderHistory.setActionDescription(order.getStatus().action_description);
             adminOrderHistoryRepository.save(orderHistory);
+        }
+
+        // Voucher history
+        if (order.getVoucher() != null && (order.getVoucher().getId() != orderRequest.getVoucher())) {
+            float totalMoney = order.getTotalMoney();
+            float voucherValue = order.getVoucher().getValue();
+            float reduceMoney = order.getVoucher().getType() == VoucherType.CASH ? voucherValue : ((totalMoney * voucherValue) / 100);
+            VoucherHistory voucherHistory = new VoucherHistory();
+            voucherHistory.setVoucher(order.getVoucher());
+            voucherHistory.setOrder(order);
+            voucherHistory.setMoneyReduction(reduceMoney);
+            voucherHistory.setMoneyBeforeReduction(totalMoney);
+            voucherHistory.setMoneyAfterReduction(reduceMoney);
+            adminVoucherHistoryRepository.save(voucherHistory);
         }
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderSave);
     }
