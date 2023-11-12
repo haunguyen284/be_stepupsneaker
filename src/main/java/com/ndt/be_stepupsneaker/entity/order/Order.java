@@ -4,6 +4,7 @@ import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
@@ -89,6 +90,9 @@ public class Order extends PrimaryEntity {
 
     @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private List<OrderHistory> orderHistories;
+
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    private List<Payment> payments;
 
     @Column(name = "code", updatable = false, length = EntityProperties.LENGTH_CODE, unique = true)
     private String code;

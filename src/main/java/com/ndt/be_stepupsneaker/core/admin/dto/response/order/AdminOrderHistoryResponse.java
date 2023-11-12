@@ -16,7 +16,7 @@ public class AdminOrderHistoryResponse {
 
     private UUID id;
 
-    private AdminOrderResponse order;
+    private AdminOrderNoOrderDetailResponse order;
 
     private String actionDescription;
 

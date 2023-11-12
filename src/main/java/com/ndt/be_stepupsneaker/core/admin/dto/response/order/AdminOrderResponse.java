@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.admin.dto.response.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
@@ -59,5 +60,9 @@ public class AdminOrderResponse {
     private OrderStatus status;
 
     private List<AdminOrderDetailResponse> orderDetails;
+
+    private List<AdminOrderHistoryResponse> orderHistories;
+
+    private List<AdminPaymentResponse> payments;
 
 }
