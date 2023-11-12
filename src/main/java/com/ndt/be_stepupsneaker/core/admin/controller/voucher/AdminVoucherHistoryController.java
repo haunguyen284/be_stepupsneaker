@@ -22,7 +22,7 @@ import java.util.UUID;
 public class AdminVoucherHistoryController {
     @Autowired
     private AdminVoucherHistoryService adminVoucherHistoryService;
-    
+
     @GetMapping("")
     public Object findAllVoucherHistory(AdminVoucherHistoryRequest voucherRequest) {
         PageableObject<AdminVoucherHistoryResponse> listVoucherHistory = adminVoucherHistoryService.findAllEntity(voucherRequest);
