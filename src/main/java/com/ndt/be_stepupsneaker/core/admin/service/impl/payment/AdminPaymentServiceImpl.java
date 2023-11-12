@@ -19,8 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminPaymentServiceImpl implements AdminPaymentService {
@@ -54,7 +56,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     @Override
     public AdminPaymentResponse create(AdminPaymentRequest paymentRequest) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findByTransactionCode(paymentRequest.getTransactionCode());
-        if(paymentOptional.isPresent()){
+        if (paymentOptional.isPresent()) {
             throw new ApiException("TRANSACTION CODE IS EXIST");
         }
 
@@ -65,22 +67,22 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     @Override
     public AdminPaymentResponse update(AdminPaymentRequest paymentRequest) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findByTransactionCode(paymentRequest.getId(), paymentRequest.getTransactionCode());
-        if(paymentOptional.isPresent()){
+        if (paymentOptional.isPresent()) {
             throw new ApiException("TRANSACTION CODE IS EXIST");
         }
 
         paymentOptional = adminPaymentRepository.findById(paymentRequest.getId());
-        if(paymentOptional.isEmpty()){
+        if (paymentOptional.isEmpty()) {
             throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
         }
 
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(paymentRequest.getPaymentMethod());
-        if(paymentMethodOptional.isEmpty()){
+        if (paymentMethodOptional.isEmpty()) {
             throw new ResourceNotFoundException("PAYMENT METHOD IS NOT EXIST");
         }
 
         Optional<Order> orderOptional = adminOrderRepository.findById(paymentRequest.getOrder());
-        if(orderOptional.isEmpty()){
+        if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException("ORDER IS NOT EXIST");
         }
 
@@ -96,7 +98,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     @Override
     public AdminPaymentResponse findById(UUID id) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findById(id);
-        if(paymentOptional.isEmpty()){
+        if (paymentOptional.isEmpty()) {
             throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
         }
         return AdminPaymentMapper.INSTANCE.paymentToAdminPaymentResponse(paymentOptional.get());
@@ -105,12 +107,24 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     @Override
     public Boolean delete(UUID id) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findById(id);
-        if(paymentOptional.isEmpty()){
+        if (paymentOptional.isEmpty()) {
             throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
         }
         Payment payment = paymentOptional.get();
         payment.setDeleted(true);
         adminPaymentRepository.save(payment);
         return true;
+    }
+
+    @Override
+    public List<AdminPaymentResponse> create(List<AdminPaymentRequest> paymentRequests) {
+        List<Payment> payments = paymentRequests.stream().map(AdminPaymentMapper.INSTANCE::adminPaymentRequestToPayment).collect(Collectors.toList());
+
+        return adminPaymentRepository.saveAll(payments).stream().map(AdminPaymentMapper.INSTANCE::paymentToAdminPaymentResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AdminPaymentResponse> update(List<AdminPaymentRequest> paymentRequests) {
+        return null;
     }
 }
