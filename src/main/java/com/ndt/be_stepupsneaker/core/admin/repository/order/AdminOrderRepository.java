@@ -27,9 +27,9 @@ public interface AdminOrderRepository extends OrderRepository {
             AND 
             ((:#{#request.type} IS NULL) OR (o.type = :#{#request.type})) 
             AND
-            (:#{#request.priceMin} IS NULL OR o.totalMoney >= :#{#request.priceMax})
+            (:#{#request.priceMin} IS NULL OR o.totalMoney >= :#{#request.priceMin})
             AND
-            (:#{#request.priceMin} IS NULL OR o.totalMoney <= :#{#request.priceMax})
+            (:#{#request.priceMax} IS NULL OR o.totalMoney <= :#{#request.priceMax})
             AND
             o.deleted=false 
             """)
