@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public interface AdminCustomerService extends BaseService<AdminCustomerResponse, UUID, AdminCustomerRequest> {
 
-    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucherId,UUID noVoucherId);
+    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucher,UUID noVoucher);
 
 
 }

@@ -18,34 +18,32 @@ import java.util.UUID;
 @Transactional
 public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
-            SELECT x FROM Customer x LEFT JOIN x.addressList y LEFT JOIN x.customerVoucherList z
-            WHERE
-            (:#{#request.q} IS NULL OR :#{#request.q} ILIKE ''
-             OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR x.email ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR x.gender ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR y.wardName ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR y.districtName ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR y.provinceName ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR y.more ILIKE CONCAT('%', :#{#request.q}, '%')
-             OR y.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%'))
-            AND
-            (:status IS NULL OR x.status = :status)
-            AND
-            (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
-            AND
-            (CAST(:voucherId as java.util.UUID) IS NULL  OR  z.voucher.id = CAST(:voucherId AS java.util.UUID))
-            AND
-             (CAST(:noVoucherId as java.util.UUID) IS NULL  OR x.id 
-             NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = CAST(:noVoucherId AS java.util.UUID) ))
-            AND
-            (x.deleted = FALSE)
-            AND
-            (x.addressList IS EMPTY OR x.addressList  IS NOT EMPTY AND EXISTS (SELECT a FROM Address a WHERE a.customer = x AND a.isDefault = TRUE))
-            """)
+    SELECT x FROM Customer x
+    WHERE
+        (:#{#request.q} IS NULL OR :#{#request.q} ILIKE ''  OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
+        OR
+        x.email ILIKE CONCAT('%', :#{#request.q}, '%') OR x.gender ILIKE CONCAT('%', :#{#request.q}, '%')
+        OR
+        EXISTS
+        (SELECT 1 FROM x.addressList a WHERE a.wardName ILIKE CONCAT('%', :#{#request.q}, '%')
+        OR
+        a.districtName ILIKE CONCAT('%', :#{#request.q}, '%')OR a.provinceName ILIKE CONCAT('%', :#{#request.q}, '%')
+        OR
+        a.more ILIKE CONCAT('%', :#{#request.q}, '%')OR a.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%')))
+        AND
+        (:status IS NULL OR x.status = :status)
+        AND
+        (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
+        AND
+        (CAST(:voucher as java.util.UUID) IS NULL OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = CAST(:voucher as java.util.UUID)))
+        AND
+        (CAST(:noVoucher as java.util.UUID) IS NULL OR x.id NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = CAST(:noVoucher as java.util.UUID)))
+        AND
+        (x.deleted = FALSE)
+    """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request,
-                                   @Param("voucherId") UUID voucherId,
-                                   @Param("noVoucherId") UUID noVoucherId,
+                                   @Param("voucher") UUID voucher,
+                                   @Param("noVoucher") UUID noVoucher,
                                    @Param("status") CustomerStatus status, Pageable pageable);
 
     Optional<Customer> findByEmail(String email);

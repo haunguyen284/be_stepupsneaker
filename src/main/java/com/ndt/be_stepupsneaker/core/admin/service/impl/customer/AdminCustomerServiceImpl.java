@@ -39,9 +39,9 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
 
     @Override
-    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, UUID voucherId, UUID noVoucherId) {
+    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucher,UUID noVoucher) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest, voucherId, noVoucherId, customerRequest.getStatus(), pageable);
+        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest,voucher,noVoucher,customerRequest.getStatus(), pageable);
         Page<AdminCustomerResponse> adminCustomerResponses = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
 
         return new PageableObject<>(adminCustomerResponses);
