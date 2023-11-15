@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,8 +78,19 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
 
     @Override
     public List<AdminProductDetailResponse> create(List<AdminProductDetailRequest> productDetailRequests) {
-        List<ProductDetail> productDetails = productDetailRequests.stream().map(AdminProductDetailMapper.INSTANCE::adminProductDetailRequestToProductDetail).collect(Collectors.toList());
-
+        List<ProductDetail> productDetails = new ArrayList<>();
+        for (AdminProductDetailRequest adminProductDetailRequest: productDetailRequests) {
+            Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findByProductProperties(adminProductDetailRequest);
+            if (productDetailOptional.isPresent()) {
+                ProductDetail productDetail = productDetailOptional.get();
+                productDetail.setQuantity(productDetail.getQuantity() + adminProductDetailRequest.getQuantity());
+                productDetail.setImage(adminProductDetailRequest.getImage());
+                productDetail.setPrice(adminProductDetailRequest.getPrice());
+                productDetails.add(productDetail);
+            } else {
+                productDetails.add(AdminProductDetailMapper.INSTANCE.adminProductDetailRequestToProductDetail(adminProductDetailRequest));
+            }
+        }
         return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());
     }
 
