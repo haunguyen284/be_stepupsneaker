@@ -35,7 +35,25 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     (:#{#request.tradeMark} IS NULL OR x.tradeMark.id = :#{#request.tradeMark}) 
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
-    AND
+    AND 
+    (
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.product.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.brand.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.color.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.material.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.size.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.sole.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.style.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.tradeMark.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+    ) 
+    AND 
     x.deleted=false 
     ) 
     """)
