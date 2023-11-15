@@ -32,9 +32,9 @@ public class AdminOrderRequest extends PageableRequest {
 
     private float totalMoney;
 
-    private String priceMin;
+    private float priceMin;
 
-    private String priceMax;
+    private float priceMax;
 
     private long startDate;
 

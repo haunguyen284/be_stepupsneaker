@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.admin.repository.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.repository.order.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,17 +26,20 @@ public interface AdminOrderRepository extends OrderRepository {
             AND 
             ((:status IS NULL) OR (o.status = :status)) 
             AND 
-            ((:#{#request.type} IS NULL) OR (o.type = :#{#request.type})) 
+            ((:type IS NULL) OR (o.type = :type)) 
+            AND 
+            ((:#{#request.customer} IS NULL) OR (o.customer.id = :#{#request.customer})) 
             AND
-            (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE '' OR o.totalMoney >= CAST(:#{#request.priceMin} as float))
+            (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} = 0 OR o.totalMoney >= :#{#request.priceMin})
             AND
-            (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} ILIKE '' OR o.totalMoney <= CAST(:#{#request.priceMax} as float))
+            (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} = 0 OR o.totalMoney <= :#{#request.priceMax})
             AND
             o.deleted=false 
             """)
     Page<Order> findAllOrder(
             @Param("request") AdminOrderRequest request,
             @Param("status") OrderStatus status,
+            @Param("type") OrderType type,
             Pageable pageable
     );
 

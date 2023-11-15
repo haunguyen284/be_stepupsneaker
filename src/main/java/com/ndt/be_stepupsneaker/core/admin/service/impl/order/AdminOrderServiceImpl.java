@@ -69,7 +69,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
         Pageable pageable = paginationUtil.pageable(orderRequest);
-        Page<Order> resp = adminOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), pageable);
+        Page<Order> resp = adminOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), orderRequest.getType(), pageable);
         Page<AdminOrderResponse> adminPaymentResponses = resp.map(AdminOrderMapper.INSTANCE::orderToAdminOrderResponse);
         return new PageableObject<>(adminPaymentResponses);
     }
