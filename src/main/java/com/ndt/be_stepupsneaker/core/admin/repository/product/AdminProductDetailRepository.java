@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 
 @Repository
 @Transactional
@@ -59,4 +61,25 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     """)
     Page<ProductDetail> findAllProductDetail(@Param("request") AdminProductDetailRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
+
+    @Query("""
+    SELECT x FROM ProductDetail x WHERE (
+    x.product.id = :#{#request.product} 
+    AND 
+    x.brand.id = :#{#request.brand} 
+    AND 
+    x.color.id = :#{#request.color} 
+    AND 
+    x.material.id = :#{#request.material} 
+    AND 
+    x.size.id = :#{#request.size} 
+    AND 
+    x.sole.id = :#{#request.sole} 
+    AND 
+    x.style.id = :#{#request.style} 
+    AND 
+    x.tradeMark.id = :#{#request.tradeMark}
+    )
+    """)
+    Optional<ProductDetail> findByProductProperties(@Param("request") AdminProductDetailRequest request);
 }
