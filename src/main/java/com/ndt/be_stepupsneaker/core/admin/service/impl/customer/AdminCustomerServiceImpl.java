@@ -3,9 +3,11 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.customer;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.cart.AdminCartRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.cart.Cart;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
@@ -25,23 +27,23 @@ import java.util.UUID;
 public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     private AdminCustomerRepository adminCustomerRepository;
-
+    private AdminCartRepository adminCartRepository;
     private PaginationUtil paginationUtil;
-
     private EmailService emailService;
 
     @Autowired
-    public AdminCustomerServiceImpl(AdminCustomerRepository adminCustomerRepository, PaginationUtil paginationUtil, EmailService emailService) {
+    public AdminCustomerServiceImpl(AdminCustomerRepository adminCustomerRepository, AdminCartRepository adminCartRepository, PaginationUtil paginationUtil, EmailService emailService) {
         this.adminCustomerRepository = adminCustomerRepository;
+        this.adminCartRepository = adminCartRepository;
         this.paginationUtil = paginationUtil;
         this.emailService = emailService;
     }
 
 
     @Override
-    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucher,UUID noVoucher) {
+    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, UUID voucher, UUID noVoucher) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest,voucher,noVoucher,customerRequest.getStatus(), pageable);
+        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest, voucher, noVoucher, customerRequest.getStatus(), pageable);
         Page<AdminCustomerResponse> adminCustomerResponses = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
 
         return new PageableObject<>(adminCustomerResponses);
@@ -61,6 +63,13 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
         customerDTO.setPassword(passWordRandom);
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
+        // add cart
+        if (customer != null) {
+            Cart cart = new Cart();
+            cart.setCustomer(customer);
+            adminCartRepository.save(cart);
+        }
+
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoPassWordToCustomer(customer);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);

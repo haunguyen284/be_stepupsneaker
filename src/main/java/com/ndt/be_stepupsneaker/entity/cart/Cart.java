@@ -19,4 +19,5 @@ public class Cart extends PrimaryEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
 
+
 }
