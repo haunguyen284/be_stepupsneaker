@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
@@ -46,5 +47,48 @@ public interface AdminOrderRepository extends OrderRepository {
     List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, Long cutoffTime);
 
     Integer countAllByStatus(OrderStatus status);
+
+
+    @Query(
+        value = """
+                SELECT
+                    extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
+                    SUM(total_money) AS value
+                FROM
+                    shop_order
+                WHERE
+                    deleted = false AND
+                    status = 4 AND
+                    created_at >= :start AND
+                    created_at <= :end
+                GROUP BY
+                    date
+                ORDER BY
+                    date
+                """,
+            nativeQuery = true
+    )
+    List<Statistic> getDailyRevenueBetween(@Param("start") Long start, @Param("end") Long end);
+
+    @Query(
+        value = """
+                SELECT
+                    extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
+                    COUNT(*) AS value
+                FROM
+                    shop_order
+                WHERE
+                    deleted = false AND
+                    status = 4 AND
+                    created_at >= :start AND
+                    created_at <= :end
+                GROUP BY
+                    date
+                ORDER BY
+                    date
+                """,
+            nativeQuery = true
+    )
+    List<Statistic> getDailyOrderBetween(@Param("start") Long start, @Param("end") Long end);
 
 }
