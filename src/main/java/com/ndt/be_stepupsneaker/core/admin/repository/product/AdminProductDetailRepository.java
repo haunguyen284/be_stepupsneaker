@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 
 @Repository
 @Transactional
@@ -35,10 +37,49 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     (:#{#request.tradeMark} IS NULL OR x.tradeMark.id = :#{#request.tradeMark}) 
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
-    AND
+    AND 
+    (
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.product.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.brand.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.color.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.material.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.size.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.sole.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.style.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+     OR 
+    (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.tradeMark.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+    ) 
+    AND 
     x.deleted=false 
     ) 
     """)
     Page<ProductDetail> findAllProductDetail(@Param("request") AdminProductDetailRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
+
+    @Query("""
+    SELECT x FROM ProductDetail x WHERE (
+    x.product.id = :#{#request.product} 
+    AND 
+    x.brand.id = :#{#request.brand} 
+    AND 
+    x.color.id = :#{#request.color} 
+    AND 
+    x.material.id = :#{#request.material} 
+    AND 
+    x.size.id = :#{#request.size} 
+    AND 
+    x.sole.id = :#{#request.sole} 
+    AND 
+    x.style.id = :#{#request.style} 
+    AND 
+    x.tradeMark.id = :#{#request.tradeMark}
+    )
+    """)
+    Optional<ProductDetail> findByProductProperties(@Param("request") AdminProductDetailRequest request);
 }
