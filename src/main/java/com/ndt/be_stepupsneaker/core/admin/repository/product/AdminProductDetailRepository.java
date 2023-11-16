@@ -56,6 +56,10 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.tradeMark.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
     ) 
     AND 
+    (:#{#request.promotion} IS NULL OR x.id IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = :#{#request.promotion})) 
+    AND 
+    (CAST(:#{#request.noPromotion} as java.util.UUID) IS NULL OR x.id NOT IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = CAST(:#{#request.noPromotion} as java.util.UUID))) 
+    AND 
     x.deleted=false 
     ) 
     """)
