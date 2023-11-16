@@ -22,5 +22,5 @@ public class AdminProductNoProductDetailResonse {
 
     private ProductStatus status;
 
-
+    private String image;
 }
