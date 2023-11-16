@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class AdminCustomerVoucherResponse extends PageableRequest {
+public class AdminCustomerVoucherResponse {
     private UUID id;
 //
 //    private AdminVoucherResponse voucher;

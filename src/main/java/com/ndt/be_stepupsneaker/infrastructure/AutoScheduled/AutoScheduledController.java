@@ -14,5 +14,6 @@ public class AutoScheduledController {
     public void updateDiscountStatusDaily() {
         autoScheduledService.updateVoucherStatusAutomatically();
         autoScheduledService.updateOrderAutomatically();
+        autoScheduledService.updatePromotionStatusAutomatically();
     }
 }

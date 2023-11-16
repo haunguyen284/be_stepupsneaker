@@ -5,4 +5,6 @@ public interface AutoScheduledService {
     void updateVoucherStatusAutomatically();
 
     void updateOrderAutomatically();
+
+    void updatePromotionStatusAutomatically();
 }

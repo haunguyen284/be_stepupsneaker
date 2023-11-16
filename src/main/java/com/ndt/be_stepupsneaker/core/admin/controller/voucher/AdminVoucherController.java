@@ -30,7 +30,9 @@ public class AdminVoucherController {
 
 
     @GetMapping("")
-    public Object findAllVoucher(AdminVoucherRequest voucherRequest, @RequestParam(value = "customer", required = false, defaultValue = "") UUID customerId, @RequestParam(value = "noCustomer", required = false, defaultValue = "") UUID noCustomerId) {
+    public Object findAllVoucher(AdminVoucherRequest voucherRequest,
+                                 @RequestParam(value = "customer", required = false, defaultValue = "") UUID customerId,
+                                 @RequestParam(value = "noCustomer", required = false, defaultValue = "") UUID noCustomerId) {
         PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllVoucher(voucherRequest, customerId, noCustomerId);
         return ResponseHelper.getResponse(listVoucher, HttpStatus.OK);
     }

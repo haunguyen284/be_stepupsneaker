@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.infrastructure.AutoScheduled;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
@@ -25,6 +26,9 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
+    private final AdminPromotionRepository adminPromotionRepository;
+    private final LocalDateTime currentDateTime = LocalDateTime.now();
+    Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
 
 
     @Autowired
@@ -32,31 +36,23 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
             AdminVoucherRepository adminVoucherRepository,
             AdminOrderRepository adminOrderRepository,
             AdminOrderHistoryRepository adminOrderHistoryRepository,
-            AdminOrderDetailRepository adminOrderDetailRepository
+            AdminOrderDetailRepository adminOrderDetailRepository,
+            AdminPromotionRepository adminPromotionRepository
     ) {
         this.adminVoucherRepository = adminVoucherRepository;
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.adminOrderDetailRepository = adminOrderDetailRepository;
+        this.adminPromotionRepository = adminPromotionRepository;
     }
 
     @Override
     public void updateVoucherStatusAutomatically() {
-        System.out.println("========================== AUTO UPDATE VOUCHER =======================");
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        List<Voucher> voucherList = adminVoucherRepository.findAll();
-
-        for (Voucher voucherStatus : voucherList) {
-            if (ConvertTime.convertLocalDateTimeToLong(currentDateTime) < (voucherStatus.getStartDate())) {
-                voucherStatus.setStatus(VoucherStatus.IN_ACTIVE);
-            } else if (ConvertTime.convertLocalDateTimeToLong(currentDateTime) >= (voucherStatus.getStartDate()) && ConvertTime.convertLocalDateTimeToLong(currentDateTime) <= (voucherStatus.getEndDate())) {
-                voucherStatus.setStatus(VoucherStatus.ACTIVE);
-            } else {
-                voucherStatus.setStatus(VoucherStatus.EXPIRED);
-            }
-
-            adminVoucherRepository.save(voucherStatus);
-        }
+        adminVoucherRepository.updateStatusAutomatically(currentLongTime);
+    }
+    @Override
+    public void updatePromotionStatusAutomatically() {
+        adminPromotionRepository.updateStatusAutomatically(currentLongTime);
     }
 
     @Transactional
@@ -79,4 +75,5 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
             adminOrderRepository.deleteAllInBatch(expiredOrders);
         }
     }
+
 }
