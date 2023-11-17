@@ -43,9 +43,9 @@ public class AdminProductDetailRequest extends PageableRequest {
     @NotNull(message = "Sole must be not null")
     private UUID sole;
 
-    private String promotion;
+    private UUID promotion;
 
-    private String noPromotion;
+    private UUID noPromotion;
 
     private String image;
 
