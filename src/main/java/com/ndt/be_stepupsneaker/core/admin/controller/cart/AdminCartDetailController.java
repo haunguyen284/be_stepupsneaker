@@ -21,39 +21,44 @@ public class AdminCartDetailController {
     private AdminCartDetailService adminCartDetailService;
 
     @GetMapping("")
-    public Object findAllCartDetail(AdminCartDetailRequest CartDetailDTO){
+    public Object findAllCartDetail(AdminCartDetailRequest CartDetailDTO) {
         PageableObject<AdminCartDetailResponse> listCartDetail = adminCartDetailService.findAllEntity(CartDetailDTO);
         return ResponseHelper.getResponse(listCartDetail, HttpStatus.OK);
 
     }
 
     @GetMapping("/{id}")
-    public Object findById(@PathVariable("id")String id){
+    public Object findById(@PathVariable("id") String id) {
         AdminCartDetailResponse resp = adminCartDetailService.findById(UUID.fromString(id));
         return ResponseHelper.getResponse(resp, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid AdminCartDetailRequest CartDetailDTO, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
-            return ResponseHelper.getErrorResponse(bindingResult,HttpStatus.BAD_REQUEST);
+    public Object create(@RequestBody @Valid AdminCartDetailRequest CartDetailDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
         }
         return ResponseHelper.getResponse(adminCartDetailService.create(CartDetailDTO), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminCartDetailRequest CartDetailRequest, BindingResult bindingResult){
+    public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminCartDetailRequest CartDetailRequest, BindingResult bindingResult) {
         CartDetailRequest.setId(UUID.fromString(id));
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
         return ResponseHelper.getResponse(adminCartDetailService.update(CartDetailRequest), HttpStatus.OK);
 
     }
 
+    @DeleteMapping("/{id}")
+    public Object delete(@PathVariable("id") String id) {
+        return ResponseHelper.getResponse(adminCartDetailService.delete(UUID.fromString(id)), HttpStatus.OK);
+    }
+
     @DeleteMapping("")
-    public Object delete(@RequestBody AdminCartDetailRequest request){
+    public Object deleteCartDetails(@RequestBody AdminCartDetailRequest request) {
         return ResponseHelper.getResponse(adminCartDetailService.deleteCartDetails(request), HttpStatus.OK);
     }
 }
