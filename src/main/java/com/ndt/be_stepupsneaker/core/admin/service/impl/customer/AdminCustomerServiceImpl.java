@@ -2,15 +2,18 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.customer;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -45,6 +49,12 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         Page<AdminCustomerResponse> adminCustomerResponses = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
 
         return new PageableObject<>(adminCustomerResponses);
+    }
+
+    @Override
+    public AdminDailyStatisticResponse getDailyCustomersBetween(Long start, Long end) {
+        List<Statistic> statistics = adminCustomerRepository.getDailyCustomerBetween(start, end);
+        return DailyStatisticUtil.getDailyStatisticResponse(statistics);
     }
 
     @Override

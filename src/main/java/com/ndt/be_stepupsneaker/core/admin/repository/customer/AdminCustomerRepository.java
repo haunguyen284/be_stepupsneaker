@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.customer;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
+import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.repository.customer.CustomerRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -53,4 +55,23 @@ public interface AdminCustomerRepository extends CustomerRepository {
             """)
     Optional<Customer> findByEmail(@Param("id") UUID id, @Param("email") String email);
 
+    @Query(
+            value = """
+                SELECT
+                    extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
+                    COUNT(*) AS value
+                FROM
+                    customer
+                WHERE
+                    deleted = false AND
+                    created_at >= :start AND
+                    created_at <= :end
+                GROUP BY
+                    date
+                ORDER BY
+                    date
+                """,
+            nativeQuery = true
+    )
+    List<Statistic> getDailyCustomerBetween(@Param("start") Long start, @Param("end") Long end);
 }

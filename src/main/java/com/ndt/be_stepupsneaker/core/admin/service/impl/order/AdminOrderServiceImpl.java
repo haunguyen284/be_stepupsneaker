@@ -2,6 +2,8 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
+import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
@@ -21,11 +23,13 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -190,10 +194,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ResourceNotFoundException("ORDER IS NOT EXIST");
         }
         Order order = orderOptional.get();
-        if(order.getStatus() == OrderStatus.PENDING){
+        if (order.getStatus() == OrderStatus.PENDING) {
             adminOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
             adminOrderRepository.delete(order);
-        }else {
+        } else {
             order.setDeleted(true);
             adminOrderRepository.save(order);
 
@@ -206,4 +210,17 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
         return true;
     }
+
+    @Override
+    public AdminDailyStatisticResponse getDailyRevenueBetween(Long start, Long end) {
+        List<Statistic> statistics = adminOrderRepository.getDailyRevenueBetween(start, end);
+        return DailyStatisticUtil.getDailyStatisticResponse(statistics);
+    }
+
+    @Override
+    public AdminDailyStatisticResponse getDailyOrdersBetween(Long start, Long end) {
+        List<Statistic> statistics = adminOrderRepository.getDailyOrderBetween(start, end);
+        return DailyStatisticUtil.getDailyStatisticResponse(statistics);
+    }
+
 }

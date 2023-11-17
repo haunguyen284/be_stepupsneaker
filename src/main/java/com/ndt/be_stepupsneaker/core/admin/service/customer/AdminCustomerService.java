@@ -4,6 +4,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequ
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -17,5 +18,6 @@ public interface AdminCustomerService extends BaseService<AdminCustomerResponse,
 
     PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucher,UUID noVoucher);
 
+    AdminDailyStatisticResponse getDailyCustomersBetween(Long start, Long end);
 
 }
