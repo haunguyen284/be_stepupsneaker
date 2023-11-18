@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.entity.product;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,9 +9,12 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -62,5 +66,8 @@ public class ProductDetail extends PrimaryEntity {
 
     @Column(name = "status")
     private ProductStatus status;
+
+    @OneToMany(mappedBy = "productDetail")
+    List<PromotionProductDetail> promotionProductDetails;
 }
 

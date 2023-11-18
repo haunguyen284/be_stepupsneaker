@@ -45,7 +45,7 @@ public class AdminProductDetailRequest extends PageableRequest {
 
     private UUID promotion;
 
-    private UUID noPromotion;
+    private int isInPromotion=1;
 
     private String image;
 

@@ -36,6 +36,12 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     AND 
     (:#{#request.tradeMark} IS NULL OR x.tradeMark.id = :#{#request.tradeMark}) 
     AND 
+    (
+    (:#{#request.promotion} IS NULL OR :#{#request.isInPromotion} = 1 AND x.id IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = :#{#request.promotion})) 
+    OR 
+    (:#{#request.promotion} IS NULL OR :#{#request.isInPromotion} = 0 AND x.id NOT IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = :#{#request.promotion}))
+    ) 
+    AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND 
     (
@@ -55,10 +61,6 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
      OR 
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.tradeMark.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
     ) 
-    AND 
-    (:#{#request.promotion} IS NULL OR x.id IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = :#{#request.promotion})) 
-    AND 
-    (:#{#request.noPromotion} IS NULL OR x.id NOT IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = :#{#request.noPromotion})) 
     AND 
     x.deleted=false 
     ) 

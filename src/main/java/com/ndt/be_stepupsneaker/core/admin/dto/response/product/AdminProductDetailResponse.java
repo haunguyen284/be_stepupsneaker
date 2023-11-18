@@ -1,11 +1,14 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.product;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminPromotionNoProductDetailResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminPromotionProductDetailResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -38,4 +41,7 @@ public class AdminProductDetailResponse {
     private int quantity;
 
     private ProductStatus status;
+
+    List<AdminPromotionNoProductDetailResponse> promotionProductDetails;
+
 }
