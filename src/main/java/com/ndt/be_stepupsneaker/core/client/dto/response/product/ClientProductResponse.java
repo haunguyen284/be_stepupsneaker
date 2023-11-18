@@ -25,6 +25,6 @@ public class ClientProductResponse {
 
     private ProductStatus status;
 
-    private Set<ClientProductDetailResponse> productDetails;
+    private Set<ClientVariantResponse> variation;
 
 }
