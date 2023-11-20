@@ -27,7 +27,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminPromotionRepository adminPromotionRepository;
-    private final LocalDateTime currentDateTime = LocalDateTime.now();
+//    private final LocalDateTime currentDateTime = LocalDateTime.now();
 
 
     @Autowired
@@ -47,11 +47,13 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
 
     @Override
     public void updateVoucherStatusAutomatically() {
+        LocalDateTime currentDateTime = LocalDateTime.now();
         Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
         adminVoucherRepository.updateStatusAutomatically(currentLongTime);
     }
     @Override
     public void updatePromotionStatusAutomatically() {
+        LocalDateTime currentDateTime = LocalDateTime.now();
         Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
         adminPromotionRepository.updateStatusAutomatically(currentLongTime);
     }
