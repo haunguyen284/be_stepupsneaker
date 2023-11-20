@@ -1,0 +1,23 @@
+cloud:
+  aws:
+    credentials:
+      #      access-key: AKIA2MSHHLKK6BQ4HPCQ
+      #      secret-key: 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
+      access-key: AKIA2MSHHLKKVLF3XVVT
+      secret-key: 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
+    region:
+      static: us-east-2
+    stack:
+      auto: false
+
+application:
+  bucket:
+    name: step-up-sneaker
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 2MB
+      max-file-size: 5MB
+      max-request-size: 10MB

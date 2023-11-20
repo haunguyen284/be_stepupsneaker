@@ -81,10 +81,16 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-<!--        send mail-->
+        <!--        send mail-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+        <!--        amazon s3 save file-->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>1.11.486</version>
         </dependency>
     </dependencies>
 

@@ -1,4 +1,4 @@
-package com.ndt.be_stepupsneaker.infrastructure.email.config;
+package com.ndt.be_stepupsneaker.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

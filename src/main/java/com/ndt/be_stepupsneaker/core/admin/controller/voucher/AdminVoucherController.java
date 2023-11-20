@@ -10,15 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -47,6 +39,13 @@ public class AdminVoucherController {
     public Object create(@RequestBody @Valid AdminVoucherRequest voucherRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+//        @ModelAttribute
+//        @RequestParam("file") MultipartFile file
+//        String folder = "image_voucher/";
+//        if (file != null) {
+//            storageService.uploadFile(file, folder);
+//            voucherRequest.setImage(file.getOriginalFilename());
+//        }
         return ResponseHelper.getResponse(adminVoucherService.create(voucherRequest), HttpStatus.OK);
     }
 
