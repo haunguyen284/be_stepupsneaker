@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminPromotionRequest extends PageableRequest {
-    private UUID id;
+    private String id;
 
     private String code;
 
@@ -33,5 +33,5 @@ public class AdminPromotionRequest extends PageableRequest {
 
     private String image;
 
-    private List<UUID> productDetailIds;
+    private List<String> productDetailIds;
 }

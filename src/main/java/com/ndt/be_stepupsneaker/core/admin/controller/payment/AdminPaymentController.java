@@ -41,7 +41,7 @@ public class AdminPaymentController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminPaymentResponse adminPaymentResponse = adminPaymentService.findById(UUID.fromString(id));
+        AdminPaymentResponse adminPaymentResponse = adminPaymentService.findById(id);
 
         return ResponseHelper.getResponse(adminPaymentResponse, HttpStatus.OK);
     }
@@ -57,7 +57,7 @@ public class AdminPaymentController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminPaymentRequest adminPaymentRequest, BindingResult bindingResult){
-        adminPaymentRequest.setId(UUID.fromString(id));
+        adminPaymentRequest.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -67,7 +67,7 @@ public class AdminPaymentController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminPaymentService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminPaymentService.delete(id), HttpStatus.OK);
     }
 
 }

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 @Repository(CustomerVoucherRepository.NAME)
-public interface CustomerVoucherRepository extends JpaRepository<CustomerVoucher, UUID> {
+public interface CustomerVoucherRepository extends JpaRepository<CustomerVoucher, String> {
     public static final String NAME = "BaseCustomerVoucherRepository";
 }

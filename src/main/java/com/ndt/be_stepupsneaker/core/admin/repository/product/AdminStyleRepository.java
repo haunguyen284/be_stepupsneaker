@@ -32,7 +32,7 @@ public interface AdminStyleRepository extends StyleRepository {
     @Query("""
     SELECT x FROM Style x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Style y WHERE y.id != :id))
     """)
-    Optional<Style> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<Style> findByName(@Param("id") String id, @Param("name") String name);
 
 
 }

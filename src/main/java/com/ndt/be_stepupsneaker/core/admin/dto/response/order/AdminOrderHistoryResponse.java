@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AdminOrderHistoryResponse {
 
-    private UUID id;
+    private String id;
 
     private AdminOrderNoOrderDetailResponse order;
 

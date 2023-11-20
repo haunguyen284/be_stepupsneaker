@@ -7,6 +7,6 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 
 import java.util.UUID;
 
-public interface AdminPromotionService extends BaseService<AdminPromotionResponse,UUID,AdminPromotionRequest> {
-    PageableObject<AdminPromotionResponse> findAllPromotion(AdminPromotionRequest request, UUID productDetail, UUID noProductDetail);
+public interface AdminPromotionService extends BaseService<AdminPromotionResponse,String,AdminPromotionRequest> {
+    PageableObject<AdminPromotionResponse> findAllPromotion(AdminPromotionRequest request, String productDetail, String noProductDetail);
 }

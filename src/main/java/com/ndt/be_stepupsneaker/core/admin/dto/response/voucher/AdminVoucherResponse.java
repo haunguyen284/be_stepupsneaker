@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminVoucherResponse {
-    private UUID id;
+    private String id;
 
     private String code;
 

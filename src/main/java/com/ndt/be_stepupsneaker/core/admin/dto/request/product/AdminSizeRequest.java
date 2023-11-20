@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class AdminSizeRequest extends PageableRequest {
-    private UUID id;
+    private String id;
     private String name;
     private ProductPropertiesStatus status;
 }

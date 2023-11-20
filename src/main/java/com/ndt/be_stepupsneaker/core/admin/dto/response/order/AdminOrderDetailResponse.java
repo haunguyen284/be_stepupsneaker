@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AdminOrderDetailResponse {
 
-    private UUID id;
+    private String id;
 
     private AdminProductDetailResponse productDetail;
 

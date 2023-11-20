@@ -6,5 +6,5 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 
 import java.util.UUID;
 
-public interface AdminRoleService  extends BaseService<AdminRoleRsponse , UUID, AdminRoleRequest> {
+public interface AdminRoleService  extends BaseService<AdminRoleRsponse , String, AdminRoleRequest> {
 }

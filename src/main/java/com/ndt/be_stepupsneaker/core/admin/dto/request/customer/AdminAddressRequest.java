@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminAddressRequest extends PageableRequest {
-    private UUID id;
+    private String id;
     private String phoneNumber;
     private Boolean isDefault;
     private String districtId;
@@ -23,6 +23,5 @@ public class AdminAddressRequest extends PageableRequest {
     private String provinceName;
     private String wardName;
     private String more;
-
-    private UUID customer;
+    private String customer;
 }

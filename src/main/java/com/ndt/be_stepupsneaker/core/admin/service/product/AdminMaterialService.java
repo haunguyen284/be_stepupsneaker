@@ -8,6 +8,6 @@ import java.util.UUID;
 
 
 
-public interface AdminMaterialService extends BaseService<AdminMaterialResponse, UUID, AdminMaterialRequest> {
+public interface AdminMaterialService extends BaseService<AdminMaterialResponse, String, AdminMaterialRequest> {
 
 }

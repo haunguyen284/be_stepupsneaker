@@ -67,7 +67,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
 
         if (!expiredOrders.isEmpty()) {
             System.out.println("========================== AUTO UPDATE ORDER =======================");
-            List<UUID> expiredOrderIds = expiredOrders.stream()
+            List<String> expiredOrderIds = expiredOrders.stream()
                     .map(Order::getId)
                     .collect(Collectors.toList());
 

@@ -8,6 +8,6 @@ import java.util.UUID;
 
 @Repository(BrandRepository.NAME)
 
-public interface BrandRepository extends JpaRepository<Brand, UUID> {
+public interface BrandRepository extends JpaRepository<Brand, String> {
     public static final String NAME = "BaseBrandRepository";
 }

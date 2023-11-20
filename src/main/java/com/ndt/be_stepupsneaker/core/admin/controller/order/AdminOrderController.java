@@ -43,7 +43,7 @@ public class AdminOrderController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminOrderResponse adminOrderResponse = adminOrderService.findById(UUID.fromString(id));
+        AdminOrderResponse adminOrderResponse = adminOrderService.findById(id);
 
         return ResponseHelper.getResponse(adminOrderResponse, HttpStatus.OK);
     }
@@ -59,7 +59,7 @@ public class AdminOrderController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult){
-        adminOrderRequest.setId(UUID.fromString(id));
+        adminOrderRequest.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -69,7 +69,7 @@ public class AdminOrderController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminOrderService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminOrderService.delete(id), HttpStatus.OK);
     }
 
 }

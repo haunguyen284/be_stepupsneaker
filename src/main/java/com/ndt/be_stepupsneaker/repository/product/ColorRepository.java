@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository(ColorRepository.NAME)
-public interface ColorRepository extends JpaRepository<Color, UUID> {
+public interface ColorRepository extends JpaRepository<Color, String> {
     public static final String NAME = "BaseColorRepository";
 }

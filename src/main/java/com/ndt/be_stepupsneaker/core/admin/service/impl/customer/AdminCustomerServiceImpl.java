@@ -13,6 +13,7 @@ import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
@@ -27,6 +28,9 @@ import java.util.UUID;
 
 @Service
 public class AdminCustomerServiceImpl implements AdminCustomerService {
+
+    @Autowired
+    private CloudinaryUpload cloudinaryUpload;
 
     private AdminCustomerRepository adminCustomerRepository;
 
@@ -43,7 +47,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
 
     @Override
-    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucher,UUID noVoucher) {
+    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,String voucher,String noVoucher) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
         Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest,voucher,noVoucher,customerRequest.getStatus(), pageable);
         Page<AdminCustomerResponse> adminCustomerResponses = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
@@ -70,6 +74,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
         customerDTO.setPassword(passWordRandom);
+        customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoPassWordToCustomer(customer);
@@ -93,13 +98,13 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         customer.setGender(customerDTO.getGender());
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
         customer.setEmail(customerDTO.getEmail());
-        customer.setImage(customerDTO.getImage());
+        customer.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(adminCustomerRepository.save(customer));
 
     }
 
     @Override
-    public AdminCustomerResponse findById(UUID id) {
+    public AdminCustomerResponse findById(String id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
             throw new RuntimeException("LOOI");
@@ -108,7 +113,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
             throw new ResourceNotFoundException("Customer not found");

@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
+import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.ConvertTime;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.aspectj.weaver.ast.Or;
@@ -33,12 +34,12 @@ import java.util.UUID;
 
 @Service
 public class AdminVoucherServiceImpl implements AdminVoucherService {
+    @Autowired
+    private CloudinaryUpload cloudinaryUpload;
+
     @Qualifier("adminVoucherRepository")
     private AdminVoucherRepository adminVoucherRepository;
-
-
     private PaginationUtil paginationUtil;
-
     private CustomerVoucherRepository customerVoucherRepository;
     @Autowired
     public AdminVoucherServiceImpl(
@@ -63,6 +64,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         if (optionalVoucher.isPresent()) {
             throw new ApiException("CODE IS EXIST");
         }
+        voucherRequest.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         Voucher voucher = adminVoucherRepository.save(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
 
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(voucher);
@@ -85,7 +87,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         newVoucher.setConstraint(voucherRequest.getConstraint());
         newVoucher.setQuantity(voucherRequest.getQuantity());
         newVoucher.setStatus(voucherRequest.getStatus());
-        newVoucher.setImage(voucherRequest.getImage());
+        newVoucher.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         newVoucher.setEndDate(voucherRequest.getEndDate());
         newVoucher.setStartDate(voucherRequest.getStartDate());
         newVoucher.setType(voucherRequest.getType());
@@ -94,7 +96,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     }
 
     @Override
-    public AdminVoucherResponse findById(UUID id) {
+    public AdminVoucherResponse findById(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
             throw new ResourceNotFoundException("VOUCHER IS NOT EXIST :" + id);
@@ -104,7 +106,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
             throw new ResourceNotFoundException("VOUCHER NOT FOUND :" + id);
@@ -117,7 +119,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
 
 
     @Override
-    public PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, UUID customerId, UUID noCustomerId) {
+    public PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, String customerId, String noCustomerId) {
         Pageable pageable = paginationUtil.pageable(voucherReq);
         Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherReq, pageable,voucherReq.getStatus(),voucherReq.getType(),customerId, noCustomerId);
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);

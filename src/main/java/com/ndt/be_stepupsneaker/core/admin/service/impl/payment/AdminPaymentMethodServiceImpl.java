@@ -67,7 +67,7 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     }
 
     @Override
-    public AdminPaymentMethodResponse findById(UUID id) {
+    public AdminPaymentMethodResponse findById(String id) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(id);
         if(paymentMethodOptional.isEmpty()){
             throw new ApiException("PAYMENT METHOD IS NOT EXIST");
@@ -77,7 +77,7 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(id);
         if(paymentMethodOptional.isEmpty()){
             throw new ApiException("PAYMENT METHOD IS NOT EXIST");

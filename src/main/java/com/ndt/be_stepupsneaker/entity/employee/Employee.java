@@ -48,8 +48,7 @@ public class Employee extends PrimaryEntity {
     @Column(name = "phone_number", length = EntityProperties.LENGTH_PHONE)
     private String phoneNumber;
 
-    @Column(name = "url_image", columnDefinition = "TEXT")
-    @Lob
+    @Column(name = "url_image")
     private String image;
 
 }

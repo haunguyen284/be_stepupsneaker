@@ -39,11 +39,11 @@ public interface AdminColorRepository extends ColorRepository {
     @Query("""
     SELECT x FROM Color x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Color y WHERE y.id != :id))
     """)
-    Optional<Color> findByName(@Param("id")UUID id, @Param("name") String name);
+    Optional<Color> findByName(@Param("id")String id, @Param("name") String name);
 
     @Query("""
     SELECT x FROM Color x WHERE x.code = :code AND :code IN (SELECT y.code FROM Color y WHERE y.id != :id)
     """)
-    Optional<Color> findByCode(@Param("id")UUID id, @Param("code") String code);
+    Optional<Color> findByCode(@Param("id")String id, @Param("code") String code);
 
 }

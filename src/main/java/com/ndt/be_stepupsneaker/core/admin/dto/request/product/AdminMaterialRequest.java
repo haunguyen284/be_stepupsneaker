@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class AdminMaterialRequest extends PageableRequest {
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "Name must be not null")
     private String name;

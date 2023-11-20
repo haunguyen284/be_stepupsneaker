@@ -31,15 +31,15 @@ public class AdminVoucherController {
 
     @GetMapping("")
     public Object findAllVoucher(AdminVoucherRequest voucherRequest,
-                                 @RequestParam(value = "customer", required = false, defaultValue = "") UUID customerId,
-                                 @RequestParam(value = "noCustomer", required = false, defaultValue = "") UUID noCustomerId) {
+                                 @RequestParam(value = "customer", required = false, defaultValue = "") String customerId,
+                                 @RequestParam(value = "noCustomer", required = false, defaultValue = "") String noCustomerId) {
         PageableObject<AdminVoucherResponse> listVoucher = adminVoucherService.findAllVoucher(voucherRequest, customerId, noCustomerId);
         return ResponseHelper.getResponse(listVoucher, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        AdminVoucherResponse adminVoucherResponse = adminVoucherService.findById(UUID.fromString(id));
+        AdminVoucherResponse adminVoucherResponse = adminVoucherService.findById(id);
         return ResponseHelper.getResponse(adminVoucherResponse, HttpStatus.OK);
     }
 
@@ -52,7 +52,7 @@ public class AdminVoucherController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminVoucherRequest voucherRequest, BindingResult bindingResult) {
-        voucherRequest.setId(UUID.fromString(id));
+        voucherRequest.setId(id);
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminVoucherService.update(voucherRequest), HttpStatus.OK);
@@ -60,6 +60,6 @@ public class AdminVoucherController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
-        return ResponseHelper.getResponse(adminVoucherService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminVoucherService.delete(id), HttpStatus.OK);
     }
 }

@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,9 @@ import java.util.UUID;
 
 @Service
 public class AdminEmployeeServiceImpl implements AdminEmployeeService {
+
+    @Autowired
+    private CloudinaryUpload cloudinaryUpload;
 
     @Autowired
     private AdminEmployeeRepository adminEmployeeRepository;
@@ -51,6 +55,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         if (employeeOptional.isPresent()) {
             throw new ApiException("PhoneNumber is exist");
         }
+        employeeDTO.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
 
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
@@ -79,14 +84,14 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         employee.setAddress(employeeDTO.getAddress());
         employee.setPhoneNumber(employeeDTO.getPhoneNumber());
         employee.setFullName(employeeDTO.getFullName());
-        employee.setImage(employeeDTO.getImage());
+        employee.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         employee.setRole(roleOptional.get());
 
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(adminEmployeeRepository.save(employee));
     }
 
     @Override
-    public AdminEmployeeResponse findById(UUID id) {
+    public AdminEmployeeResponse findById(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
             throw new RuntimeException("LOOI");
@@ -95,7 +100,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
             throw new ResourceNotFoundException("Employee is not found");

@@ -96,7 +96,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     }
 
     @Override
-    public AdminPaymentResponse findById(UUID id) {
+    public AdminPaymentResponse findById(String id) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findById(id);
         if (paymentOptional.isEmpty()) {
             throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
@@ -105,7 +105,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findById(id);
         if (paymentOptional.isEmpty()) {
             throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");

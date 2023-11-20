@@ -65,7 +65,7 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     }
 
     @Override
-    public AdminStyleResponse findById(UUID id) {
+    public AdminStyleResponse findById(String id) {
         Optional<Style> soleOptional = adminStyleRepository.findById(id);
         if (soleOptional.isEmpty()){
             throw new ResourceNotFoundException("MATERIAL IS NOT EXIST");
@@ -75,7 +75,7 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Style> soleOptional = adminStyleRepository.findById(id);
         if (soleOptional.isEmpty()){
             throw new ResourceNotFoundException("MATERIAL NOT FOUND");

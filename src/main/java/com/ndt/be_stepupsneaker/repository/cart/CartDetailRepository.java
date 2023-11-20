@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository(CartDetailRepository.NAME)
-public interface CartDetailRepository extends JpaRepository<CartDetail, UUID> {
+public interface CartDetailRepository extends JpaRepository<CartDetail, String> {
     public static final String NAME = "BaseCartDetailRepository";
 }

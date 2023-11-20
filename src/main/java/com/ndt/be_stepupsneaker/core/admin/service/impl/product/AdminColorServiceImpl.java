@@ -74,7 +74,7 @@ public class AdminColorServiceImpl implements AdminColorService {
     }
 
     @Override
-    public AdminColorResponse findById(UUID id) {
+    public AdminColorResponse findById(String id) {
         Optional<Color> colorOptional = adminColorRepository.findById(id);
         if (colorOptional.isEmpty()){
             throw new RuntimeException("LOOI");
@@ -84,7 +84,7 @@ public class AdminColorServiceImpl implements AdminColorService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Color> colorOptional = adminColorRepository.findById(id);
         if (colorOptional.isEmpty()){
             throw new ResourceNotFoundException("COLOR NOT FOUND");

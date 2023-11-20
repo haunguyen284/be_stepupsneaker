@@ -36,7 +36,7 @@ public class AdminMaterialController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminMaterialResponse adminMaterialResponse = adminMaterialService.findById(UUID.fromString(id));
+        AdminMaterialResponse adminMaterialResponse = adminMaterialService.findById(id);
 
         return ResponseHelper.getResponse(adminMaterialResponse, HttpStatus.OK);
     }
@@ -52,7 +52,7 @@ public class AdminMaterialController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminMaterialRequest colorDTO, BindingResult bindingResult){
-        colorDTO.setId(UUID.fromString(id));
+        colorDTO.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -62,6 +62,6 @@ public class AdminMaterialController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminMaterialService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminMaterialService.delete(id), HttpStatus.OK);
     }
 }

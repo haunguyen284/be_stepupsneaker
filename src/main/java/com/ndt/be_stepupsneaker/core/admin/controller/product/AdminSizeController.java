@@ -33,7 +33,7 @@ public class AdminSizeController {
     }
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        AdminSizeResponse adminSizeResponse = adminSizeService.findById(UUID.fromString(id));
+        AdminSizeResponse adminSizeResponse = adminSizeService.findById(id);
         return ResponseHelper.getResponse(adminSizeResponse,HttpStatus.OK);
     }
 
@@ -48,7 +48,7 @@ public class AdminSizeController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminSizeRequest adminSizeRequest, BindingResult bindingResult){
-        adminSizeRequest.setId(UUID.fromString(id));
+        adminSizeRequest.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -58,6 +58,6 @@ public class AdminSizeController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminSizeService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminSizeService.delete(id), HttpStatus.OK);
     }
 }

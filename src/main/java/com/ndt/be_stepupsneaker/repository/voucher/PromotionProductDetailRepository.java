@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository(PromotionProductDetailRepository.NAME)
-public interface PromotionProductDetailRepository extends JpaRepository<PromotionProductDetail, UUID> {
+public interface PromotionProductDetailRepository extends JpaRepository<PromotionProductDetail, String> {
     public static final String NAME = "BasePromotionProductDetailRepository";
 }

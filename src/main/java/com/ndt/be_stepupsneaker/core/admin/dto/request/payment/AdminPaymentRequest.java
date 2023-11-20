@@ -14,13 +14,13 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminPaymentRequest extends PageableRequest {
 
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "Order must be not null")
-    private UUID order;
+    private String order;
 
     @NotBlank(message = "Payment Method must be not null")
-    private UUID paymentMethod;
+    private String paymentMethod;
 
     @NotBlank(message = "Transaction code Method must be not null")
     private String transactionCode;

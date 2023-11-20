@@ -33,6 +33,6 @@ public interface AdminCustomerVoucherRepository extends CustomerVoucherRepositor
     @Modifying
     @Transactional
     @Query("DELETE FROM CustomerVoucher x WHERE x.voucher.id = :voucherId AND x.customer.id IN :customerIds")
-    void deleteCustomersByVoucherIdAndCustomerIds(@Param("voucherId") UUID voucherId, @Param("customerIds") List<UUID> customerIds);
+    void deleteCustomersByVoucherIdAndCustomerIds(@Param("voucherId") String voucherId, @Param("customerIds") List<String> customerIds);
 
 }

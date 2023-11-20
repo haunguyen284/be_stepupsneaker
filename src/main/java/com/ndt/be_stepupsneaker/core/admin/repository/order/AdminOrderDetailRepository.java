@@ -50,5 +50,5 @@ public interface AdminOrderDetailRepository extends OrderDetailRepository {
     @Modifying
     @Transactional
     @Query("DELETE FROM OrderDetail x WHERE x.order.id IN :orderIds")
-    void deleteAllByOrder(List<UUID> orderIds);
+    void deleteAllByOrder(List<String> orderIds);
 }

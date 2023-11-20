@@ -7,6 +7,6 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import java.util.UUID;
 
 
-public interface AdminSoleService extends BaseService<AdminSoleResponse, UUID, AdminSoleRequest> {
+public interface AdminSoleService extends BaseService<AdminSoleResponse, String, AdminSoleRequest> {
 
 }

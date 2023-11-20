@@ -46,7 +46,6 @@ public class Customer extends PrimaryEntity {
     private String gender;
 
     @Column(name = "url_image")
-    @Lob
     private String image;
 
     @OneToMany(mappedBy = "customer")

@@ -53,7 +53,7 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     }
 
     @Override
-    public AdminPromotionProductDetailResponse findById(UUID id) {
+    public AdminPromotionProductDetailResponse findById(String id) {
         Optional<PromotionProductDetail> optionalPromotionProductDetail = adminPromotionProductDetailRepository.findById(id);
         if (optionalPromotionProductDetail.isEmpty()) {
             throw new ResourceNotFoundException("PromotionProductDetail IS NOT EXIST :" + id);
@@ -62,7 +62,7 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<PromotionProductDetail> optionalPromotionProductDetail = adminPromotionProductDetailRepository.findById(id);
         if (optionalPromotionProductDetail.isEmpty()) {
             throw new ResourceNotFoundException("PromotionProductDetail NOT FOUND :" + id);
@@ -74,7 +74,7 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     }
 
     @Override
-    public Boolean deleteProductDetailsByPromotionId(UUID promotion, List<UUID> productDetails) {
+    public Boolean deleteProductDetailsByPromotionId(String promotion, List<String> productDetails) {
         adminPromotionProductDetailRepository.deleteProductDetailsByPromotionId(promotion, productDetails);
         return true;
     }

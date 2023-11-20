@@ -94,7 +94,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     }
 
     @Override
-    public AdminOrderDetailResponse findById(UUID id) {
+    public AdminOrderDetailResponse findById(String id) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(id);
         if(orderDetailOptional.isEmpty()){
             throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
@@ -104,7 +104,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(id);
         if(orderDetailOptional.isEmpty()){
             throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");

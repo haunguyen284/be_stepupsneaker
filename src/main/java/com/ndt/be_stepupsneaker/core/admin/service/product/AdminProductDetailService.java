@@ -7,7 +7,7 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import java.util.List;
 import java.util.UUID;
 
-public interface AdminProductDetailService extends BaseService<AdminProductDetailResponse, UUID, AdminProductDetailRequest> {
+public interface AdminProductDetailService extends BaseService<AdminProductDetailResponse, String, AdminProductDetailRequest> {
     List<AdminProductDetailResponse> create(List<AdminProductDetailRequest> productDetailRequests);
     List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests);
 

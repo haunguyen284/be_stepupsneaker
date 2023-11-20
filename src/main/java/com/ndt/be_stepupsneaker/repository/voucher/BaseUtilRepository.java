@@ -11,7 +11,7 @@ import java.util.UUID;
 
 @Transactional
 @NoRepositoryBean
-public interface BaseUtilRepository<T> extends JpaRepository<T, UUID> {
+public interface BaseUtilRepository<T> extends JpaRepository<T, String> {
 
     @Modifying
     @Query("UPDATE #{#entityName} e " +

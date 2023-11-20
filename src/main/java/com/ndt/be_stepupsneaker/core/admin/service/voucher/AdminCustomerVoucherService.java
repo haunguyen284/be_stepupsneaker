@@ -11,8 +11,8 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import java.util.List;
 import java.util.UUID;
 
-public interface AdminCustomerVoucherService extends BaseService<AdminCustomerVoucherResponse, UUID, AdminCustomerVoucherRequest> {
-    List<AdminCustomerVoucherResponse> createCustomerVoucher(List<UUID> voucherIds, List<UUID> customerIds);
+public interface AdminCustomerVoucherService extends BaseService<AdminCustomerVoucherResponse, String, AdminCustomerVoucherRequest> {
+    List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds);
 
-    Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds);
+    Boolean deleteCustomersByVoucherIdAndCustomerIds(String voucherId, List<String> customerIds);
 }

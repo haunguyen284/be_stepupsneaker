@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminProductNoProductDetailResonse {
-    private UUID id;
+    private String id;
 
     private String code;
 

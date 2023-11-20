@@ -40,7 +40,7 @@ public class AdminOrderHistoryController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminOrderHistoryResponse adminOrderHistoryResponse = adminOrderHistoryService.findById(UUID.fromString(id));
+        AdminOrderHistoryResponse adminOrderHistoryResponse = adminOrderHistoryService.findById(id);
 
         return ResponseHelper.getResponse(adminOrderHistoryResponse, HttpStatus.OK);
     }

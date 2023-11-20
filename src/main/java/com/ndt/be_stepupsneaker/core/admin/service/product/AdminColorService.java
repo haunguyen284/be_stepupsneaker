@@ -6,6 +6,6 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 
 import java.util.UUID;
 
-public interface AdminColorService extends BaseService<AdminColorResponse, UUID, AdminColorRequest> {
+public interface AdminColorService extends BaseService<AdminColorResponse, String, AdminColorRequest> {
 
 }

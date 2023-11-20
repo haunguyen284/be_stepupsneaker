@@ -17,33 +17,33 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class AdminProductDetailRequest extends PageableRequest {
-    private UUID id;
+    private String id;
 
     @NotNull(message = "Trade mark must be not null")
-    private UUID tradeMark;
+    private String tradeMark;
 
     @NotNull(message = "style must be not null")
-    private UUID style;
+    private String style;
 
     @NotNull(message = "Size must be not null")
-    private UUID size;
+    private String size;
 
     @NotNull(message = "Product must be not null")
-    private UUID product;
+    private String product;
 
     @NotNull(message = "Material must be not null")
-    private UUID material;
+    private String material;
 
     @NotNull(message = "Color must be not null")
-    private UUID color;
+    private String color;
 
     @NotNull(message = "Brand must be not null")
-    private UUID brand;
+    private String brand;
 
     @NotNull(message = "Sole must be not null")
-    private UUID sole;
+    private String sole;
 
-    private UUID promotion;
+    private String promotion;
 
     private int isInPromotion=1;
 

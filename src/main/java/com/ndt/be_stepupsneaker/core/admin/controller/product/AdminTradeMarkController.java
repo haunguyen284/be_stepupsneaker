@@ -35,7 +35,7 @@ public class AdminTradeMarkController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminTradeMarkResponse adminTradeMarkResponse = adminTradeMarkService.findById(UUID.fromString(id));
+        AdminTradeMarkResponse adminTradeMarkResponse = adminTradeMarkService.findById(id);
 
         return ResponseHelper.getResponse(adminTradeMarkResponse, HttpStatus.OK);
     }
@@ -51,7 +51,7 @@ public class AdminTradeMarkController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminTradeMarkRequest colorDTO, BindingResult bindingResult){
-        colorDTO.setId(UUID.fromString(id));
+        colorDTO.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -61,6 +61,6 @@ public class AdminTradeMarkController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminTradeMarkService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminTradeMarkService.delete(id), HttpStatus.OK);
     }
 }

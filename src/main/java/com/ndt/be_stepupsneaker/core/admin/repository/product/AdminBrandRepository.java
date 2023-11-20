@@ -32,5 +32,5 @@ public interface AdminBrandRepository extends BrandRepository {
     SELECT x FROM Brand x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Brand y WHERE y.id != :id))
     
     """)
-    Optional<Brand> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<Brand> findByName(@Param("id") String id, @Param("name") String name);
 }

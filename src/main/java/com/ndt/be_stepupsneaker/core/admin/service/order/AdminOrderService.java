@@ -7,7 +7,7 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 
 import java.util.UUID;
 
-public interface AdminOrderService extends BaseService<AdminOrderResponse, UUID, AdminOrderRequest> {
+public interface AdminOrderService extends BaseService<AdminOrderResponse, String, AdminOrderRequest> {
 
     AdminDailyStatisticResponse getDailyRevenueBetween(Long start, Long end);
 

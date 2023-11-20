@@ -15,13 +15,13 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminOrderDetailRequest extends PageableRequest {
 
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "Product detail must be not null")
-    private UUID productDetail;
+    private String productDetail;
 
     @NotBlank(message = "Order must be not null")
-    private UUID order;
+    private String order;
 
     @NotNull(message = "Quantity must be not null")
     private int quantity;
@@ -37,20 +37,20 @@ public class AdminOrderDetailRequest extends PageableRequest {
 
 //    Filters
 
-    private UUID tradeMark;
+    private String tradeMark;
 
-    private UUID style;
+    private String style;
 
-    private UUID size;
+    private String size;
 
-    private UUID product;
+    private String product;
 
-    private UUID material;
+    private String material;
 
-    private UUID color;
+    private String color;
 
-    private UUID brand;
+    private String brand;
 
-    private UUID sole;
+    private String sole;
 
 }

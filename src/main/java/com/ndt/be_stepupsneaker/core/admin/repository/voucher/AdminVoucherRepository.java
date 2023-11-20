@@ -35,24 +35,24 @@ public interface AdminVoucherRepository extends VoucherRepository, BaseUtilRepos
                     AND
                     (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
                     AND
-                    (CAST(:customer as java.util.UUID) IS NULL OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = CAST(:customer as java.util.UUID) ))
+                    (:customer IS NULL OR :customer ILIKE '' OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customer))
                     AND
-                    (CAST(:noCustomer as java.util.UUID)  IS NULL OR x.id NOT IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = CAST(:noCustomer as java.util.UUID) ))
+                    (:noCustomer IS NULL OR :noCustomer ILIKE '' OR x.id NOT IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :noCustomer))
                     AND
                     (x.deleted = false)
             """)
     Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable,
                                  @Param("status") VoucherStatus voucherStatus,
                                  @Param("type") VoucherType voucherType,
-                                 @Param("customer") UUID customer,
-                                 @Param("noCustomer") UUID noCustomer);
+                                 @Param("customer") String customer,
+                                 @Param("noCustomer") String noCustomer);
 
 
     @Query("""
             SELECT x FROM Voucher x 
             WHERE x.code = :code AND :code IN (SELECT y.code FROM Voucher y WHERE y.id != :id)
             """)
-    Optional<Voucher> findByCode(@Param("id") UUID id, @Param("code") String code);
+    Optional<Voucher> findByCode(@Param("id") String id, @Param("code") String code);
 
     Optional<Voucher> findByCode(String code);
 

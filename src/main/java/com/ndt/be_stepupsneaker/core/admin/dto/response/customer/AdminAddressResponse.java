@@ -12,7 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminAddressResponse {
-    private UUID id;
+    private String id;
     private String phoneNumber;
     private Boolean isDefault;
     private String districtId;

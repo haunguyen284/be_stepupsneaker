@@ -4,7 +4,6 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherReque
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper

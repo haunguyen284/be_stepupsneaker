@@ -179,7 +179,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    public AdminOrderResponse findById(UUID id) {
+    public AdminOrderResponse findById(String id) {
         Optional<Order> orderOptional = adminOrderRepository.findById(id);
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException("ORDER IS NOT EXIST");
@@ -188,7 +188,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Order> orderOptional = adminOrderRepository.findById(id);
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException("ORDER IS NOT EXIST");

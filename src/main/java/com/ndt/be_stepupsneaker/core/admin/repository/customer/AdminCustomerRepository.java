@@ -37,15 +37,15 @@ public interface AdminCustomerRepository extends CustomerRepository {
         AND
         (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
         AND
-        (CAST(:voucher as java.util.UUID) IS NULL OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = CAST(:voucher as java.util.UUID)))
+        (:voucher IS NULL OR :voucher ILIKE '' OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :voucher))
         AND
-        (CAST(:noVoucher as java.util.UUID) IS NULL OR x.id NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = CAST(:noVoucher as java.util.UUID)))
+        (:noVoucher IS NULL OR :noVoucher ILIKE '' OR x.id NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :noVoucher))
         AND
         (x.deleted = FALSE)
     """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request,
-                                   @Param("voucher") UUID voucher,
-                                   @Param("noVoucher") UUID noVoucher,
+                                   @Param("voucher") String voucher,
+                                   @Param("noVoucher") String noVoucher,
                                    @Param("status") CustomerStatus status, Pageable pageable);
 
     Optional<Customer> findByEmail(String email);
@@ -53,7 +53,7 @@ public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
             SELECT x FROM Customer x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id'))
             """)
-    Optional<Customer> findByEmail(@Param("id") UUID id, @Param("email") String email);
+    Optional<Customer> findByEmail(@Param("id") String id, @Param("email") String email);
 
     @Query(
             value = """

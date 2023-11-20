@@ -35,7 +35,7 @@ public class AdminProductDetailController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminProductDetailResponse adminProductDetailResponse = adminProductDetailService.findById(UUID.fromString(id));
+        AdminProductDetailResponse adminProductDetailResponse = adminProductDetailService.findById(id);
 
         return ResponseHelper.getResponse(adminProductDetailResponse, HttpStatus.OK);
     }
@@ -50,7 +50,7 @@ public class AdminProductDetailController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminProductDetailRequest colorDTO, BindingResult bindingResult){
-        colorDTO.setId(UUID.fromString(id));
+        colorDTO.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -69,6 +69,6 @@ public class AdminProductDetailController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminProductDetailService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminProductDetailService.delete(id), HttpStatus.OK);
     }
 }

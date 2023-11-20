@@ -55,7 +55,6 @@ public class ProductDetail extends PrimaryEntity {
     private Sole sole;
 
     @Column(name = "url_image")
-    @Lob
     private String image;
 
     @Column(name = "price")

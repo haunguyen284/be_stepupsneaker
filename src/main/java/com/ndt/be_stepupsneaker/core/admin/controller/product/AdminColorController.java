@@ -36,7 +36,7 @@ public class AdminColorController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminColorResponse adminBrandResponse = adminColorService.findById(UUID.fromString(id));
+        AdminColorResponse adminBrandResponse = adminColorService.findById(id);
 
         return ResponseHelper.getResponse(adminBrandResponse, HttpStatus.OK);
     }
@@ -52,7 +52,7 @@ public class AdminColorController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminColorRequest colorDTO, BindingResult bindingResult){
-        colorDTO.setId(UUID.fromString(id));
+        colorDTO.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -62,6 +62,6 @@ public class AdminColorController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminColorService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminColorService.delete(id), HttpStatus.OK);
     }
 }

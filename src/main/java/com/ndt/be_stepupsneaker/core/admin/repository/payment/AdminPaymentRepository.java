@@ -17,6 +17,6 @@ public interface AdminPaymentRepository extends PaymentRepository {
     @Query("""
     SELECT x FROM Payment x WHERE (x.transactionCode = :transactionCode AND :transactionCode IN (SELECT y.transactionCode FROM Payment y WHERE y.id != :id))
     """)
-    Optional<Payment> findByTransactionCode(@Param("id") UUID id, @Param("transactionCode") String transactionCode);
+    Optional<Payment> findByTransactionCode(@Param("id") String id, @Param("transactionCode") String transactionCode);
 
 }

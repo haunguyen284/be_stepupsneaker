@@ -65,7 +65,7 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     }
 
     @Override
-    public AdminMaterialResponse findById(UUID id) {
+    public AdminMaterialResponse findById(String id) {
         Optional<Material> MaterialOptional = adminMaterialRepository.findById(id);
         if (MaterialOptional.isEmpty()){
             throw new ResourceNotFoundException("MATERIAL IS NOT EXIST");
@@ -75,7 +75,7 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Material> brandOptional = adminMaterialRepository.findById(id);
         if (brandOptional.isEmpty()){
             throw new ResourceNotFoundException("MATERIAL NOT FOUND");

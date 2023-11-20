@@ -38,7 +38,7 @@ public class AdminStyleController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminStyleResponse adminStyleResponse = adminStyleService.findById(UUID.fromString(id));
+        AdminStyleResponse adminStyleResponse = adminStyleService.findById(id);
 
         return ResponseHelper.getResponse(adminStyleResponse, HttpStatus.OK);
     }
@@ -54,7 +54,7 @@ public class AdminStyleController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminStyleRequest colorDTO, BindingResult bindingResult){
-        colorDTO.setId(UUID.fromString(id));
+        colorDTO.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -64,6 +64,6 @@ public class AdminStyleController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminStyleService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminStyleService.delete(id), HttpStatus.OK);
     }
 }

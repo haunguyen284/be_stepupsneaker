@@ -21,7 +21,7 @@ public class AdminAddressController {
     private AdminAddressService adminAddressService;
 
     @GetMapping("")
-    public Object findAllAddress(@RequestParam(name = "customer",required = false,defaultValue = "") UUID customerId, AdminAddressRequest addressDTO) {
+    public Object findAllAddress(@RequestParam(name = "customer",required = false,defaultValue = "") String customerId, AdminAddressRequest addressDTO) {
         PageableObject<AdminAddressResponse> pageAddress = adminAddressService.findAllAddress(customerId, addressDTO);
         return ResponseHelper.getResponse(pageAddress, HttpStatus.OK);
     }
@@ -36,7 +36,7 @@ public class AdminAddressController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminAddressRequest addressDTO, BindingResult bindingResult) {
-        addressDTO.setId(UUID.fromString(id));
+        addressDTO.setId(id);
         if (bindingResult.hasErrors()) {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
@@ -44,19 +44,19 @@ public class AdminAddressController {
     }
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        return ResponseHelper.getResponse(adminAddressService.findById(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminAddressService.findById(id), HttpStatus.OK);
     }
 
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
-        return ResponseHelper.getResponse(adminAddressService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminAddressService.delete(id), HttpStatus.OK);
     }
 
     @PutMapping("/set-default-address")
     public Object setDefaultAddressByCustomer(
             @RequestParam("address") String addressId) {
-        return ResponseHelper.getResponse(adminAddressService.updateDefaultAddressByCustomer(UUID.fromString(addressId)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminAddressService.updateDefaultAddressByCustomer(addressId), HttpStatus.OK);
     }
 
 }

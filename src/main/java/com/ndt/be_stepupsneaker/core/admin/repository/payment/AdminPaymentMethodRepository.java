@@ -17,6 +17,6 @@ public interface AdminPaymentMethodRepository extends PaymentMethodRepository {
     @Query("""
     SELECT x FROM PaymentMethod x WHERE (x.name = :name AND :name IN (SELECT y.name FROM PaymentMethod y WHERE y.id != :id))
     """)
-    Optional<PaymentMethod> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<PaymentMethod> findByName(@Param("id") String id, @Param("name") String name);
 
 }

@@ -67,7 +67,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public AdminCustomerVoucherResponse findById(UUID id) {
+    public AdminCustomerVoucherResponse findById(String id) {
         Optional<CustomerVoucher> optionalCustomerVoucher = adminCustomerVoucherRepository.findById(id);
         if (optionalCustomerVoucher.isEmpty()) {
             throw new ResourceNotFoundException("CustomerVoucher IS NOT EXIST :" + id);
@@ -76,7 +76,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<CustomerVoucher> optionalCustomerVoucher = adminCustomerVoucherRepository.findById(id);
         if (optionalCustomerVoucher.isEmpty()) {
             throw new ResourceNotFoundException("CustomerVoucher NOT FOUND :" + id);
@@ -88,10 +88,10 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<UUID> voucherIds, List<UUID> customerIds) {
+    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
         List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
-        for (UUID voucherId : voucherIds) {
-            for (UUID customerId : customerIds) {
+        for (String voucherId : voucherIds) {
+            for (String customerId : customerIds) {
                 Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
                 Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
                 if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
@@ -109,7 +109,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public Boolean deleteCustomersByVoucherIdAndCustomerIds(UUID voucherId, List<UUID> customerIds) {
+    public Boolean deleteCustomersByVoucherIdAndCustomerIds(String voucherId, List<String> customerIds) {
         adminCustomerVoucherRepository.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIds);
         return true;
     }

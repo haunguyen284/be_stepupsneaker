@@ -21,15 +21,15 @@ public class AdminPromotionController {
 
     @GetMapping("")
     public Object findAllPromotion(AdminPromotionRequest PromotionRequest,
-                                   @RequestParam(value = "productDetail", required = false, defaultValue = "") UUID productDetail,
-                                   @RequestParam(value = "noProductDetail", required = false, defaultValue = "") UUID noProductDetail) {
+                                   @RequestParam(value = "productDetail", required = false, defaultValue = "") String productDetail,
+                                   @RequestParam(value = "noProductDetail", required = false, defaultValue = "") String noProductDetail) {
         PageableObject<AdminPromotionResponse> listPromotion = adminPromotionService.findAllPromotion(PromotionRequest, productDetail, noProductDetail);
         return ResponseHelper.getResponse(listPromotion, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        AdminPromotionResponse adminPromotionResponse = adminPromotionService.findById(UUID.fromString(id));
+        AdminPromotionResponse adminPromotionResponse = adminPromotionService.findById(id);
         return ResponseHelper.getResponse(adminPromotionResponse, HttpStatus.OK);
     }
 
@@ -42,7 +42,7 @@ public class AdminPromotionController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminPromotionRequest request, BindingResult bindingResult) {
-        request.setId(UUID.fromString(id));
+        request.setId(id);
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminPromotionService.update(request), HttpStatus.OK);
@@ -50,6 +50,6 @@ public class AdminPromotionController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
-        return ResponseHelper.getResponse(adminPromotionService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminPromotionService.delete(id), HttpStatus.OK);
     }
 }

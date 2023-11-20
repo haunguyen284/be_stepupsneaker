@@ -16,6 +16,7 @@ import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductDetailSer
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminProductDetailServiceImpl implements AdminProductDetailService {
+
+    @Autowired
+    private CloudinaryUpload cloudinaryUpload;
+
     @Autowired
     private AdminProductDetailRepository adminProductDetailRepository;
 
@@ -80,6 +85,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public List<AdminProductDetailResponse> create(List<AdminProductDetailRequest> productDetailRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         for (AdminProductDetailRequest adminProductDetailRequest: productDetailRequests) {
+            adminProductDetailRequest.setImage(cloudinaryUpload.upload(adminProductDetailRequest.getImage()));
             Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findByProductProperties(adminProductDetailRequest);
             if (productDetailOptional.isPresent()) {
                 ProductDetail productDetail = productDetailOptional.get();
@@ -96,7 +102,11 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
 
     @Override
     public List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests) {
-        List<ProductDetail> productDetails = productDetailRequests.stream().map(AdminProductDetailMapper.INSTANCE::adminProductDetailRequestToProductDetail).collect(Collectors.toList());
+        List<ProductDetail> productDetails = new ArrayList<>();
+        for (AdminProductDetailRequest adminProductDetailRequest: productDetailRequests) {
+            adminProductDetailRequest.setImage(cloudinaryUpload.upload(adminProductDetailRequest.getImage()));
+            productDetails.add(AdminProductDetailMapper.INSTANCE.adminProductDetailRequestToProductDetail(adminProductDetailRequest));
+        }
         return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());
     }
 
@@ -126,7 +136,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     }
 
     @Override
-    public AdminProductDetailResponse findById(UUID id) {
+    public AdminProductDetailResponse findById(String id) {
         Optional<ProductDetail> ProductDetailOptional = adminProductDetailRepository.findById(id);
         if (ProductDetailOptional.isEmpty()){
             throw new ResourceNotFoundException("PRODUCT DETAIL IS NOT EXIST");
@@ -136,7 +146,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<ProductDetail> brandOptional = adminProductDetailRepository.findById(id);
         if (brandOptional.isEmpty()){
             throw new ResourceNotFoundException("PRODUCT DETAIL NOT FOUND");

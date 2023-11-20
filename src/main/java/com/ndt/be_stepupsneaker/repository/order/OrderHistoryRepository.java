@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository(OrderHistoryRepository.NAME)
-public interface OrderHistoryRepository extends JpaRepository<OrderHistory, UUID> {
+public interface OrderHistoryRepository extends JpaRepository<OrderHistory, String> {
     public static final String NAME = "BaseOrderHistoryRepository";
 }

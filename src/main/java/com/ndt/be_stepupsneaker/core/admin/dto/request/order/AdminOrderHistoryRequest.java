@@ -13,10 +13,10 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminOrderHistoryRequest extends PageableRequest {
 
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "Order must be not null")
-    private UUID order;
+    private String order;
 
     @NotBlank(message = "Action description must be not null")
     private String actionDescription;

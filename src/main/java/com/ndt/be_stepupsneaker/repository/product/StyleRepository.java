@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository(StyleRepository.NAME)
 
-public interface StyleRepository extends JpaRepository<Style, UUID> {
+public interface StyleRepository extends JpaRepository<Style, String> {
     public static final String NAME = "BaseStyleRepository";
 }

@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminEmployeeResponse {
-    private UUID id;
+    private String id;
     private String fullName;
     private AdminRoleRsponse role;
     private String email;

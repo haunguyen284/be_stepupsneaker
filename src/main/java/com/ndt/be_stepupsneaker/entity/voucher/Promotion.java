@@ -36,8 +36,7 @@ public class Promotion extends PrimaryEntity {
     @Column(name = "end_date", nullable = false)
     private Long endDate;
 
-    @Column(name = "url_image", columnDefinition = "TEXT")
-    @Lob
+    @Column(name = "url_image")
     private String image;
 
     @OneToMany(mappedBy = "promotion")

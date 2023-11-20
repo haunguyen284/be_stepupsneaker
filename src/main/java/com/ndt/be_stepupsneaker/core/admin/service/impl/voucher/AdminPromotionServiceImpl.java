@@ -13,6 +13,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class AdminPromotionServiceImpl implements AdminPromotionService {
+    @Autowired
+    private CloudinaryUpload cloudinaryUpload;
+
     private AdminPromotionRepository adminPromotionRepository;
     private PaginationUtil paginationUtil;
     private AdminProductDetailRepository adminProductDetailRepository;
@@ -53,7 +57,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     }
 
     @Override
-    public PageableObject<AdminPromotionResponse> findAllPromotion(AdminPromotionRequest request, UUID productDetail, UUID noProductDetail) {
+    public PageableObject<AdminPromotionResponse> findAllPromotion(AdminPromotionRequest request, String productDetail, String noProductDetail) {
         Pageable pageable = paginationUtil.pageable(request);
         Page<Promotion> promotionPage = adminPromotionRepository.findAllPromotion(request, pageable, request.getStatus(), productDetail, noProductDetail);
         Page<AdminPromotionResponse> responsePage = promotionPage.map(AdminPromotionMapper.INSTANCE::promotionToAdminPromotionResponse);
@@ -67,6 +71,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         if (promotionOptional.isPresent()) {
             throw new ApiException("CODE IS EXIST");
         }
+        request.setImage(cloudinaryUpload.upload(request.getImage()));
         Promotion promotion = adminPromotionRepository.save(AdminPromotionMapper.INSTANCE.adminPromotionRequestToPromotion(request));
         productDetailsInPromotion(promotion, request.getProductDetailIds());
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotion);
@@ -87,7 +92,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         newPromotion.setName(request.getName());
         newPromotion.setCode(request.getCode());
         newPromotion.setStatus(request.getStatus());
-        newPromotion.setImage(request.getImage());
+        newPromotion.setImage(cloudinaryUpload.upload(request.getImage()));
         newPromotion.setEndDate(request.getEndDate());
         newPromotion.setStartDate(request.getStartDate());
         newPromotion.setValue(request.getValue());
@@ -96,7 +101,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     }
 
     @Override
-    public AdminPromotionResponse findById(UUID id) {
+    public AdminPromotionResponse findById(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
             throw new ResourceNotFoundException("PROMOTION IS NOT EXIST :" + id);
@@ -106,7 +111,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
             throw new ResourceNotFoundException("PROMOTION NOT FOUND :" + id);
@@ -117,7 +122,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         return true;
     }
 
-    public void productDetailsInPromotion(Promotion model, List<UUID> productDetailIds) {
+    public void productDetailsInPromotion(Promotion model, List<String> productDetailIds) {
         Promotion promotion = adminPromotionRepository.findById(model.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("PROMOTION NOT FOUND"));
         if (promotion.getPromotionProductDetailList() == null) {

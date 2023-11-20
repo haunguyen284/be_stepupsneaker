@@ -63,7 +63,7 @@ public class AdminRoleServiceImpl implements AdminRoleService {
         return AdminRoleMapper.INSTANCE.roleToAdminRoleResponse(adminRoleRepository.save(role));
     }
     @Override
-    public AdminRoleRsponse findById(UUID id) {
+    public AdminRoleRsponse findById(String id) {
         Optional<Role> optionalRole = adminRoleRepository.findById(id);
         if (optionalRole.isEmpty()){
             throw  new RuntimeException("LOOI");
@@ -73,7 +73,7 @@ public class AdminRoleServiceImpl implements AdminRoleService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Role> optionalRole = adminRoleRepository.findById(id);
         if (optionalRole.isEmpty()){
             throw  new RuntimeException("Role is not exist");

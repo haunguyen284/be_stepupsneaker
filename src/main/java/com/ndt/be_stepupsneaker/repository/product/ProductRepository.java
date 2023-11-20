@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Repository(ProductRepository.NAME)
 
-public interface ProductRepository extends JpaRepository<Product, UUID> {
+public interface ProductRepository extends JpaRepository<Product, String> {
     public static final String NAME = "BaseProductRepository";
 }
 

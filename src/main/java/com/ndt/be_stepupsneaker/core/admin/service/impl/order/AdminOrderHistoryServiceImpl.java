@@ -54,7 +54,7 @@ public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
     }
 
     @Override
-    public AdminOrderHistoryResponse findById(UUID id) {
+    public AdminOrderHistoryResponse findById(String id) {
         Optional<OrderHistory> orderHistory = adminOrderHistoryRepository.findById(id);
         if(orderHistory.isEmpty()){
             throw new RuntimeException("ORDER HISTORY IS NOT EXIST");
@@ -63,7 +63,7 @@ public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         return null;
     }
 }

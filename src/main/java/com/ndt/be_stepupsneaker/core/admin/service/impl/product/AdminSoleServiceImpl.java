@@ -64,7 +64,7 @@ public class AdminSoleServiceImpl implements AdminSoleService {
     }
 
     @Override
-    public AdminSoleResponse findById(UUID id) {
+    public AdminSoleResponse findById(String id) {
         Optional<Sole> soleOptional = adminSoleRepository.findById(id);
         if (soleOptional.isEmpty()){
             throw new ResourceNotFoundException("MATERIAL IS NOT EXIST");
@@ -74,7 +74,7 @@ public class AdminSoleServiceImpl implements AdminSoleService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Sole> soleOptional = adminSoleRepository.findById(id);
         if (soleOptional.isEmpty()){
             throw new ResourceNotFoundException("MATERIAL NOT FOUND");

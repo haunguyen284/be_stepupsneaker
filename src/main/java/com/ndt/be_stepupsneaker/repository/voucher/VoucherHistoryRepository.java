@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository(VoucherHistoryRepository.NAME)
-public interface VoucherHistoryRepository extends JpaRepository<VoucherHistory, UUID> {
+public interface VoucherHistoryRepository extends JpaRepository<VoucherHistory, String> {
     public static final String NAME = "BaseVoucherHistoryRepository";
 
 }

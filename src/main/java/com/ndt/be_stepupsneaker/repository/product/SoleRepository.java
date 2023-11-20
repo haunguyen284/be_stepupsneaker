@@ -9,6 +9,6 @@ import java.util.UUID;
 
 @Repository(SoleRepository.NAME)
 
-public interface SoleRepository extends JpaRepository<Sole, UUID> {
+public interface SoleRepository extends JpaRepository<Sole, String> {
     public static final String NAME = "BaseSoleRepository";
 }

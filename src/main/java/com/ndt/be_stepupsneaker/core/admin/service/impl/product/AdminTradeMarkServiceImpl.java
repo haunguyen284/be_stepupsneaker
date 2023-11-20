@@ -65,7 +65,7 @@ public class AdminTradeMarkServiceImpl implements AdminTradeMarkService {
     }
 
     @Override
-    public AdminTradeMarkResponse findById(UUID id) {
+    public AdminTradeMarkResponse findById(String id) {
         Optional<TradeMark> soleOptional = adminTradeMarkRepository.findById(id);
         if (soleOptional.isEmpty()){
             throw new ResourceNotFoundException("TRADEMARK IS NOT EXIST");
@@ -75,7 +75,7 @@ public class AdminTradeMarkServiceImpl implements AdminTradeMarkService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<TradeMark> soleOptional = adminTradeMarkRepository.findById(id);
         if (soleOptional.isEmpty()){
             throw new ResourceNotFoundException("TRADEMARK NOT FOUND");

@@ -16,15 +16,15 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminOrderRequest extends PageableRequest {
 
-    private UUID id;
+    private String id;
 
-    private UUID customer;
+    private String customer;
 
-    private UUID employee;
+    private String employee;
 
-    private UUID voucher;
+    private String voucher;
 
-    private UUID address;
+    private String address;
 
     private String phoneNumber;
 

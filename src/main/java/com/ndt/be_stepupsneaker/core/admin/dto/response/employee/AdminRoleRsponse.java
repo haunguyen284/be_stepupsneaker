@@ -12,6 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminRoleRsponse {
-    private UUID id;
+    private String id;
     private String name;
 }

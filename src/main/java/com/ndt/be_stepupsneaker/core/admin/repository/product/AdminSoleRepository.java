@@ -34,7 +34,7 @@ public interface AdminSoleRepository extends SoleRepository {
     @Query("""
     SELECT x FROM Sole x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Sole y WHERE y.id != :id))
     """)
-    Optional<Sole> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<Sole> findByName(@Param("id") String id, @Param("name") String name);
 
 
 }

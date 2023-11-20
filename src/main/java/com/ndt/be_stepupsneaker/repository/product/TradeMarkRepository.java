@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository(TradeMarkRepository.NAME)
 
-public interface TradeMarkRepository extends JpaRepository<TradeMark, UUID> {
+public interface TradeMarkRepository extends JpaRepository<TradeMark, String> {
     public static final String NAME = "BaseTradeMarkRepository";
 }

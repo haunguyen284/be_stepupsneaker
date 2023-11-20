@@ -18,5 +18,5 @@ public interface AdminPromotionProductDetailRepository extends PromotionProductD
     @Modifying
     @Transactional
     @Query("DELETE FROM PromotionProductDetail x WHERE x.promotion.id = :promotion AND x.productDetail.id IN :productDetails")
-    void deleteProductDetailsByPromotionId(@Param("promotion") UUID promotion, @Param("productDetails") List<UUID> productDetails);
+    void deleteProductDetailsByPromotionId(@Param("promotion") String promotion, @Param("productDetails") List<String> productDetails);
 }

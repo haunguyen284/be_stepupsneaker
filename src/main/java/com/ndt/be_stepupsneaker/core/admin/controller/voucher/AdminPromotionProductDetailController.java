@@ -31,9 +31,9 @@ public class AdminPromotionProductDetailController {
 
     @DeleteMapping("/{id}")
     public Object deleteProductDetailsByPromotionId(
-            @PathVariable("id") String promotionId,
+            @PathVariable("id") String id,
             @RequestBody AdminPromotionProductDetailRequest request) {
-        Boolean deleted = adminPromotionProductDetailService.deleteProductDetailsByPromotionId(UUID.fromString(promotionId), request.getProductDetails());
+        Boolean deleted = adminPromotionProductDetailService.deleteProductDetailsByPromotionId(id, request.getProductDetails());
         if (deleted) {
             return ResponseHelper.getResponse("ProductDetails DELETED SUCCESSFULLY.", HttpStatus.OK);
         } else {

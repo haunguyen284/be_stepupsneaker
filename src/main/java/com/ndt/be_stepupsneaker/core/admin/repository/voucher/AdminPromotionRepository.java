@@ -26,23 +26,23 @@ public interface AdminPromotionRepository extends PromotionRepository, BaseUtilR
                     AND
                     (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
                     AND
-                    (CAST(:productDetail as java.util.UUID)  IS NULL  OR x.id IN (SELECT y.promotion.id FROM PromotionProductDetail y WHERE y.productDetail.id = CAST(:productDetail as java.util.UUID)))
+                    (:productDetail IS NULL OR :productDetail ILIKE '' OR x.id IN (SELECT y.promotion.id FROM PromotionProductDetail y WHERE y.productDetail.id = :productDetail))
                     AND
-                    (CAST(:noProductDetail as java.util.UUID) IS NULL OR  x.id NOT IN (SELECT y.promotion.id FROM PromotionProductDetail y WHERE y.productDetail.id = CAST(:noProductDetail as java.util.UUID)))
+                    (:noProductDetail IS NULL OR :noProductDetail ILIKE '' OR  x.id NOT IN (SELECT y.promotion.id FROM PromotionProductDetail y WHERE y.productDetail.id = :noProductDetail))
                     AND
                     (x.deleted = false) AND (:status IS NULL OR x.status = :status)
             """)
     Page<Promotion> findAllPromotion(@Param("request") AdminPromotionRequest request, Pageable pageable,
                                      @Param("status") VoucherStatus status,
-                                     @Param("productDetail") UUID productDetail,
-                                     @Param("noProductDetail") UUID noProductDetail);
+                                     @Param("productDetail") String productDetail,
+                                     @Param("noProductDetail") String noProductDetail);
 
 
     @Query("""
             SELECT x FROM Promotion x 
             WHERE x.code = :code AND :code IN (SELECT y.code FROM Promotion y WHERE y.id != :id)
             """)
-    Optional<Promotion> findByCode(@Param("id") UUID id, @Param("code") String code);
+    Optional<Promotion> findByCode(@Param("id") String id, @Param("code") String code);
 
     Optional<Promotion> findByCode(String code);
 

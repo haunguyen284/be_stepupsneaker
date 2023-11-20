@@ -20,7 +20,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AdminOrderNoOrderDetailResponse {
 
-    private UUID id;
+    private String id;
 
     private AdminCustomerResponse customer;
 

@@ -7,8 +7,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 
-
-@Mapper
+@Mapper(componentModel = "spring")
 public interface AdminProductMapper {
 
     AdminProductMapper INSTANCE = Mappers.getMapper( AdminProductMapper.class );
@@ -16,5 +15,6 @@ public interface AdminProductMapper {
     AdminProductResponse productToAdminProductResponse(Product product);
 
     Product adminProductRequestToProduct(AdminProductRequest productRequest);
+
 }
 

@@ -91,7 +91,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     }
 
     @Override
-    public AdminAddressResponse findById(UUID id) {
+    public AdminAddressResponse findById(String id) {
         Optional<Address> addressOptional = adminAddressRepository.findById(id);
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Address Not Found");
@@ -101,7 +101,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Address> addressOptional = adminAddressRepository.findById(id);
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Address Not Found");
@@ -114,7 +114,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     }
 
     @Override
-    public PageableObject<AdminAddressResponse> findAllAddress(UUID customerId, AdminAddressRequest addressRequest) {
+    public PageableObject<AdminAddressResponse> findAllAddress(String customerId, AdminAddressRequest addressRequest) {
         Pageable pageable = paginationUtil.pageable(addressRequest);
         Page<Address> addressPage = adminAddressRepository.findAllAddress(customerId, addressRequest, pageable);
         Page<AdminAddressResponse> adminAddressRespPage = addressPage.map(AdminAddressMapper.INSTANCE::addressToAdminAddressResponse);
@@ -122,7 +122,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     }
 
     @Override
-    public Boolean updateDefaultAddressByCustomer(UUID addressId) {
+    public Boolean updateDefaultAddressByCustomer(String addressId) {
         Optional<Address> newDefaultAddressOptional = adminAddressRepository.findById(addressId);
         if (newDefaultAddressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Address Not Found ! TAO QUÁ MỆT MỎI !");

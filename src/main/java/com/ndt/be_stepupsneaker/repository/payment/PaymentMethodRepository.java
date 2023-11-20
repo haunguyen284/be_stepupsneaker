@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository(PaymentMethodRepository.NAME)
-public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, UUID> {
+public interface PaymentMethodRepository extends JpaRepository<PaymentMethod, String> {
     public static final String NAME = "BasePaymentMethodRepository";
 }

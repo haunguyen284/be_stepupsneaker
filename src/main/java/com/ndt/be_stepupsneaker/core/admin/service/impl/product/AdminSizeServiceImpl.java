@@ -65,7 +65,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     }
 
     @Override
-    public AdminSizeResponse findById(UUID id) {
+    public AdminSizeResponse findById(String id) {
         Optional<Size> optionalSize = adminSizeRepository.findById(id);
         if (optionalSize.isEmpty()) {
             throw new ResourceNotFoundException("SIZE IS NOT EXIST :" + id);
@@ -74,7 +74,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Size> optionalSize = adminSizeRepository.findById(id);
         if (optionalSize.isEmpty()) {
             throw new ResourceNotFoundException("VOUCHER NOT FOUND :" + id);

@@ -23,15 +23,15 @@ public class AdminCustomerController {
 
     @GetMapping("")
     public Object findAllCustomer(AdminCustomerRequest customerDTO,
-                                  @RequestParam(name = "voucher",required = false,defaultValue = "") UUID voucherId,
-                                  @RequestParam(name = "noVoucher",required = false,defaultValue = "") UUID noVoucherId){
+                                  @RequestParam(name = "voucher",required = false,defaultValue = "") String voucherId,
+                                  @RequestParam(name = "noVoucher",required = false,defaultValue = "") String noVoucherId){
         PageableObject<AdminCustomerResponse> listCustomer = adminCustomerService.findAllCustomer(customerDTO,voucherId,noVoucherId);
         return ResponseHelper.getResponse(listCustomer, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public Object findAllCustomerById(@PathVariable("id")String id){
-        AdminCustomerResponse response = adminCustomerService.findById(UUID.fromString(id));
+        AdminCustomerResponse response = adminCustomerService.findById(id);
         return ResponseHelper.getResponse(response, HttpStatus.OK);
     }
 
@@ -46,7 +46,7 @@ public class AdminCustomerController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminCustomerRequest customerDTO, BindingResult bindingResult ){
-        customerDTO.setId(UUID.fromString(id));
+        customerDTO.setId(id);
         if (bindingResult.hasErrors()){
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
@@ -54,6 +54,6 @@ public class AdminCustomerController {
     }
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id){
-        return ResponseHelper.getResponse(adminCustomerService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminCustomerService.delete(id), HttpStatus.OK);
     }
 }

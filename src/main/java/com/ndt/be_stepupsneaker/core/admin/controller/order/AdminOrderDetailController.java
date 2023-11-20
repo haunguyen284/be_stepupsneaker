@@ -42,7 +42,7 @@ public class AdminOrderDetailController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminOrderDetailResponse adminOrderDetailResponse = adminOrderDetailService.findById(UUID.fromString(id));
+        AdminOrderDetailResponse adminOrderDetailResponse = adminOrderDetailService.findById(id);
 
         return ResponseHelper.getResponse(adminOrderDetailResponse, HttpStatus.OK);
     }
@@ -58,7 +58,7 @@ public class AdminOrderDetailController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminOrderDetailRequest adminOrderDetailRequest, BindingResult bindingResult){
-        adminOrderDetailRequest.setId(UUID.fromString(id));
+        adminOrderDetailRequest.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -77,7 +77,7 @@ public class AdminOrderDetailController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminOrderDetailService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminOrderDetailService.delete(id), HttpStatus.OK);
     }
 
 }

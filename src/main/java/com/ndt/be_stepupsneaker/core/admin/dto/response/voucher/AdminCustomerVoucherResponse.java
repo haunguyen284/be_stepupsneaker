@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class AdminCustomerVoucherResponse {
-    private UUID id;
+    private String id;
 //
 //    private AdminVoucherResponse voucher;
 //

@@ -30,7 +30,7 @@ public interface AdminSizeRepository extends SizeRepository {
     @Query("""
             SELECT x FROM Size x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Color y WHERE y.id != :id))
             """)
-    Optional<Size> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<Size> findByName(@Param("id") String id, @Param("name") String name);
 
     Optional<Size> findByName(String name);
 

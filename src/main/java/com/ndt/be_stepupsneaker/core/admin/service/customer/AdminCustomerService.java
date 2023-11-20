@@ -14,9 +14,9 @@ import org.hibernate.validator.internal.engine.validationcontext.BaseBeanValidat
 import java.util.List;
 import java.util.UUID;
 
-public interface AdminCustomerService extends BaseService<AdminCustomerResponse, UUID, AdminCustomerRequest> {
+public interface AdminCustomerService extends BaseService<AdminCustomerResponse, String, AdminCustomerRequest> {
 
-    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,UUID voucher,UUID noVoucher);
+    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,String voucher,String noVoucher);
 
     AdminDailyStatisticResponse getDailyCustomersBetween(Long start, Long end);
 

@@ -64,7 +64,7 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     }
 
     @Override
-    public AdminBrandResponse findById(UUID id) {
+    public AdminBrandResponse findById(String id) {
         Optional<Brand> BrandOptional = adminBrandRepository.findById(id);
         if (BrandOptional.isEmpty()){
             throw new ResourceNotFoundException("BRAND IS NOT EXIST");
@@ -74,7 +74,7 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     }
 
     @Override
-    public Boolean delete(UUID id) {
+    public Boolean delete(String id) {
         Optional<Brand> brandOptional = adminBrandRepository.findById(id);
         if (brandOptional.isEmpty()){
             throw new ResourceNotFoundException("BRAND NOT FOUND");

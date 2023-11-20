@@ -4,7 +4,6 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerReq
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper

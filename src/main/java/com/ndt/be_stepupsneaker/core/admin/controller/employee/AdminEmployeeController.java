@@ -35,7 +35,7 @@ public class AdminEmployeeController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminEmployeeResponse employeeResponse = adminEmployeeService.findById(UUID.fromString(id));
+        AdminEmployeeResponse employeeResponse = adminEmployeeService.findById(id);
 
         return ResponseHelper.getResponse(employeeResponse, HttpStatus.OK);
     }
@@ -50,7 +50,7 @@ public class AdminEmployeeController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminEmployeeRequest employeeRequest, BindingResult  bindingResult){
-        employeeRequest.setId(UUID.fromString(id));
+        employeeRequest.setId(id);
         if (bindingResult.hasErrors()){
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
@@ -59,6 +59,6 @@ public class AdminEmployeeController {
     }
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id){
-        return ResponseHelper.getResponse(adminEmployeeService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminEmployeeService.delete(id), HttpStatus.OK);
     }
 }

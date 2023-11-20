@@ -42,7 +42,7 @@ public class AdminCustomerVoucherController {
     // not use this function
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        AdminCustomerVoucherResponse customerVoucherResponse = adminCustomerVoucherService.findById(UUID.fromString(id));
+        AdminCustomerVoucherResponse customerVoucherResponse = adminCustomerVoucherService.findById(id);
         return ResponseHelper.getResponse(customerVoucherResponse, HttpStatus.OK);
     }
 
@@ -57,8 +57,7 @@ public class AdminCustomerVoucherController {
     public Object deleteCustomersByVoucherAndCustomerIds(
             @PathVariable("id") String voucherId,
             @RequestBody ListCustomerIdAndVoucherIdRequest customerIdRequest) {
-        UUID voucherUUID = UUID.fromString(voucherId);
-        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherUUID, customerIdRequest.getCustomer());
+        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIdRequest.getCustomer());
         if (deleted) {
             return ResponseHelper.getResponse("CUSTOMERS DELETED SUCCESSFULLY.", HttpStatus.OK);
         } else {

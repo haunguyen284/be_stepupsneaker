@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminEmployeeRequest extends PageableRequest {
-    private UUID id;
+    private String id;
     private String fullName;
     private String email;
     private String password;
@@ -23,5 +23,5 @@ public class AdminEmployeeRequest extends PageableRequest {
     private String gender;
     private String phoneNumber;
     private String image;
-    private UUID role;
+    private String role;
 }

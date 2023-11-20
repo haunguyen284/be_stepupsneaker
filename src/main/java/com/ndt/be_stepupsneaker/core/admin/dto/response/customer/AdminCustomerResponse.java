@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminCustomerResponse {
-    private UUID id;
+    private String id;
     private String fullName;
     private String email;
     private Long dateOfBirth;

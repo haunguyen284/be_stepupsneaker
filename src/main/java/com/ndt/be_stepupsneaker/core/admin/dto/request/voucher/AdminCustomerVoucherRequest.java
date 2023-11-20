@@ -15,9 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class AdminCustomerVoucherRequest extends PageableRequest {
-    private UUID id;
+    private String id;
 
-    private UUID voucher;
+    private String voucher;
 
-    private UUID customer;
+    private String customer;
 }

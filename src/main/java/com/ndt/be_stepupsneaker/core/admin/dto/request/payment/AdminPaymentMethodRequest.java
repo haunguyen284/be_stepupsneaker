@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminPaymentMethodRequest extends PageableRequest {
 
-    private UUID id;
+    private String id;
 
     @NotBlank(message = "Name must not be null")
     private String name;

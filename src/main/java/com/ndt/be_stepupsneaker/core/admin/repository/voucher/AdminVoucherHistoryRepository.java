@@ -17,7 +17,7 @@ public interface AdminVoucherHistoryRepository extends VoucherHistoryRepository 
     @Query("""
     SELECT x FROM VoucherHistory x 
     WHERE 
-    (:#{#request.customer} IS NULL OR :#{#request.customer} ILIKE '' OR x.order.customer.id = CAST(:#{#request.customer} AS java.util.UUID)) 
+    (:#{#request.customer} IS NULL OR :#{#request.customer} ILIKE '' OR x.order.customer.id = :#{#request.customer}) 
     AND 
     x.deleted=false
     """)

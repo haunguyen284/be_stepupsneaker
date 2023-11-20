@@ -36,7 +36,7 @@ public class AdminRoleController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminRoleRsponse adminRoleRsponse = adminRoleService.findById(UUID.fromString(id));
+        AdminRoleRsponse adminRoleRsponse = adminRoleService.findById(id);
 
         return ResponseHelper.getResponse(adminRoleRsponse, HttpStatus.OK);
     }
@@ -52,7 +52,7 @@ public class AdminRoleController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminRoleRequest roleRequest, BindingResult bindingResult){
-        roleRequest.setId(UUID.fromString(id));
+        roleRequest.setId(id);
         if (bindingResult.hasErrors()){
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
@@ -62,6 +62,6 @@ public class AdminRoleController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id){
-        return ResponseHelper.getResponse(adminRoleService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminRoleService.delete(id), HttpStatus.OK);
     }
 }

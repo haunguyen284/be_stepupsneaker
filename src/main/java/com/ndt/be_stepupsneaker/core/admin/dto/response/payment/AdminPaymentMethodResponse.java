@@ -11,7 +11,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminPaymentMethodResponse {
 
-    private UUID id;
+    private String id;
 
     private String name;
 

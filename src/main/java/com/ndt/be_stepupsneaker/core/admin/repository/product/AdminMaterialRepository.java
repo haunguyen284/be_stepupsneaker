@@ -33,7 +33,7 @@ public interface AdminMaterialRepository extends MaterialRepository {
     @Query("""
     SELECT x FROM Material x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Material y WHERE y.id != :id))
     """)
-    Optional<Material> findByName(@Param("id")UUID id, @Param("name") String name);
+    Optional<Material> findByName(@Param("id")String id, @Param("name") String name);
 
 
 }

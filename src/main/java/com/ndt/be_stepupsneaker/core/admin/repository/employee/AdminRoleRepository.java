@@ -27,5 +27,5 @@ public interface AdminRoleRepository extends RoleRepository {
     @Query("""
             SELECT x FROM Role x WHERE (x.name = :name AND :name IN ('SELECT y.name FROM Role y WHERE y.id != :id'))
             """)
-    Optional<Role> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<Role> findByName(@Param("id") String id, @Param("name") String name);
 }

@@ -7,8 +7,8 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 
 import java.util.UUID;
 
-public interface AdminAddressService extends BaseService<AdminAddressResponse, UUID, AdminAddressRequest> {
-    PageableObject<AdminAddressResponse> findAllAddress(UUID customerId, AdminAddressRequest addressRequest);
+public interface AdminAddressService extends BaseService<AdminAddressResponse, String, AdminAddressRequest> {
+    PageableObject<AdminAddressResponse> findAllAddress(String customerId, AdminAddressRequest addressRequest);
 
-    Boolean updateDefaultAddressByCustomer(UUID addressId);
+    Boolean updateDefaultAddressByCustomer(String addressId);
 }

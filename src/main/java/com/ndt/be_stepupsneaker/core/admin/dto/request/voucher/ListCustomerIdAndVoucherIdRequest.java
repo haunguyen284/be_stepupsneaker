@@ -10,6 +10,6 @@ import java.util.UUID;
 @Getter
 @Setter
 public class ListCustomerIdAndVoucherIdRequest {
-    private List<UUID> voucher;
-    private List<UUID> customer;
+    private List<String> voucher;
+    private List<String> customer;
 }

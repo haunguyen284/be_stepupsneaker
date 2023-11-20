@@ -18,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 
 public class AdminVoucherRequest extends PageableRequest {
-    private UUID id;
+    private String id;
 
     private String code;
 

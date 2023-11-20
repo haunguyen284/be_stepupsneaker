@@ -14,11 +14,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminPromotionProductDetailRequest extends PageableRequest {
-    private UUID id;
+    private String id;
 
-    private UUID promotion;
+    private String promotion;
 
-    private UUID productDetail;
+    private String productDetail;
 
-    private List<UUID> productDetails;
+    private List<String> productDetails;
 }

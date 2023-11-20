@@ -9,7 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 
 import java.util.UUID;
 
-public interface AdminVoucherService extends BaseService<AdminVoucherResponse, UUID, AdminVoucherRequest> {
-    PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, UUID customerId, UUID noCustomerId);
+public interface AdminVoucherService extends BaseService<AdminVoucherResponse, String, AdminVoucherRequest> {
+    PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, String customerId, String noCustomerId);
 
 }

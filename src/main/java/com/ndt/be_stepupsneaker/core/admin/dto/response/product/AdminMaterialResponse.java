@@ -14,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminMaterialResponse {
-    private UUID id;
+    private String id;
     private String name;
     private ProductPropertiesStatus status;
 }

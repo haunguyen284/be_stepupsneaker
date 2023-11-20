@@ -36,7 +36,7 @@ public class SoleController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
-        AdminSoleResponse adminSoleResponse = adminSoleService.findById(UUID.fromString(id));
+        AdminSoleResponse adminSoleResponse = adminSoleService.findById(id);
 
         return ResponseHelper.getResponse(adminSoleResponse, HttpStatus.OK);
     }
@@ -52,7 +52,7 @@ public class SoleController {
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminSoleRequest colorDTO, BindingResult bindingResult){
-        colorDTO.setId(UUID.fromString(id));
+        colorDTO.setId(id);
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -62,6 +62,6 @@ public class SoleController {
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id")String id){
-        return ResponseHelper.getResponse(adminSoleService.delete(UUID.fromString(id)), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminSoleService.delete(id), HttpStatus.OK);
     }
 }

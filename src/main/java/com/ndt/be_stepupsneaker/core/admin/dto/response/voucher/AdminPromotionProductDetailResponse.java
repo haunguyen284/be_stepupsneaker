@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminPromotionProductDetailResponse {
-    private UUID id;
+    private String id;
     //    private AdminPromotionResponse promotion;
     private AdminProductDetailResponse productDetail;
 }

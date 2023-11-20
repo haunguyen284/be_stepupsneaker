@@ -32,21 +32,21 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND 
-    (:#{#request.tradeMark} IS NULL OR :#{#request.tradeMark} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.tradeMark.id = CAST(:#{#request.tradeMark} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.tradeMark} IS NULL OR :#{#request.tradeMark} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.tradeMark.id = :#{#request.tradeMark} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.style} IS NULL OR :#{#request.style} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.style.id = CAST(:#{#request.style} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.style} IS NULL OR :#{#request.style} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.style.id = :#{#request.style} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.size} IS NULL OR :#{#request.size} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id = CAST(:#{#request.size} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.size} IS NULL OR :#{#request.size} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id = :#{#request.size} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.product} IS NULL OR :#{#request.product} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.product.id = CAST(:#{#request.product} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.product} IS NULL OR :#{#request.product} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.product.id = :#{#request.product} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.material} IS NULL OR :#{#request.material} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id = CAST(:#{#request.material} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.material} IS NULL OR :#{#request.material} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id = :#{#request.material} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.color} IS NULL OR :#{#request.color} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.color.id = CAST(:#{#request.color} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.color} IS NULL OR :#{#request.color} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.color.id = :#{#request.color} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.brand} IS NULL OR :#{#request.brand} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.brand.id = CAST(:#{#request.brand} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.brand} IS NULL OR :#{#request.brand} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.brand.id = :#{#request.brand} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.sole} IS NULL OR :#{#request.sole} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id = CAST(:#{#request.sole} as java.util.UUID) GROUP BY pd.product.id)) 
+    (:#{#request.sole} IS NULL OR :#{#request.sole} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id = :#{#request.sole} GROUP BY pd.product.id)) 
     AND 
     (:#{#request.minQuantity} IS NULL OR :#{#request.minQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) >= CAST(:#{#request.minQuantity} AS int)))
     AND 
@@ -61,12 +61,12 @@ public interface AdminProductRepository extends ProductRepository {
     @Query("""
     SELECT x FROM Product x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Product y WHERE y.id != :id))
     """)
-    Optional<Product> findByName(@Param("id") UUID id, @Param("name") String name);
+    Optional<Product> findByName(@Param("id") String id, @Param("name") String name);
 
     @Query("""
     SELECT x FROM Product x WHERE x.code = :code AND :code IN (SELECT y.code FROM Product y WHERE y.id != :id)
     """)
-    Optional<Product> findByCode(@Param("id")UUID id, @Param("code") String code);
+    Optional<Product> findByCode(@Param("id")String id, @Param("code") String code);
     
     Optional<Product> findByCode(String code);
 
