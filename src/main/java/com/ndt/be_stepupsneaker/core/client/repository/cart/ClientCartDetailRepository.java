@@ -44,4 +44,8 @@ public interface ClientCartDetailRepository extends CartDetailRepository {
     @Modifying
     @Transactional
     void deleteAllByIdIn(List<String> cartDetailIds);
+
+    @Modifying
+    @Transactional
+    void deleteByUpdatedAtBefore(Long date);
 }

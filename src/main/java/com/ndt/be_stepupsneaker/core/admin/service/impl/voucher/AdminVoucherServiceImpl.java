@@ -1,57 +1,49 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
-import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
-import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
+import com.ndt.be_stepupsneaker.infrastructure.scheduled.AutoScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
-import com.ndt.be_stepupsneaker.util.ConvertTime;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminVoucherServiceImpl implements AdminVoucherService {
-    @Autowired
-    private CloudinaryUpload cloudinaryUpload;
+
 
     @Qualifier("adminVoucherRepository")
     private AdminVoucherRepository adminVoucherRepository;
     private PaginationUtil paginationUtil;
     private CustomerVoucherRepository customerVoucherRepository;
-    @Autowired
-    public AdminVoucherServiceImpl(
-            AdminVoucherRepository adminVoucherRepository,
-            CustomerVoucherRepository customerVoucherRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.customerVoucherRepository = customerVoucherRepository;
-        this.paginationUtil = paginationUtil;
-    }
+    private AutoScheduledService autoScheduledService;
+    private CloudinaryUpload cloudinaryUpload;
 
+    @Autowired
+    public AdminVoucherServiceImpl(AdminVoucherRepository adminVoucherRepository,
+                                   PaginationUtil paginationUtil,
+                                   CustomerVoucherRepository customerVoucherRepository,
+                                   AutoScheduledService autoScheduledService,
+                                   CloudinaryUpload cloudinaryUpload) {
+        this.adminVoucherRepository = adminVoucherRepository;
+        this.paginationUtil = paginationUtil;
+        this.customerVoucherRepository = customerVoucherRepository;
+        this.autoScheduledService = autoScheduledService;
+        this.cloudinaryUpload = cloudinaryUpload;
+    }
 
     @Override
     public PageableObject<AdminVoucherResponse> findAllEntity(AdminVoucherRequest voucherRequest) {
@@ -66,7 +58,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         }
         voucherRequest.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         Voucher voucher = adminVoucherRepository.save(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
-
+        adminVoucherRepository.updateStatusBasedOnTime(voucher.getId(), voucher.getStartDate(), voucher.getEndDate());
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(voucher);
     }
 
@@ -121,11 +113,10 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     @Override
     public PageableObject<AdminVoucherResponse> findAllVoucher(AdminVoucherRequest voucherReq, String customerId, String noCustomerId) {
         Pageable pageable = paginationUtil.pageable(voucherReq);
-        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherReq, pageable,voucherReq.getStatus(),voucherReq.getType(),customerId, noCustomerId);
+        Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherReq, pageable, voucherReq.getStatus(), voucherReq.getType(), customerId, noCustomerId);
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);
         return new PageableObject<>(adminVoucherResponsePage);
     }
-
 
 
 }

@@ -11,11 +11,11 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
+import com.ndt.be_stepupsneaker.infrastructure.scheduled.AutoScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,32 +24,31 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class AdminPromotionServiceImpl implements AdminPromotionService {
-    @Autowired
     private CloudinaryUpload cloudinaryUpload;
-
+    private AutoScheduledService autoScheduledService;
     private AdminPromotionRepository adminPromotionRepository;
     private PaginationUtil paginationUtil;
     private AdminProductDetailRepository adminProductDetailRepository;
     private AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
 
     @Autowired
-    public AdminPromotionServiceImpl(
-            AdminPromotionRepository adminPromotionRepository,
-            PaginationUtil paginationUtil,
-            AdminProductDetailRepository adminProductDetailRepository,
-            AdminPromotionProductDetailRepository adminPromotionProductDetailRepository
-    ) {
+    public AdminPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
+                                     AutoScheduledService autoScheduledService,
+                                     AdminPromotionRepository adminPromotionRepository,
+                                     PaginationUtil paginationUtil,
+                                     AdminProductDetailRepository adminProductDetailRepository,
+                                     AdminPromotionProductDetailRepository adminPromotionProductDetailRepository) {
+        this.cloudinaryUpload = cloudinaryUpload;
+        this.autoScheduledService = autoScheduledService;
         this.adminPromotionRepository = adminPromotionRepository;
         this.paginationUtil = paginationUtil;
         this.adminProductDetailRepository = adminProductDetailRepository;
         this.adminPromotionProductDetailRepository = adminPromotionProductDetailRepository;
     }
-
 
     @Override
     public PageableObject<AdminPromotionResponse> findAllEntity(AdminPromotionRequest request) {
@@ -73,6 +72,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         }
         request.setImage(cloudinaryUpload.upload(request.getImage()));
         Promotion promotion = adminPromotionRepository.save(AdminPromotionMapper.INSTANCE.adminPromotionRequestToPromotion(request));
+        adminPromotionRepository.updateStatusBasedOnTime(promotion.getId(), promotion.getStartDate(),promotion.getEndDate());
         productDetailsInPromotion(promotion, request.getProductDetailIds());
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotion);
     }

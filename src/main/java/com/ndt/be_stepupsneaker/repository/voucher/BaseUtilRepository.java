@@ -24,4 +24,16 @@ public interface BaseUtilRepository<T> extends JpaRepository<T, String> {
             "WHERE e.deleted = FALSE")
     @Transactional
     void updateStatusAutomatically(@Param("currentTime") Long currentTime);
+
+    @Modifying
+    @Query("UPDATE #{#entityName} x " +
+            "SET x.status = "+
+            "   CASE " +
+            "       WHEN (:startDate < CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP < :endDate) THEN 0 "+
+            "       ELSE 1 " +
+            "   END "+
+            "WHERE x.id = :id")
+    void updateStatusBasedOnTime(@Param("id") String id,
+                                 @Param("startDate") Long startDate,
+                                 @Param("endDate") Long endDate);
 }

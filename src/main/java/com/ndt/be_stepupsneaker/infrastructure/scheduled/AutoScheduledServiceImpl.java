@@ -1,14 +1,13 @@
-package com.ndt.be_stepupsneaker.infrastructure.AutoScheduled;
+package com.ndt.be_stepupsneaker.infrastructure.scheduled;
 
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.cart.ClientCartDetailRepository;
 import com.ndt.be_stepupsneaker.entity.order.Order;
-import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.util.ConvertTime;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +25,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminPromotionRepository adminPromotionRepository;
-//    private final LocalDateTime currentDateTime = LocalDateTime.now();
+    private final ClientCartDetailRepository clientCartDetailRepository;
 
 
     @Autowired
@@ -36,13 +34,14 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
             AdminOrderRepository adminOrderRepository,
             AdminOrderHistoryRepository adminOrderHistoryRepository,
             AdminOrderDetailRepository adminOrderDetailRepository,
-            AdminPromotionRepository adminPromotionRepository
-    ) {
+            AdminPromotionRepository adminPromotionRepository,
+            ClientCartDetailRepository clientCartDetailRepository) {
         this.adminVoucherRepository = adminVoucherRepository;
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.adminOrderDetailRepository = adminOrderDetailRepository;
         this.adminPromotionRepository = adminPromotionRepository;
+        this.clientCartDetailRepository = clientCartDetailRepository;
     }
 
     @Override
@@ -51,11 +50,19 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
         Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
         adminVoucherRepository.updateStatusAutomatically(currentLongTime);
     }
+
     @Override
     public void updatePromotionStatusAutomatically() {
         LocalDateTime currentDateTime = LocalDateTime.now();
         Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
         adminPromotionRepository.updateStatusAutomatically(currentLongTime);
+    }
+
+    @Override
+    public void deleteCartDetailsByDate() {
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        Long thirtyDaysAgoTimestamp = ConvertTime.convertLocalDateTimeToLong(thirtyDaysAgo);
+        clientCartDetailRepository.deleteByUpdatedAtBefore(thirtyDaysAgoTimestamp);
     }
 
     @Transactional
