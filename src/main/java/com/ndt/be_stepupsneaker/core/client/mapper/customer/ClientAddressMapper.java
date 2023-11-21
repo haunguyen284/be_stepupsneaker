@@ -16,5 +16,5 @@ public interface ClientAddressMapper {
     ClientAddressResponse addressToClientAddressResponse(Address address);
 
     @Mapping(target = "customer.id", source = "customer")
-    Address clientAddressRequestAddress(ClientAddressRequest addressDTO);
+    Address clientAddressRequestToAddress(ClientAddressRequest addressDTO);
 }

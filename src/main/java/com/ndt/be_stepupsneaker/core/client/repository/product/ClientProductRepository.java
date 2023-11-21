@@ -1,6 +1,6 @@
-package com.ndt.be_stepupsneaker.core.admin.repository.product;
+package com.ndt.be_stepupsneaker.core.client.repository.product;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminProductRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.request.product.ClientProductRequest;
 import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import com.ndt.be_stepupsneaker.repository.product.ProductRepository;
@@ -12,13 +12,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
-import java.util.UUID;
-
 
 
 @Repository
 @Transactional
-public interface AdminProductRepository extends ProductRepository {
+public interface ClientProductRepository extends ProductRepository {
     @Query("""
     SELECT x FROM Product x 
     WHERE (:#{#request.name} IS NULL OR :#{#request.name} ILIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.name}, '%')) 
@@ -54,7 +52,7 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     x.deleted=false 
     """)
-    Page<Product> findAllProduct(@Param("request") AdminProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
+    Page<Product> findAllProduct(@Param("request") ClientProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
     Optional<Product> findByName(String name);
 
