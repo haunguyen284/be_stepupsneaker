@@ -121,11 +121,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         newOrder.setFullName(orderRequest.getFullName());
         newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
         newOrder.setNote(orderRequest.getNote());
-        newOrder.setExpectedDeliveryDate(orderRequest.getExpectedDeliveryDate());
-        newOrder.setConfirmationDate(orderRequest.getConfirmationDate());
-        newOrder.setReceivedDate(orderRequest.getReceivedDate());
-        newOrder.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
-        newOrder.setStatus(orderRequest.getStatus());
         setOrderDetails(newOrder, orderRequest);
         float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder);
         applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
