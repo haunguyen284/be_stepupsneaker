@@ -28,4 +28,6 @@ public class ClientProductResponse {
 
     private Set<ClientProductDetailResponse> productDetails;
 
+    private Long createdAt;
+
 }
