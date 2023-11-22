@@ -23,6 +23,7 @@ public class ClientOrderResponse {
 
     private ClientCustomerResponse customer;
 
+
     private ClientVoucherResponse voucher;
 
     private String phoneNumber;
