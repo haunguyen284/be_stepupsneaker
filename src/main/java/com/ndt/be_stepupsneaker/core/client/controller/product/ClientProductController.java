@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.controller.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminProductRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductService;
 import com.ndt.be_stepupsneaker.core.client.dto.request.product.ClientProductRequest;
@@ -36,6 +37,13 @@ public class ClientProductController {
     public Object findAllProduct(ClientProductRequest request){
         PageableObject<ClientProductResponse> listProduct = clientProductService.findAllEntity(request);
         return ResponseHelper.getResponse(listProduct, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id")String id){
+        ClientProductResponse clientProductResponse = clientProductService.findById(id);
+
+        return ResponseHelper.getResponse(clientProductResponse, HttpStatus.OK);
     }
 
 }
