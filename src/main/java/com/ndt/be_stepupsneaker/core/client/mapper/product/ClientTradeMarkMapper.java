@@ -10,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 public interface ClientTradeMarkMapper {
     ClientTradeMarkMapper INSTANCE = Mappers.getMapper( ClientTradeMarkMapper.class );
 
-    ClientTradeMarkResponse tradeMarkToClientTradeMarkResponse(TradeMark tradeMark);
+    ClientTradeMarkResponse colorToClientTradeMarkResponse(TradeMark tradeMark);
 
     TradeMark clientTradeMarkRequestToTradeMark(ClientTradeMarkRequest request);
 }
