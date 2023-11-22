@@ -22,4 +22,8 @@ public class ClientAddressRequest extends PageableRequest {
     private String wardName;
     private String more;
     private String customer;
+    private int height;
+    private int length;
+    private int weight;
+    private int width;
 }

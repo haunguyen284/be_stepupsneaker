@@ -207,7 +207,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderHistory.setActionDescription("Order is deleted");
             adminOrderHistoryRepository.save(orderHistory);
         }
-
         return true;
     }
 

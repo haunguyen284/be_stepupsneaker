@@ -50,7 +50,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
         }
         List<Address> addressList = clientAddressRepository.findByCustomer(customerOptional.get());
         if (addressList.size() >= 3) {
-            throw new ResourceNotFoundException("Customers can only create a maximum of 3 addresses ! LEW LEW");
+            throw new ResourceNotFoundException("Customers can only create a maximum of 3 addresses !");
         }
         boolean hasAddress = clientAddressRepository.existsByCustomer(customerOptional.get());
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(addressDTO);

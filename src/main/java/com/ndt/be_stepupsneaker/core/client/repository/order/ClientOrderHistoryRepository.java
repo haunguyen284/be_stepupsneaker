@@ -21,13 +21,11 @@ public interface ClientOrderHistoryRepository extends OrderHistoryRepository {
 
     @Query("""
     SELECT oh FROM OrderHistory oh
-    WHERE (
-    (:#{#request.order} IS NULL OR oh.order.id = :#{#request.order}) 
+    WHERE oh.order.id = :#{#request.order} 
     AND
     oh.deleted=false 
-    ) 
     """)
-    Page<OrderHistory> findAllOrderHistory(@Param("request") ClientOrderHistoryRequest request, Pageable pageable);
+    Page<OrderHistory> findAllOrderHistory(@Param("request")ClientOrderHistoryRequest request, Pageable pageable);
 
     @Modifying
     @Transactional
