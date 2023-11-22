@@ -171,9 +171,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     public float calculateTotalPriceOrderDetailOfOrder(Order order) {
-        return order.getOrderDetails().stream()
-                .map(OrderDetail::getTotalPrice)
-                .reduce(0.0f, Float::sum);
+        if (order.getOrderDetails() != null) {
+            return order.getOrderDetails().stream()
+                    .map(OrderDetail::getTotalPrice)
+                    .reduce(0.0f, Float::sum);
+        }
+        return 0;
     }
 
     private void setOrderDetails(Order order, ClientOrderRequest orderRequest) {
