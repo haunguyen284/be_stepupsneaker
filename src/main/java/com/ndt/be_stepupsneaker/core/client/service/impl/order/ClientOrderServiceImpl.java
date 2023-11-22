@@ -92,7 +92,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setType(OrderType.ONLINE);
         orderSave.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(clientOrderRequest.getAddressShipping());
-
         if (clientOrderRequest.getAddressShipping().getCustomer() == null) {
             address.setCustomer(null);
         }

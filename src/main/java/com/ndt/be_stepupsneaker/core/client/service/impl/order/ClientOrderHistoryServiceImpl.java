@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderHistoryR
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderHistoryService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,10 +34,12 @@ public class ClientOrderHistoryServiceImpl implements ClientOrderHistoryService 
     @Override
     public PageableObject<ClientOrderHistoryResponse> findAllEntity(ClientOrderHistoryRequest orderHistoryRequest) {
         Pageable pageable = paginationUtil.pageable(orderHistoryRequest);
+        if (orderHistoryRequest.getOrder() == null) {
+            throw new ResourceNotFoundException("Order Not Found !");
+        }
         Page<OrderHistory> resp = clientOrderHistoryRepository.findAllOrderHistory(orderHistoryRequest, pageable);
-
-        Page<ClientOrderHistoryResponse> ClientOrderHistoryResponses = resp.map(ClientOrderHistoryMapper.INSTANCE::orderHistoryToClientOrderHistoryResponse);
-        return new PageableObject<>(ClientOrderHistoryResponses);
+        Page<ClientOrderHistoryResponse> clientOrderHistoryResponses = resp.map(ClientOrderHistoryMapper.INSTANCE::orderHistoryToClientOrderHistoryResponse);
+        return new PageableObject<>(clientOrderHistoryResponses);
     }
 
     @Override
@@ -62,4 +65,5 @@ public class ClientOrderHistoryServiceImpl implements ClientOrderHistoryService 
     public Boolean delete(String id) {
         return null;
     }
+
 }

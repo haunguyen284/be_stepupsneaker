@@ -38,7 +38,6 @@ public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
     public PageableObject<AdminOrderHistoryResponse> findAllEntity(AdminOrderHistoryRequest orderHistoryRequest) {
         Pageable pageable = paginationUtil.pageable(orderHistoryRequest);
         Page<OrderHistory> resp = adminOrderHistoryRepository.findAllOrderHistory(orderHistoryRequest, pageable);
-
         Page<AdminOrderHistoryResponse> adminOrderHistoryResponses = resp.map(AdminOrderHistoryMapper.INSTANCE::orderHistoryToAdminOrderHistoryResponse);
         return new PageableObject<>(adminOrderHistoryResponses);
     }
