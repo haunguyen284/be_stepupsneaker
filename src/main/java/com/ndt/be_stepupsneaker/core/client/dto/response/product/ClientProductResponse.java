@@ -24,6 +24,8 @@ public class ClientProductResponse {
 
     private ProductStatus status;
 
+    private Long saleCount;
+
     private Set<ClientProductDetailResponse> productDetails;
 
 }

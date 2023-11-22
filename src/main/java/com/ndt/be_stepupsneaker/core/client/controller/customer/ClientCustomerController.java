@@ -3,7 +3,6 @@ package com.ndt.be_stepupsneaker.core.client.controller.customer;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService;
-import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/client/customers")
-public class AdminCustomerController {
+public class ClientCustomerController {
     @Autowired
     private AdminCustomerService adminCustomerService;
 

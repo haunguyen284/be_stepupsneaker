@@ -1,9 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.controller.customer;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminAddressService;
-import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/client/addresses")
-public class AdminAddressController {
+public class ClientAddressController {
 
     private AdminAddressService adminAddressService;
 
     @Autowired
-    public AdminAddressController(AdminAddressService adminAddressService) {
+    public ClientAddressController(AdminAddressService adminAddressService) {
         this.adminAddressService = adminAddressService;
     }
 
