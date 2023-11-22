@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClientProductServiceImpl implements ClientProductService {
@@ -42,6 +43,16 @@ public class ClientProductServiceImpl implements ClientProductService {
         }
         Page<ClientProductResponse> clientProductResponsePage = new PageImpl<>(clientProductResponses, pageable, resp.getTotalElements());
         return new PageableObject<>(clientProductResponsePage);
+    }
+
+    @Override
+    public ClientProductResponse findById(String id) {
+        Optional<Product> productOptional = clientProductRepository.findById(id);
+        if (productOptional.isEmpty()){
+            throw new RuntimeException("NOT FOUND");
+        }
+
+        return ClientProductMapper.INSTANCE.productToClientProductResponse(productOptional.get());
     }
 
 }
