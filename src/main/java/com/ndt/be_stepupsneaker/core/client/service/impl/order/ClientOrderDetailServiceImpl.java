@@ -8,7 +8,6 @@ import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDeta
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderDetailService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,18 +77,8 @@ public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
 
     @Override
     public List<ClientOrderDetailResponse> create(List<ClientOrderDetailRequest> orderDetailRequests) {
-        List<OrderDetail> orderDetails = orderDetailRequests.stream().map(request -> {
-            ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail()).orElse(null); // Hàm này cần được xác định trong service của bạn
-            float totalPrice = request.getQuantity() * productDetail.getPrice();
-            OrderDetail orderDetail = ClientOrderDetailMapper.INSTANCE.clientOrderDetailRequestToOrderDetail(request);
-            orderDetail.setPrice(productDetail.getPrice());
-            orderDetail.setTotalPrice(totalPrice);
-            return orderDetail;
-        }).collect(Collectors.toList());
-        return clientOrderDetailRepository.saveAll(orderDetails)
-                .stream()
-                .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
-                .collect(Collectors.toList());
+        List<OrderDetail> orderDetails = orderDetailRequests.stream().map(ClientOrderDetailMapper.INSTANCE::clientOrderDetailRequestToOrderDetail).collect(Collectors.toList());
+        return clientOrderDetailRepository.saveAll(orderDetails).stream().map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse).collect(Collectors.toList());
     }
 
     @Override

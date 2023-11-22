@@ -20,7 +20,6 @@ public class ClientOrderController {
     public ClientOrderController(ClientOrderService clientOrderService) {
         this.clientOrderService = clientOrderService;
     }
-
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
         ClientOrderResponse ClientOrderResponse = clientOrderService.findById(id);

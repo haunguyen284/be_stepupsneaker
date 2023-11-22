@@ -27,10 +27,10 @@ public class ClientOrderDetailRequest extends PageableRequest {
     @NotNull(message = "Price must be not null")
     private float price;
 
-    //    @NotNull(message = "Total price must be not null")
+    @NotNull(message = "Total price must be not null")
     private float totalPrice;
 
-    //    @NotNull(message = "Status must be not null")
+    @NotNull(message = "Status must be not null")
     private OrderStatus status;
 
 //    Filters

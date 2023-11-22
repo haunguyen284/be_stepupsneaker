@@ -16,7 +16,7 @@ public interface ClientOrderMapper {
     @Mapping(target = "customer.id", source = "customer")
     @Mapping(target = "employee.id", source = "employee")
     @Mapping(target = "voucher.id", source = "voucher")
-    @Mapping(target = "address.id", source = "address")
+//    @Mapping(target = "address.id", source = "address")
     Order clientOrderRequestToOrder(ClientOrderRequest orderRequest);
 
 }
