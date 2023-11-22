@@ -13,6 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientProductResponse {
+
     private String id;
     private String code;
 
