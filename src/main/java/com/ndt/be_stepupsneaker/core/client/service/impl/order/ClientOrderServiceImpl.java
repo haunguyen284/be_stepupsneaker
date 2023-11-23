@@ -105,7 +105,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         // create orderDetail
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
-            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId()).orElse(null);
+            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
+                    .orElseThrow(()->new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
