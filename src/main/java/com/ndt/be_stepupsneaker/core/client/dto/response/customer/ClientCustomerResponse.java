@@ -22,6 +22,6 @@ public class ClientCustomerResponse {
     private CustomerStatus status;
     private String gender;
     private String image;
-    List<ClientAddressResponse> addressList;
-    List<AdminCustomerVoucherResponse> customerVoucherList;
+    List<ClientAddressNoCustomerResponse> addressList;
+//    List<AdminCustomerVoucherResponse> customerVoucherList;
 }
