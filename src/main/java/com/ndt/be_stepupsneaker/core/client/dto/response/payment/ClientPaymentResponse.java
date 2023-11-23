@@ -23,4 +23,6 @@ public class ClientPaymentResponse {
 
     private String description;
 
+    private Long createdAt;
+
 }

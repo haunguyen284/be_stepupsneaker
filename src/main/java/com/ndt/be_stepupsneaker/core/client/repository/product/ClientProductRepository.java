@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.core.client.repository.product;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminProductRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.product.ClientProductRequest;
 import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
@@ -19,10 +18,7 @@ import java.util.Optional;
 @Transactional
 public interface ClientProductRepository extends ProductRepository {
     @Query("""
-    SELECT x, COALESCE(SUM(od.quantity), 0) AS saleCount 
-    FROM Product x 
-    LEFT JOIN x.productDetails pd 
-    LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id 
+    SELECT x FROM Product x 
     WHERE (:#{#request.name} IS NULL OR :#{#request.name} ILIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.name}, '%')) 
     AND
     (:#{#request.code} IS NULL OR :#{#request.code} ILIKE '' OR x.code ILIKE  CONCAT('%', :#{#request.code}, '%')) 
@@ -30,13 +26,17 @@ public interface ClientProductRepository extends ProductRepository {
     (
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.code ILIKE  CONCAT('%', :#{#request.q}, '%')) OR 
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
-    ) 
+    )
+    AND 
+    ((:status IS NULL) OR (x.status = :status)) 
     AND 
     (:#{#request.tradeMark} IS NULL OR :#{#request.tradeMark} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.tradeMark.id = :#{#request.tradeMark} GROUP BY pd.product.id)) 
     AND 
     (:#{#request.style} IS NULL OR :#{#request.style} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.style.id = :#{#request.style} GROUP BY pd.product.id)) 
     AND 
     (:#{#request.size} IS NULL OR :#{#request.size} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id = :#{#request.size} GROUP BY pd.product.id)) 
+    AND 
+    (:#{#request.product} IS NULL OR :#{#request.product} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.product.id = :#{#request.product} GROUP BY pd.product.id)) 
     AND 
     (:#{#request.material} IS NULL OR :#{#request.material} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id = :#{#request.material} GROUP BY pd.product.id)) 
     AND 
@@ -50,13 +50,23 @@ public interface ClientProductRepository extends ProductRepository {
     AND 
     (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.maxQuantity} AS int))) 
     AND 
-    x.status=0 
-    AND 
     x.deleted=false 
-    GROUP BY x.id
     """)
-    Page<Object[]> findAllProduct(@Param("request") ClientProductRequest request, Pageable pageable);
+    Page<Product> findAllProduct(@Param("request") ClientProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
+    Optional<Product> findByName(String name);
+
+    @Query("""
+    SELECT x FROM Product x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Product y WHERE y.id != :id))
+    """)
+    Optional<Product> findByName(@Param("id") String id, @Param("name") String name);
+
+    @Query("""
+    SELECT x FROM Product x WHERE x.code = :code AND :code IN (SELECT y.code FROM Product y WHERE y.id != :id)
+    """)
+    Optional<Product> findByCode(@Param("id")String id, @Param("code") String code);
+    
+    Optional<Product> findByCode(String code);
 
 
 }

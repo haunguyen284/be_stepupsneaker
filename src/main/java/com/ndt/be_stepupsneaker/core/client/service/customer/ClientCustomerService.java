@@ -9,6 +9,8 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 
 public interface ClientCustomerService extends BaseService<ClientCustomerResponse, String, ClientCustomerRequest> {
+
     PageableObject<ClientCustomerResponse> findAllCustomer(ClientCustomerRequest customerRequest,String voucher,String noVoucher);
+
 
 }

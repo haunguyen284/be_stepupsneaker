@@ -10,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 public interface ClientStyleMapper {
     ClientStyleMapper INSTANCE = Mappers.getMapper( ClientStyleMapper.class );
 
-    ClientStyleResponse styleToClientStyleResponse(Style style);
+    ClientStyleResponse colorToClientStyleResponse(Style style);
 
     Style clientStyleRequestToStyle(ClientStyleRequest clientStyleRequest);
 }

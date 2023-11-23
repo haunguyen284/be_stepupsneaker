@@ -12,7 +12,7 @@ public interface ClientSizeMapper {
 
     ClientSizeMapper INSTANCE = Mappers.getMapper( ClientSizeMapper.class );
 
-    ClientSizeResponse sizeToClientSizeResponse(Size size);
+    ClientSizeResponse sizeToAdminSizeResponse(Size size);
 
     Size clientSizeRequestToSize(ClientSizeRequest clientSizeRequest);
 }

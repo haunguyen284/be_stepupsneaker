@@ -7,9 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ClientShippingResponse {
-    @JsonProperty("success")
-    private boolean success;
+    @JsonProperty("code")
+    private int code;
 
-    @JsonProperty("service_fee")
-    private float fee;
+    @JsonProperty("message")
+    private String message;
+
+    @JsonProperty("data")
+    private ClientShippingDataResponse data;
 }

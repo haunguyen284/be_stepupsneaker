@@ -6,6 +6,7 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequ
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientShippingRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientShippingDataResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientShippingResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
@@ -20,7 +21,6 @@ import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepo
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
@@ -31,12 +31,17 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -57,6 +62,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final PaginationUtil paginationUtil;
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientOrderDetailRepository clientOrderDetailRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ClientOrderServiceImpl.class);
+
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
@@ -92,7 +99,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setType(OrderType.ONLINE);
         orderSave.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(clientOrderRequest.getAddressShipping());
-
         if (clientOrderRequest.getAddressShipping().getCustomer() == null) {
             address.setCustomer(null);
         }
@@ -101,12 +107,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         setOrderDetails(orderSave, clientOrderRequest);
         Order orderResult = clientOrderRepository.save(orderSave);
         // shipping
-//        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
-//        orderResult.setShippingMoney(shippingFee);
+        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
+        orderResult.setShippingMoney(shippingFee);
         // create orderDetail
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
-            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId()).orElse(null);
+            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
@@ -146,33 +153,40 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     @Override
     public ClientOrderResponse update(ClientOrderRequest orderRequest) {
-//
-//        Optional<Order> orderOptional = clientOrderRepository.findById(orderRequest.getId());
-//        if (orderOptional.isEmpty()) {
-//            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
-//        }
-//        Order newOrder = orderOptional.get();
-//        if (newOrder.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && newOrder.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-//            throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
-//        }
-//        newOrder.setFullName(orderRequest.getFullName());
-//        newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
-//        newOrder.setNote(orderRequest.getNote());
-//        setOrderDetails(newOrder, orderRequest);
-//        float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder);
-//        applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
-//        Order order = clientOrderRepository.save(newOrder);
-//        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
-//        if (existingOrderHistoryOptional.isEmpty()) {
-//            OrderHistory orderHistory = new OrderHistory();
-//            orderHistory.setOrder(order);
-//            orderHistory.setActionStatus(order.getStatus());
-//            orderHistory.setNote(orderRequest.getOrderHistoryNote());
-//            orderHistory.setActionDescription(order.getStatus().action_description);
-//            clientOrderHistoryRepository.save(orderHistory);
-//        }
-//        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
-        return null;
+
+        Optional<Order> orderOptional = clientOrderRepository.findById(orderRequest.getId());
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
+        }
+        Order newOrder = orderOptional.get();
+        if (newOrder.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && newOrder.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+            throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
+        }
+        Address address = clientAddressRepository.findById(newOrder.getAddress().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Address Not Found !"));
+        if (address.getCustomer() == null) {
+            address.setCustomer(null);
+        }
+        float shippingFee = calculateShippingFee(orderRequest.getAddressShipping());
+        newOrder.setShippingMoney(shippingFee);
+        newOrder.setType(OrderType.ONLINE);
+        newOrder.setFullName(orderRequest.getFullName());
+        newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
+        newOrder.setNote(orderRequest.getNote());
+        setOrderDetails(newOrder, orderRequest);
+        float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder.getOrderDetails());
+        applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
+        Order order = clientOrderRepository.save(newOrder);
+        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
+        if (existingOrderHistoryOptional.isEmpty()) {
+            OrderHistory orderHistory = new OrderHistory();
+            orderHistory.setOrder(order);
+            orderHistory.setActionStatus(order.getStatus());
+            orderHistory.setNote(orderRequest.getOrderHistoryNote());
+            orderHistory.setActionDescription(order.getStatus().action_description);
+            clientOrderHistoryRepository.save(orderHistory);
+        }
+        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
     }
 
     @Override
@@ -197,7 +211,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         } else {
             order.setDeleted(true);
             clientOrderRepository.save(order);
-
             OrderHistory orderHistory = new OrderHistory();
             orderHistory.setOrder(order);
             orderHistory.setNote(order.getNote());
@@ -237,27 +250,43 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
     }
 
-    private float calculateShippingFee(ClientAddressRequest addressRequest) {
-        RestTemplate restTemplate = new RestTemplate();
+    public float calculateShippingFee(ClientAddressRequest addressRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("token", EntityProperties.VITE_GHN_USER_TOKEN);
-//        headers.set("shop_id",VITE_GHN_SHOP_ID);
+        headers.set("shop_id", EntityProperties.VITE_GHN_SHOP_ID);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         ClientShippingRequest shippingRequest = createShippingRequest(addressRequest);
+        String apiUrl = EntityProperties.GHN_API_FEE_URL;
         HttpEntity<ClientShippingRequest> requestEntity = new HttpEntity<>(shippingRequest, headers);
-        ResponseEntity<ClientShippingResponse> responseEntity = restTemplate.exchange(
-                EntityProperties.GHN_API_FEE_URL,
-                HttpMethod.POST,
-                requestEntity,
-                ClientShippingResponse.class
-        );
-        System.out.println("========================" + responseEntity.getBody().getFee());
-        if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
-            ClientShippingResponse response = responseEntity.getBody();
-            if (response != null && response.isSuccess()) {
-                return response.getFee();
+        ResponseEntity<ClientShippingResponse> responseEntity;
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            responseEntity = restTemplate.exchange(
+                    apiUrl,
+                    HttpMethod.POST,
+                    requestEntity,
+                    ClientShippingResponse.class
+            );
+            if (responseEntity != null && responseEntity.getStatusCode().is2xxSuccessful()) {
+                ClientShippingResponse response = responseEntity.getBody();
+                if (response != null) {
+                    ClientShippingDataResponse data = response.getData();
+                    return data.getService_fee();
+                } else {
+                    System.out.println("API Success Response but Failed: " + response.getData());
+                }
+            } else {
+                System.out.println("API Call Failed with Status Code: " + responseEntity.getStatusCode());
+                System.out.println("API Response: " + responseEntity.getBody());
             }
+        } catch (HttpClientErrorException e) {
+            System.out.println("Client Error: " + e.getMessage());
+        } catch (HttpServerErrorException e) {
+            System.out.println("Server Error: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
-        return 0;
+        return 0.0f;
     }
 
     private ClientShippingRequest createShippingRequest(ClientAddressRequest addressRequest) {
@@ -266,11 +295,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         shippingRequest.setToDistrictId(Integer.parseInt(addressRequest.getDistrictId()));
         shippingRequest.setToWardCode(addressRequest.getWardCode());
         shippingRequest.setServiceId(53321);
-//        shippingRequest.setShopId(Integer.parseInt(VITE_GHN_SHOP_ID));
-        shippingRequest.setHeight(addressRequest.getHeight());
-        shippingRequest.setLength(addressRequest.getLength());
-        shippingRequest.setWeight(addressRequest.getWeight());
-        shippingRequest.setWidth(addressRequest.getWidth());
+        shippingRequest.setHeight(15);
+        shippingRequest.setLength(15);
+        shippingRequest.setWeight(500);
+        shippingRequest.setWidth(15);
         return shippingRequest;
     }
 
