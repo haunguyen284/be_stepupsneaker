@@ -36,6 +36,4 @@ public class ClientShippingRequest {
     @JsonProperty("width")
     private int width;
 
-
-
 }
