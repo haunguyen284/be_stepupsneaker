@@ -22,7 +22,7 @@ public class VNPayConfig {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
-    public static String vnp_Returnurl = "http://localhost:5173/success";
+    public static String vnp_Returnurl = "http://localhost:5173/checkout";
 
     public static String vnp_TmnCode = "6ATWTPCI";
 
