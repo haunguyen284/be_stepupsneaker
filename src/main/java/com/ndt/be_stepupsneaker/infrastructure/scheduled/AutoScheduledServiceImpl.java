@@ -74,7 +74,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
     public void deleteOrderAutomaticallyByTypeAndStatus() {
         long currentMillis = Instant.now().toEpochMilli();
         // Calculate the time 30 minutes ago in milliseconds
-        long thirtyMinutesAgo = currentMillis - (1 * 60 * 1000); // 30 minutes * 60 seconds/minute * 1000 milliseconds/second
+        long thirtyMinutesAgo = currentMillis - (30 * 60 * 1000); // 30 minutes * 60 seconds/minute * 1000 milliseconds/second
 
         List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBeforeAndType(OrderStatus.PENDING, thirtyMinutesAgo, OrderType.ONLINE);
 
