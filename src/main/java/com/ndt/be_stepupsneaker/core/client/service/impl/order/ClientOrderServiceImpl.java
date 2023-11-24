@@ -23,6 +23,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepo
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.cart.CartDetail;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
@@ -48,6 +49,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,33 +110,28 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public Object create(ClientOrderRequest clientOrderRequest) {
         Order orderSave = ClientOrderMapper.INSTANCE.clientOrderRequestToOrder(clientOrderRequest);
         orderSave.setType(OrderType.ONLINE);
-        orderSave.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
+        orderSave.setStatus(clientOrderRequest.getPaymentMethod().equals("Cast") ? OrderStatus.WAIT_FOR_CONFIRMATION : OrderStatus.PENDING);
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(clientOrderRequest.getAddressShipping());
         if (clientOrderRequest.getAddressShipping().getCustomer() == null) {
             address.setCustomer(null);
         }
-        // shipping
-        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
-        if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
-            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
-            String vnpayUrl = vnPayService.createOrder((int) totalVnPay, clientOrderRequest.getNote());
-            return vnpayUrl;
-        }
-        if (clientOrderRequest.getTransactionInfo().getPaymentStatus() != 0) {
-            throw new ApiException("Transaction failed!");
-        }
         Address newAddress = clientAddressRepository.save(address);
         orderSave.setAddress(newAddress);
+        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());;
         orderSave.setShippingMoney(shippingFee);
         setOrderDetails(orderSave, clientOrderRequest);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
-        Order orderResult = clientOrderRepository.save(orderSave);
-        createOrderDetails(orderResult, clientOrderRequest);
-        clientOrderRepository.save(orderResult);
-        createPayment(orderResult, clientOrderRequest);
-        createVoucherHistory(orderResult);
-        createOrderHistory(orderResult);
-        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderResult);
+        Order newOrder = clientOrderRepository.save(orderSave);
+        if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
+            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
+            String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
+            return vnpayUrl;
+        }
+        createPayment(newOrder, clientOrderRequest);
+        createOrderDetails(newOrder, clientOrderRequest);
+        createVoucherHistory(newOrder);
+        createOrderHistory(newOrder);
+        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
     }
 
     @Override
@@ -203,7 +200,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             orderHistory.setActionDescription("Order is deleted");
             clientOrderHistoryRepository.save(orderHistory);
         }
-
         return true;
     }
 
@@ -246,7 +242,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
                 float finalTotalPrice = Math.max(0, totalOrderPrice - discount);
                 order.setTotalMoney(finalTotalPrice + shippingFee);
-
             }
         } else {
             order.setTotalMoney(totalOrderPrice + shippingFee);
@@ -317,6 +312,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     private Payment createPayment(Order order, ClientOrderRequest orderRequest) {
+
         PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
                 .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod NOT FOUND !"));
         Payment payment = new Payment();

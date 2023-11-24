@@ -1,17 +1,16 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
+
+import java.util.List;
 
 @Getter
 @Setter

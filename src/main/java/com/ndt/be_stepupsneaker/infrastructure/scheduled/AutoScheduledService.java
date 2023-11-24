@@ -9,4 +9,6 @@ public interface AutoScheduledService {
     void updatePromotionStatusAutomatically();
 
     void deleteCartDetailsByDate();
+
+    void deleteOrderAutomaticallyByTypeAndStatus();
 }

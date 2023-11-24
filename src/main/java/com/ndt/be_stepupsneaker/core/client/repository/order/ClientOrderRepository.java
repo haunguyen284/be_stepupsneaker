@@ -92,4 +92,5 @@ public interface ClientOrderRepository extends OrderRepository {
     )
     List<Statistic> getDailyOrderBetween(@Param("start") Long start, @Param("end") Long end);
 
+
 }

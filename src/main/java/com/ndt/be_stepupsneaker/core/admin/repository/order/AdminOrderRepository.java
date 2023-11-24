@@ -46,6 +46,8 @@ public interface AdminOrderRepository extends OrderRepository {
 
     List<Order> findAllByStatusAndCreatedAtBefore(OrderStatus status, Long cutoffTime);
 
+    List<Order> findAllByStatusAndCreatedAtBeforeAndType(OrderStatus status, Long cutoffTime,OrderType orderType);
+
     Integer countAllByStatus(OrderStatus status);
 
 

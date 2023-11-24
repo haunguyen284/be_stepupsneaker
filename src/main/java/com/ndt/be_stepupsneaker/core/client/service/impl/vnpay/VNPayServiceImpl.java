@@ -1,26 +1,38 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.vnpay;
 
+import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
+import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentMethodRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
+import com.ndt.be_stepupsneaker.entity.customer.Address;
+import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
+import com.ndt.be_stepupsneaker.entity.payment.Payment;
+import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
+import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.config.VNPayConfig;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.net.http.HttpRequest;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class VNPayServiceImpl implements VNPayService {
+    private final ClientOrderRepository clientOrderRepository;
+    private final ClientPaymentRepository clientPaymentRepository;
+    private final ClientPaymentMethodRepository clientPaymentMethodRepository;
 
     @Override
     public String createOrder(int total, String orderInfor) {
@@ -35,7 +47,7 @@ public class VNPayServiceImpl implements VNPayService {
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        vnp_Params.put("vnp_Amount", String.valueOf(total*100));
+        vnp_Params.put("vnp_Amount", String.valueOf(total * 100));
         vnp_Params.put("vnp_CurrCode", "VND");
 
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
@@ -91,10 +103,9 @@ public class VNPayServiceImpl implements VNPayService {
         return paymentUrl;
     }
 
-    @Override
-    public int orderReturn(HttpServletRequest request) {
+    private int orderReturn(HttpServletRequest request) {
         Map fields = new HashMap();
-        for (Enumeration params = request.getParameterNames(); params.hasMoreElements();) {
+        for (Enumeration params = request.getParameterNames(); params.hasMoreElements(); ) {
             String fieldName = null;
             String fieldValue = null;
             try {
@@ -125,6 +136,35 @@ public class VNPayServiceImpl implements VNPayService {
         } else {
             return -1;
         }
+    }
+
+    @Override
+    public Order authenticateVnPay(HttpServletRequest request) {
+        int result = orderReturn(request);
+        if (result == 1) {
+            TransactionInfo transactionInfo = new TransactionInfo();
+            transactionInfo.setTransactionCode(request.getParameter("vnp_TransactionNo"));
+            transactionInfo.setOrderInfo(request.getParameter("vnp_OrderInfo"));
+            transactionInfo.setPaymentTime(request.getParameter("vnp_PayDate"));
+            transactionInfo.setTotalPrice(request.getParameter("vnp_Amount"));
+            Optional<Order> orderOptional = clientOrderRepository.findById(transactionInfo.getOrderInfo());
+            if (orderOptional.isEmpty()) {
+                throw new ResourceNotFoundException("Order Not Found!");
+            }
+            PaymentMethod paymentMethod = clientPaymentMethodRepository.findByName("Card")
+                    .orElseThrow(() -> new ResourceNotFoundException("Payment Method Not Found !"));
+            Payment payment = new Payment();
+            payment.setOrder(orderOptional.get());
+            payment.setPaymentMethod(paymentMethod);
+            payment.setDescription(orderOptional.get().getNote());
+            payment.setTotalMoney(orderOptional.get().getTotalMoney());
+            payment.setTransactionCode(transactionInfo.getTransactionCode());
+            clientPaymentRepository.save(payment);
+            Order order = orderOptional.get();
+            order.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
+            return clientOrderRepository.save(order);
+        }
+        return null;
     }
 
 }

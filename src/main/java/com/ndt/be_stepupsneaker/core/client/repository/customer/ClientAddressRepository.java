@@ -4,8 +4,10 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRe
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.repository.customer.AddressRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -48,4 +50,8 @@ public interface ClientAddressRepository extends AddressRepository {
 
     List<Address> findByCustomer(Customer customer);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Address x WHERE x.id IN (SELECT y.address.id FROM Order y WHERE y.id IN :orderIds)")
+    void deleteAddressByOrder(List<String> orderIds);
 }
