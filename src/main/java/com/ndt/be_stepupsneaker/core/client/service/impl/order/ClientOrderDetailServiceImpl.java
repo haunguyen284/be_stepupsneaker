@@ -52,7 +52,7 @@ public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
     }
 
     @Override
-    public ClientOrderDetailResponse create(ClientOrderDetailRequest orderDetailRequest) {
+    public Object create(ClientOrderDetailRequest orderDetailRequest) {
         return null;
     }
 

@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminEmployeeServiceImpl implements AdminEmployeeService {
@@ -46,7 +45,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     }
 
     @Override
-    public AdminEmployeeResponse create(AdminEmployeeRequest employeeDTO) {
+    public Object create(AdminEmployeeRequest employeeDTO) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
         if (employeeOptional.isPresent()) {
             throw new ApiException("Email is exist");

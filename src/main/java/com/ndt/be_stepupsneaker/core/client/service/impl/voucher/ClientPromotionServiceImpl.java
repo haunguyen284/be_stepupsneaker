@@ -7,7 +7,6 @@ import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDeta
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientPromotionRepository;
 import com.ndt.be_stepupsneaker.core.client.service.voucher.ClientPromotionService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.AutoScheduledService;
@@ -56,7 +55,7 @@ public class ClientPromotionServiceImpl implements ClientPromotionService {
     }
 
     @Override
-    public ClientPromotionResponse create(ClientPromotionRequest request) {
+    public Object create(ClientPromotionRequest request) {
         return null;
     }
 

@@ -15,15 +15,20 @@ import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRe
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentMethodRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
+import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
+import com.ndt.be_stepupsneaker.entity.payment.Payment;
+import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
@@ -63,6 +68,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientOrderDetailRepository clientOrderDetailRepository;
     private static final Logger logger = LoggerFactory.getLogger(ClientOrderServiceImpl.class);
+    private final ClientPaymentMethodRepository clientPaymentMethodRepository;
+    private final ClientPaymentRepository clientPaymentRepository;
+    private final VNPayService vnPayService;
 
 
     @Autowired
@@ -75,7 +83,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                                   ClientVoucherHistoryRepository clientVoucherHistoryRepository,
                                   PaginationUtil paginationUtil,
                                   ClientProductDetailRepository clientProductDetailRepository,
-                                  ClientOrderDetailRepository clientOrderDetailRepository) {
+                                  ClientOrderDetailRepository clientOrderDetailRepository, ClientPaymentMethodRepository clientPaymentMethodRepository, ClientPaymentRepository clientPaymentRepository, VNPayService vnPayService) {
         this.clientOrderRepository = clientOrderRepository;
         this.clientOrderHistoryRepository = clientOrderHistoryRepository;
         this.clientCustomerRepository = clientCustomerRepository;
@@ -86,6 +94,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.paginationUtil = paginationUtil;
         this.clientProductDetailRepository = clientProductDetailRepository;
         this.clientOrderDetailRepository = clientOrderDetailRepository;
+        this.clientPaymentMethodRepository = clientPaymentMethodRepository;
+        this.clientPaymentRepository = clientPaymentRepository;
+        this.vnPayService = vnPayService;
     }
 
     @Override
@@ -94,7 +105,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     @Override
-    public ClientOrderResponse create(ClientOrderRequest clientOrderRequest) {
+    public Object create(ClientOrderRequest clientOrderRequest) {
         Order orderSave = ClientOrderMapper.INSTANCE.clientOrderRequestToOrder(clientOrderRequest);
         orderSave.setType(OrderType.ONLINE);
         orderSave.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
@@ -102,52 +113,27 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         if (clientOrderRequest.getAddressShipping().getCustomer() == null) {
             address.setCustomer(null);
         }
-        Address newAddress = clientAddressRepository.save(address);
-        orderSave.setAddress(newAddress);
-        setOrderDetails(orderSave, clientOrderRequest);
-        Order orderResult = clientOrderRepository.save(orderSave);
         // shipping
         float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
-        orderResult.setShippingMoney(shippingFee);
-        // create orderDetail
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
-            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
-            if (productDetail != null) {
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setProductDetail(productDetail);
-                orderDetail.setQuantity(clientCartItemRequest.getQuantity());
-                orderDetail.setOrder(orderResult);
-                orderDetail.setPrice(productDetail.getPrice());
-                orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                orderDetails.add(orderDetail);
-            }
+        if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
+            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
+            String vnpayUrl = vnPayService.createOrder((int) totalVnPay, clientOrderRequest.getNote());
+            return vnpayUrl;
         }
-        List<OrderDetail> savedOrderDetails = clientOrderDetailRepository.saveAll(orderDetails);
-        float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(savedOrderDetails);
-        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalOrderPrice, orderResult.getShippingMoney());
+        if (clientOrderRequest.getTransactionInfo().getPaymentStatus() != 0) {
+            throw new ApiException("Transaction failed!");
+        }
+        Address newAddress = clientAddressRepository.save(address);
+        orderSave.setAddress(newAddress);
+        orderSave.setShippingMoney(shippingFee);
+        setOrderDetails(orderSave, clientOrderRequest);
+        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
+        Order orderResult = clientOrderRepository.save(orderSave);
+        createOrderDetails(orderResult, clientOrderRequest);
         clientOrderRepository.save(orderResult);
-
-        // Voucher history
-        if (clientOrderRequest.getVoucher() != null) {
-            float totalMoney = orderResult.getTotalMoney();
-            float voucherValue = orderResult.getVoucher().getValue();
-            float reduceMoney = orderResult.getVoucher().getType() == VoucherType.CASH ? voucherValue : ((totalMoney * voucherValue) / 100);
-            VoucherHistory voucherHistory = new VoucherHistory();
-            voucherHistory.setVoucher(orderResult.getVoucher());
-            voucherHistory.setOrder(orderResult);
-            voucherHistory.setMoneyReduction(reduceMoney);
-            voucherHistory.setMoneyBeforeReduction(totalMoney);
-            voucherHistory.setMoneyAfterReduction(reduceMoney);
-            clientVoucherHistoryRepository.save(voucherHistory);
-        }
-        // orderHistory
-        OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setOrder(orderResult);
-        orderHistory.setNote(orderResult.getNote());
-        orderHistory.setActionDescription(OrderStatus.WAIT_FOR_CONFIRMATION.action_description);
-        clientOrderHistoryRepository.save(orderHistory);
+        createPayment(orderResult, clientOrderRequest);
+        createVoucherHistory(orderResult);
+        createOrderHistory(orderResult);
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderResult);
     }
 
@@ -230,6 +216,21 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return 0;
     }
 
+    public float totalCartItem(List<ClientCartItemRequest> clientCartItemRequests) {
+        float total = 0.0f;
+        if (clientCartItemRequests != null) {
+            for (ClientCartItemRequest request : clientCartItemRequests) {
+                ProductDetail productDetail = clientProductDetailRepository.findById(request.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found"));
+                float price = productDetail.getPrice();
+                total += price * request.getQuantity();
+
+            }
+
+        }
+        return total;
+    }
+
     private void setOrderDetails(Order order, ClientOrderRequest orderRequest) {
         String customerId = orderRequest.getCustomer();
         String employeeId = orderRequest.getEmployee();
@@ -247,7 +248,20 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 order.setTotalMoney(finalTotalPrice + shippingFee);
 
             }
+        } else {
+            order.setTotalMoney(totalOrderPrice + shippingFee);
         }
+    }
+
+    private float totalVnPay(String voucherId, float totalCartItem, float shippingFee) {
+        if (voucherId != null) {
+            Voucher voucher = clientVoucherRepository.findById(voucherId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Voucher Not Found !"));
+            float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalCartItem;
+            float finalTotalPrice = Math.max(0, totalCartItem - discount);
+            return finalTotalPrice + shippingFee;
+        }
+        return totalCartItem + shippingFee;
     }
 
     public float calculateShippingFee(ClientAddressRequest addressRequest) {
@@ -302,5 +316,59 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return shippingRequest;
     }
 
+    private Payment createPayment(Order order, ClientOrderRequest orderRequest) {
+        PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
+                .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod NOT FOUND !"));
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setPaymentMethod(paymentMethod);
+        payment.setTotalMoney(order.getTotalMoney());
+        payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode() == null ? "CASH" : orderRequest.getTransactionInfo().getTransactionCode());
+        payment.setDescription(order.getNote());
+        return clientPaymentRepository.save(payment);
+    }
 
+    private VoucherHistory createVoucherHistory(Order order) {
+        if (order.getVoucher() != null) {
+            VoucherHistory voucherHistory = new VoucherHistory();
+            float totalMoney = order.getTotalMoney();
+            float voucherValue = order.getVoucher().getValue();
+            float reduceMoney = order.getVoucher().getType() == VoucherType.CASH ? voucherValue : ((totalMoney * voucherValue) / 100);
+            voucherHistory.setVoucher(order.getVoucher());
+            voucherHistory.setOrder(order);
+            voucherHistory.setMoneyReduction(reduceMoney);
+            voucherHistory.setMoneyBeforeReduction(totalMoney);
+            voucherHistory.setMoneyAfterReduction(reduceMoney);
+            clientVoucherHistoryRepository.save(voucherHistory);
+            return voucherHistory;
+        }
+        return null;
+    }
+
+    private OrderHistory createOrderHistory(Order order) {
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setOrder(order);
+        orderHistory.setNote(order.getNote());
+        orderHistory.setActionDescription(OrderStatus.WAIT_FOR_CONFIRMATION.action_description);
+        clientOrderHistoryRepository.save(orderHistory);
+        return orderHistory;
+    }
+
+    private List<OrderDetail> createOrderDetails(Order order, ClientOrderRequest clientOrderRequest) {
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
+            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+            if (productDetail != null) {
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setProductDetail(productDetail);
+                orderDetail.setQuantity(clientCartItemRequest.getQuantity());
+                orderDetail.setOrder(order);
+                orderDetail.setPrice(productDetail.getPrice());
+                orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                orderDetails.add(orderDetail);
+            }
+        }
+        return clientOrderDetailRepository.saveAll(orderDetails);
+    }
 }

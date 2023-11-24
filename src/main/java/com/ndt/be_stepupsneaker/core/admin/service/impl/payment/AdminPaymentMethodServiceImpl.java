@@ -15,9 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService {
@@ -40,7 +38,7 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     }
 
     @Override
-    public AdminPaymentMethodResponse create(AdminPaymentMethodRequest paymentMethodRequest) {
+    public Object create(AdminPaymentMethodRequest paymentMethodRequest) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findByName(paymentMethodRequest.getName());
         if(paymentMethodOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminSoleServiceImpl implements AdminSoleService {
@@ -36,7 +35,7 @@ public class AdminSoleServiceImpl implements AdminSoleService {
     }
 
     @Override
-    public AdminSoleResponse create(AdminSoleRequest soleRequest) {
+    public Object create(AdminSoleRequest soleRequest) {
         Optional<Sole> brandOptional = adminSoleRepository.findByName(soleRequest.getName());
         if (brandOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

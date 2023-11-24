@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminColorServiceImpl implements AdminColorService {
@@ -36,7 +35,7 @@ public class AdminColorServiceImpl implements AdminColorService {
     }
 
     @Override
-    public AdminColorResponse create(AdminColorRequest colorDTO) {
+    public Object create(AdminColorRequest colorDTO) {
         Optional<Color> colorOptional = adminColorRepository.findByName(colorDTO.getName());
         if (colorOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

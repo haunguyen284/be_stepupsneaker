@@ -22,7 +22,7 @@ public class AdminPaymentRequest extends PageableRequest {
     @NotBlank(message = "Payment Method must be not null")
     private String paymentMethod;
 
-    @NotBlank(message = "Transaction code Method must be not null")
+//    @NotBlank(message = "Transaction code Method must be not null")
     private String transactionCode;
 
     @NotNull(message = "Total money must be not null")

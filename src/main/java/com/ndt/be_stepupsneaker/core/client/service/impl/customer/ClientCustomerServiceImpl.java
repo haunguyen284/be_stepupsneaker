@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -58,7 +57,7 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
     }
 
     @Override
-    public ClientCustomerResponse create(ClientCustomerRequest customerDTO) {
+    public Object create(ClientCustomerRequest customerDTO) {
         Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(customerDTO.getEmail());
         if (customerOptional.isPresent()) {
             throw new ApiException("EMAIL IS EXIT !");

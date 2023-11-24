@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminAddressServiceImpl implements AdminAddressService {
@@ -40,7 +39,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
 
     // Tạo address bắt buộc phải cho id customer
     @Override
-    public AdminAddressResponse create(AdminAddressRequest addressDTO) {
+    public Object create(AdminAddressRequest addressDTO) {
         Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
         if (addressOptional.isPresent()) {
             throw new ResourceNotFoundException("PHONE IS EXISTS ! TAO QUÁ BUỒN ....");

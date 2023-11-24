@@ -65,7 +65,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     }
 
     @Override
-    public AdminPromotionResponse create(AdminPromotionRequest request) {
+    public Object create(AdminPromotionRequest request) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findByCode(request.getCode());
         if (promotionOptional.isPresent()) {
             throw new ApiException("CODE IS EXIST");

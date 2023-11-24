@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminRoleServiceImpl implements AdminRoleService {
@@ -37,7 +36,7 @@ public class AdminRoleServiceImpl implements AdminRoleService {
     }
 
     @Override
-    public AdminRoleRsponse create(AdminRoleRequest roleDTO) {
+    public Object create(AdminRoleRequest roleDTO) {
         Optional<Role> optionalRole = adminRoleRepository.findByName(roleDTO.getName());
         if (optionalRole.isPresent()){
             throw new ApiException("Role name is exist");

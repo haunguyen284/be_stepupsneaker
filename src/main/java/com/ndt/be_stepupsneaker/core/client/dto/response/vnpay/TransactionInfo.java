@@ -15,7 +15,7 @@ public class TransactionInfo {
 
     private String paymentTime;
 
-    private String transactionId;
+    private String transactionCode;
 
     private String totalPrice;
 

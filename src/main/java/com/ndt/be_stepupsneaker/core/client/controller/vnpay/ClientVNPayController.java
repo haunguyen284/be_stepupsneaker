@@ -27,13 +27,11 @@ public class ClientVNPayController {
         String vnpayUrl = vnPayService.createOrder(orderTotal, orderInfo);
         return ResponseHelper.getResponse(vnpayUrl, HttpStatus.OK);
     }
-
     @GetMapping("/payment")
     public Object getOrderStatus(HttpServletRequest request) {
         int paymentStatus = vnPayService.orderReturn(request);
-
         TransactionInfo transactionInfo = new TransactionInfo();
-        transactionInfo.setTransactionId(request.getParameter("vnp_TransactionNo"));
+        transactionInfo.setTransactionCode(request.getParameter("vnp_TransactionNo"));
         transactionInfo.setOrderInfo(request.getParameter("vnp_OrderInfo"));
         transactionInfo.setPaymentTime(request.getParameter("vnp_PayDate"));
         transactionInfo.setTotalPrice(request.getParameter("vnp_Amount"));

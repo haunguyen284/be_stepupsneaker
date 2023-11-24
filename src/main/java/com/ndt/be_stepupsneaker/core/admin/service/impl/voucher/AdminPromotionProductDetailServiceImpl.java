@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminPromotionProductDetailServiceImpl implements AdminPromotionProductDetailService {
@@ -43,7 +42,7 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     }
 
     @Override
-    public AdminPromotionProductDetailResponse create(AdminPromotionProductDetailRequest PromotionProductDetailRequest) {
+    public Object create(AdminPromotionProductDetailRequest PromotionProductDetailRequest) {
         return null;
     }
 

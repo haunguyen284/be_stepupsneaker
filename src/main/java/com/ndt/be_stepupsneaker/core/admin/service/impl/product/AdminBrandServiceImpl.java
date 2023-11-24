@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminBrandServiceImpl implements AdminBrandService {
@@ -36,7 +35,7 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     }
 
     @Override
-    public AdminBrandResponse create(AdminBrandRequest BrandDTO) {
+    public Object create(AdminBrandRequest BrandDTO) {
         Optional<Brand> brandOptional = adminBrandRepository.findByName(BrandDTO.getName());
         if (brandOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

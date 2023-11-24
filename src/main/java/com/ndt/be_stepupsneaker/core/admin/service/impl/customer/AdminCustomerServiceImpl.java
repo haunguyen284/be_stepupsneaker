@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminCustomerServiceImpl implements AdminCustomerService {
@@ -67,7 +66,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     }
 
     @Override
-    public AdminCustomerResponse create(AdminCustomerRequest customerDTO) {
+    public Object create(AdminCustomerRequest customerDTO) {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
         if (customerOptional.isPresent()) {
             throw new ApiException("EMAIL IS EXIT !");

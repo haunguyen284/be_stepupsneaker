@@ -51,7 +51,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     }
 
     @Override
-    public AdminVoucherResponse create(AdminVoucherRequest voucherRequest) {
+    public Object create(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
             throw new ApiException("CODE IS EXIST");

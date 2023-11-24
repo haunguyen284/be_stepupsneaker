@@ -59,4 +59,5 @@ public class ClientOrderResponse {
 
     private List<ClientPaymentResponse> payments;
 
+
 }

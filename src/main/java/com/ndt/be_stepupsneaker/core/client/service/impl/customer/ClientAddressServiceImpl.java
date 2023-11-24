@@ -39,7 +39,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     // Tạo address bắt buộc phải cho id customer
     @Override
-    public ClientAddressResponse create(ClientAddressRequest addressDTO) {
+    public Object create(ClientAddressRequest addressDTO) {
         Optional<Address> addressOptional = clientAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
         if (addressOptional.isPresent()) {
             throw new ResourceNotFoundException("PHONE IS EXISTS !");

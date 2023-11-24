@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -37,7 +36,7 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     }
 
     @Override
-    public AdminMaterialResponse create(AdminMaterialRequest MaterialDTO) {
+    public Object create(AdminMaterialRequest MaterialDTO) {
         Optional<Material> brandOptional = adminMaterialRepository.findByName(MaterialDTO.getName());
         if (brandOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

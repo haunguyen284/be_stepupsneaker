@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AdminSizeServiceImpl implements AdminSizeService {
@@ -36,7 +35,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     }
 
     @Override
-    public AdminSizeResponse create(AdminSizeRequest adminSizeRequest) {
+    public Object create(AdminSizeRequest adminSizeRequest) {
         Optional<Size> optionalSize = adminSizeRepository.findByName(adminSizeRequest.getName());
         if (optionalSize.isPresent()) {
             throw new ApiException("NAME IS EXIST !");

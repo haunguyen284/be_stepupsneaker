@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -37,7 +36,7 @@ public class AdminTradeMarkServiceImpl implements AdminTradeMarkService {
     }
 
     @Override
-    public AdminTradeMarkResponse create(AdminTradeMarkRequest soleRequest) {
+    public Object create(AdminTradeMarkRequest soleRequest) {
         Optional<TradeMark> brandOptional = adminTradeMarkRepository.findByName(soleRequest.getName());
         if (brandOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

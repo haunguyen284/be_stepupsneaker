@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +53,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     }
 
     @Override
-    public AdminPaymentResponse create(AdminPaymentRequest paymentRequest) {
+    public Object create(AdminPaymentRequest paymentRequest) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findByTransactionCode(paymentRequest.getTransactionCode());
         if (paymentOptional.isPresent()) {
             throw new ApiException("TRANSACTION CODE IS EXIST");
@@ -119,7 +118,6 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     @Override
     public List<AdminPaymentResponse> create(List<AdminPaymentRequest> paymentRequests) {
         List<Payment> payments = paymentRequests.stream().map(AdminPaymentMapper.INSTANCE::adminPaymentRequestToPayment).collect(Collectors.toList());
-
         return adminPaymentRepository.saveAll(payments).stream().map(AdminPaymentMapper.INSTANCE::paymentToAdminPaymentResponse).collect(Collectors.toList());
     }
 

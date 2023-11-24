@@ -43,7 +43,7 @@ public class ClientOrderHistoryServiceImpl implements ClientOrderHistoryService 
     }
 
     @Override
-    public ClientOrderHistoryResponse create(ClientOrderHistoryRequest orderHistoryRequest) {
+    public Object create(ClientOrderHistoryRequest orderHistoryRequest) {
         return null;
     }
 

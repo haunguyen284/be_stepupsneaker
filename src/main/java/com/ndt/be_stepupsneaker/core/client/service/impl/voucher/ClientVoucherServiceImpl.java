@@ -49,7 +49,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     }
 
     @Override
-    public ClientVoucherResponse create(ClientVoucherRequest voucherRequest) {
+    public Object create(ClientVoucherRequest voucherRequest) {
         return null;
     }
 

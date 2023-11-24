@@ -2,16 +2,13 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderDetailRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderDetailResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderDetailMapper;
-import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductDetailMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderDetailService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,7 +53,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     }
 
     @Override
-    public AdminOrderDetailResponse create(AdminOrderDetailRequest orderDetailRequest) {
+    public Object create(AdminOrderDetailRequest orderDetailRequest) {
         return null;
     }
 

@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.product;
 
-import com.cloudinary.Cloudinary;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminProductRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductMapper;
@@ -18,10 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -47,7 +43,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     }
 
     @Override
-    public AdminProductResponse create(AdminProductRequest productDTO) {
+    public Object create(AdminProductRequest productDTO) {
         Optional<Product> productOptional = adminProductRepository.findByName(productDTO.getName());
         if (productOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");

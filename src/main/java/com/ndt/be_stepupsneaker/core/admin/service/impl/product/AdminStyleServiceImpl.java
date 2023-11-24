@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -37,7 +36,7 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     }
 
     @Override
-    public AdminStyleResponse create(AdminStyleRequest soleRequest) {
+    public Object create(AdminStyleRequest soleRequest) {
         Optional<Style> brandOptional = adminStyleRepository.findByName(soleRequest.getName());
         if (brandOptional.isPresent()){
             throw new ApiException("NAME IS EXIST");
