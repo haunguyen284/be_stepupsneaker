@@ -15,6 +15,7 @@ public class AutoScheduledController {
         autoScheduledService.updateVoucherStatusAutomatically();
         autoScheduledService.updateOrderAutomatically();
         autoScheduledService.updatePromotionStatusAutomatically();
+        autoScheduledService.deleteOrderAutomaticallyByTypeAndStatus();
     }
 
     @Scheduled(cron = "0 0 0 1 * ?") // Chạy vào ngày đầu tiên của mỗi tháng

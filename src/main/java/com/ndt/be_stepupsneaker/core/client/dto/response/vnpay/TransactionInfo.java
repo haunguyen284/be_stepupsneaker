@@ -1,14 +1,12 @@
 package com.ndt.be_stepupsneaker.core.client.dto.response.vnpay;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class TransactionInfo {
 
     private String orderInfo;
