@@ -4,12 +4,16 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherHisto
 import com.ndt.be_stepupsneaker.core.client.dto.request.voucher.ClientVoucherHistoryRequest;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.repository.voucher.VoucherHistoryRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+@Transactional
 @Repository
 public interface ClientVoucherHistoryRepository extends VoucherHistoryRepository {
     @Query("""
@@ -21,4 +25,8 @@ public interface ClientVoucherHistoryRepository extends VoucherHistoryRepository
     """)
     Page<VoucherHistory> findAllVoucherHistory(@Param("request") ClientVoucherHistoryRequest request, Pageable pageable);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM VoucherHistory x WHERE x.order.id IN :orderIds")
+    void deleteVoucherHistoryByOrder(List<String> orderIds);
 }

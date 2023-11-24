@@ -161,7 +161,7 @@ public class VNPayServiceImpl implements VNPayService {
             payment.setTransactionCode(transactionInfo.getTransactionCode());
             clientPaymentRepository.save(payment);
             Order order = orderOptional.get();
-            order.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
+            order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
             return clientOrderRepository.save(order);
         }
         return null;

@@ -7,6 +7,8 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionRepo
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.cart.ClientCartDetailRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientAddressRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
@@ -29,6 +31,8 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
     private final AdminPromotionRepository adminPromotionRepository;
     private final ClientCartDetailRepository clientCartDetailRepository;
     private final ClientAddressRepository clientAddressRepository;
+    private final ClientPaymentRepository clientPaymentRepository;
+    private final ClientVoucherHistoryRepository clientVoucherHistoryRepository;
 
 
     @Autowired
@@ -39,7 +43,9 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
             AdminOrderDetailRepository adminOrderDetailRepository,
             AdminPromotionRepository adminPromotionRepository,
             ClientCartDetailRepository clientCartDetailRepository,
-            ClientAddressRepository clientAddressRepository) {
+            ClientAddressRepository clientAddressRepository,
+            ClientPaymentRepository clientPaymentRepository,
+            ClientVoucherHistoryRepository clientVoucherHistoryRepository) {
         this.adminVoucherRepository = adminVoucherRepository;
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
@@ -47,6 +53,8 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
         this.adminPromotionRepository = adminPromotionRepository;
         this.clientCartDetailRepository = clientCartDetailRepository;
         this.clientAddressRepository = clientAddressRepository;
+        this.clientPaymentRepository = clientPaymentRepository;
+        this.clientVoucherHistoryRepository = clientVoucherHistoryRepository;
     }
 
     @Override
@@ -69,21 +77,20 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
         Long thirtyDaysAgoTimestamp = ConvertTime.convertLocalDateTimeToLong(thirtyDaysAgo);
         clientCartDetailRepository.deleteByUpdatedAtBefore(thirtyDaysAgoTimestamp);
     }
-
+    @Transactional
     @Override
     public void deleteOrderAutomaticallyByTypeAndStatus() {
         long currentMillis = Instant.now().toEpochMilli();
-        // Calculate the time 30 minutes ago in milliseconds
         long thirtyMinutesAgo = currentMillis - (30 * 60 * 1000); // 30 minutes * 60 seconds/minute * 1000 milliseconds/second
-
         List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBeforeAndType(OrderStatus.PENDING, thirtyMinutesAgo, OrderType.ONLINE);
-
         if (!expiredOrders.isEmpty()) {
-            System.out.println("========================== AUTO UPDATE ORDER =======================");
             List<String> expiredOrderIds = expiredOrders.stream()
                     .map(Order::getId)
                     .collect(Collectors.toList());
 
+            clientVoucherHistoryRepository.deleteVoucherHistoryByOrder(expiredOrderIds);
+            clientPaymentRepository.deleteAddressByOrder1(expiredOrderIds);
+            clientPaymentRepository.deletePaymentByOrder(expiredOrderIds);
             adminOrderHistoryRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderDetailRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderRepository.deleteAllInBatch(expiredOrders);

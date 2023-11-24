@@ -127,7 +127,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         setOrderDetails(orderSave, clientOrderRequest);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
-        List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
+        newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + 86_400_000L);
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         createVoucherHistory(newOrder);
@@ -136,10 +136,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             return vnpayUrl;
         }
-        createVoucherHistory(newOrder);
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
+        if (newOrder.getPayments() == null) {
+            List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
+            clientOrderResponse.setPayments(clientPaymentResponse);
+        }
+        createVoucherHistory(newOrder);
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
-        clientOrderResponse.setPayments(clientPaymentResponse);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
         return clientOrderResponse;
     }
