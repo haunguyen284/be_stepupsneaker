@@ -115,7 +115,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public Object create(ClientOrderRequest clientOrderRequest) {
         Order orderSave = ClientOrderMapper.INSTANCE.clientOrderRequestToOrder(clientOrderRequest);
         orderSave.setType(OrderType.ONLINE);
-        orderSave.setStatus(clientOrderRequest.getPaymentMethod().equals("Cast") ? OrderStatus.WAIT_FOR_CONFIRMATION : OrderStatus.PENDING);
+        orderSave.setStatus(clientOrderRequest.getPaymentMethod().equals("Cash") ? OrderStatus.WAIT_FOR_CONFIRMATION : OrderStatus.PENDING);
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(clientOrderRequest.getAddressShipping());
         if (clientOrderRequest.getAddressShipping().getCustomer() == null) {
             address.setCustomer(null);
@@ -127,14 +127,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         setOrderDetails(orderSave, clientOrderRequest);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
+        List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
+        List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
+        createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
             String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             return vnpayUrl;
         }
-        List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
-        List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         createVoucherHistory(newOrder);
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
@@ -244,7 +245,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     private void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
-        if (voucherId != null) {
+        if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = clientVoucherRepository.findById(voucherId).orElse(null);
             order.setVoucher(voucher);
             if (voucher != null) {
@@ -259,7 +260,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     private float totalVnPay(String voucherId, float totalCartItem, float shippingFee) {
-        if (voucherId != null) {
+        if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = clientVoucherRepository.findById(voucherId)
                     .orElse(null);
             float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalCartItem;
@@ -323,14 +324,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     private List<ClientPaymentResponse> createPayment(Order order, ClientOrderRequest orderRequest) {
         List<ClientPaymentResponse> clientPaymentResponses = new ArrayList<>();
-
         PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
                 .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod NOT FOUND !"));
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentMethod(paymentMethod);
         payment.setTotalMoney(order.getTotalMoney());
-        payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode() == null ? "CASH" : orderRequest.getTransactionInfo().getTransactionCode());
+        payment.setTransactionCode(orderRequest.getTransactionInfo() == null ? "CASH" : orderRequest.getTransactionInfo().getTransactionCode());
         payment.setDescription(order.getNote());
         clientPaymentResponses.add(ClientPaymentMapper.INSTANCE.paymentToClientPaymentResponse(clientPaymentRepository.save(payment)));
         return clientPaymentResponses;
