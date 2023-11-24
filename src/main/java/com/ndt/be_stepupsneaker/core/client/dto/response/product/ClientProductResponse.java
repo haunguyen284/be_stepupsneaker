@@ -13,6 +13,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientProductResponse {
+
     private String id;
     private String code;
 
@@ -24,6 +25,10 @@ public class ClientProductResponse {
 
     private ProductStatus status;
 
+    private Long saleCount;
+
     private Set<ClientProductDetailResponse> productDetails;
+
+    private Long createdAt;
 
 }
