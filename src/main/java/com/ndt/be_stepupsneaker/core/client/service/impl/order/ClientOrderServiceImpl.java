@@ -5,11 +5,15 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRe
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientShippingRequest;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientShippingDataResponse;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientShippingResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.*;
+import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherHistoryResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
+import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderDetailMapper;
+import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
+import com.ndt.be_stepupsneaker.core.client.mapper.payment.ClientPaymentMapper;
+import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherHistoryMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientAddressRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderDetailRepository;
@@ -54,6 +58,7 @@ import org.springframework.web.servlet.view.RedirectView;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -117,7 +122,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         Address newAddress = clientAddressRepository.save(address);
         orderSave.setAddress(newAddress);
-        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());;
+        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
         orderSave.setShippingMoney(shippingFee);
         setOrderDetails(orderSave, clientOrderRequest);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
@@ -127,11 +132,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             return vnpayUrl;
         }
-        createPayment(newOrder, clientOrderRequest);
-        createOrderDetails(newOrder, clientOrderRequest);
+        List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
+        List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         createVoucherHistory(newOrder);
-        createOrderHistory(newOrder);
-        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
+        ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
+        clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
+        clientOrderResponse.setPayments(clientPaymentResponse);
+        clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
+        return clientOrderResponse;
     }
 
     @Override
@@ -244,6 +253,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 order.setTotalMoney(finalTotalPrice + shippingFee);
             }
         } else {
+            order.setVoucher(null);
             order.setTotalMoney(totalOrderPrice + shippingFee);
         }
     }
@@ -251,7 +261,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private float totalVnPay(String voucherId, float totalCartItem, float shippingFee) {
         if (voucherId != null) {
             Voucher voucher = clientVoucherRepository.findById(voucherId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Voucher Not Found !"));
+                    .orElse(null);
             float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalCartItem;
             float finalTotalPrice = Math.max(0, totalCartItem - discount);
             return finalTotalPrice + shippingFee;
@@ -311,7 +321,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return shippingRequest;
     }
 
-    private Payment createPayment(Order order, ClientOrderRequest orderRequest) {
+    private List<ClientPaymentResponse> createPayment(Order order, ClientOrderRequest orderRequest) {
+        List<ClientPaymentResponse> clientPaymentResponses = new ArrayList<>();
 
         PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
                 .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod NOT FOUND !"));
@@ -321,10 +332,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         payment.setTotalMoney(order.getTotalMoney());
         payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode() == null ? "CASH" : orderRequest.getTransactionInfo().getTransactionCode());
         payment.setDescription(order.getNote());
-        return clientPaymentRepository.save(payment);
+        clientPaymentResponses.add(ClientPaymentMapper.INSTANCE.paymentToClientPaymentResponse(clientPaymentRepository.save(payment)));
+        return clientPaymentResponses;
     }
 
-    private VoucherHistory createVoucherHistory(Order order) {
+    private ClientVoucherHistoryResponse createVoucherHistory(Order order) {
         if (order.getVoucher() != null) {
             VoucherHistory voucherHistory = new VoucherHistory();
             float totalMoney = order.getTotalMoney();
@@ -335,22 +347,25 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             voucherHistory.setMoneyReduction(reduceMoney);
             voucherHistory.setMoneyBeforeReduction(totalMoney);
             voucherHistory.setMoneyAfterReduction(reduceMoney);
-            clientVoucherHistoryRepository.save(voucherHistory);
-            return voucherHistory;
+            return ClientVoucherHistoryMapper
+                    .INSTANCE
+                    .voucherHistoryToClientVoucherHistoryResponse(clientVoucherHistoryRepository.save(voucherHistory));
         }
         return null;
     }
 
-    private OrderHistory createOrderHistory(Order order) {
+    private List<ClientOrderHistoryResponse> createOrderHistory(Order order) {
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
         OrderHistory orderHistory = new OrderHistory();
         orderHistory.setOrder(order);
+        orderHistory.setActionStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
         orderHistory.setNote(order.getNote());
         orderHistory.setActionDescription(OrderStatus.WAIT_FOR_CONFIRMATION.action_description);
-        clientOrderHistoryRepository.save(orderHistory);
-        return orderHistory;
+        clientOrderHistoryResponses.add(ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(clientOrderHistoryRepository.save(orderHistory)));
+        return clientOrderHistoryResponses;
     }
 
-    private List<OrderDetail> createOrderDetails(Order order, ClientOrderRequest clientOrderRequest) {
+    private List<ClientOrderDetailResponse> createOrderDetails(Order order, ClientOrderRequest clientOrderRequest) {
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
@@ -365,6 +380,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 orderDetails.add(orderDetail);
             }
         }
-        return clientOrderDetailRepository.saveAll(orderDetails);
+        return clientOrderDetailRepository.saveAll(orderDetails)
+                .stream()
+                .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
+                .collect(Collectors.toList());
     }
 }
