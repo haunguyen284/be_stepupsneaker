@@ -141,7 +141,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
             clientOrderResponse.setPayments(clientPaymentResponse);
         }
-        createVoucherHistory(newOrder);
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
         return clientOrderResponse;
@@ -233,7 +232,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                         .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found"));
                 float price = productDetail.getPrice();
                 total += price * request.getQuantity();
-
+                productDetail.setQuantity(productDetail.getQuantity() - request.getQuantity());
+                clientProductDetailRepository.save(productDetail);
             }
 
         }
@@ -255,6 +255,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
                 float finalTotalPrice = Math.max(0, totalOrderPrice - discount);
                 order.setTotalMoney(finalTotalPrice + shippingFee);
+                voucher.setQuantity(voucher.getQuantity() - 1);
+                clientVoucherRepository.save(voucher);
             }
         } else {
             order.setVoucher(null);
