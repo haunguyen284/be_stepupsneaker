@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminProductResponse {
     private String id;
+
     private String code;
 
     private String name;
@@ -24,6 +25,8 @@ public class AdminProductResponse {
     private String image;
 
     private ProductStatus status;
+
+    private Long saleCount;
 
     private Set<AdminProductDetailResponse> productDetails;
 

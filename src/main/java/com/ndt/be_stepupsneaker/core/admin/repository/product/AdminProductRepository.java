@@ -20,7 +20,10 @@ import java.util.UUID;
 @Transactional
 public interface AdminProductRepository extends ProductRepository {
     @Query("""
-    SELECT x FROM Product x 
+    SELECT x, COALESCE(SUM(od.quantity), 0) AS saleCount 
+    FROM Product x 
+    LEFT JOIN x.productDetails pd 
+    LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id 
     WHERE (:#{#request.name} IS NULL OR :#{#request.name} ILIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.name}, '%')) 
     AND
     (:#{#request.code} IS NULL OR :#{#request.code} ILIKE '' OR x.code ILIKE  CONCAT('%', :#{#request.code}, '%')) 
@@ -53,8 +56,9 @@ public interface AdminProductRepository extends ProductRepository {
     (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.maxQuantity} AS int))) 
     AND 
     x.deleted=false 
+    GROUP BY x.id
     """)
-    Page<Product> findAllProduct(@Param("request") AdminProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
+    Page<Object[]> findAllProduct(@Param("request") AdminProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
     Optional<Product> findByName(String name);
 
