@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
@@ -217,6 +218,18 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public AdminDailyStatisticResponse getDailyOrdersBetween(Long start, Long end) {
         List<Statistic> statistics = adminOrderRepository.getDailyOrderBetween(start, end);
         return DailyStatisticUtil.getDailyStatisticResponse(statistics);
+    }
+
+    @Override
+    public List<AdminDailyGrowthResponse> getRevenueGrowthBetween(Long start, Long end) {
+        List<Statistic> statistics = adminOrderRepository.getDailyRevenueBetween(start, end);
+        return DailyStatisticUtil.getDailyGrowth(statistics);
+    }
+
+    @Override
+    public List<AdminDailyGrowthResponse> getOrderGrowthBetween(Long start, Long end) {
+        List<Statistic> statistics = adminOrderRepository.getDailyOrderBetween(start, end);
+        return DailyStatisticUtil.getDailyGrowth(statistics);
     }
 
 }

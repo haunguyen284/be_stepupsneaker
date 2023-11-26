@@ -1,9 +1,11 @@
 package com.ndt.be_stepupsneaker.util;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +34,29 @@ public class DailyStatisticUtil {
         dailyRevenueResponse.setTrend(Math.round(growth));
         return dailyRevenueResponse;
 
+    }
+
+    public static List<AdminDailyGrowthResponse> getDailyGrowth(List<Statistic> statistics) {
+        List<AdminDailyGrowthResponse> dailyGrowthList = new ArrayList<>();
+
+        for (int i = 0; i < statistics.size(); i++) {
+            Float todayRevenue = getStatisticValue(statistics, i);
+            Float yesterdayRevenue = getStatisticValue(statistics, i - 1);
+
+            if (todayRevenue != null && yesterdayRevenue != null && yesterdayRevenue != 0) {
+                float dailyGrowth = calculateGrowth(yesterdayRevenue, todayRevenue);
+
+                AdminDailyGrowthResponse dailyGrowthResponse = new AdminDailyGrowthResponse();
+                dailyGrowthResponse.setDate(statistics.get(i).getDate());
+                dailyGrowthResponse.setDailyGrowth(Math.round(dailyGrowth));
+
+                dailyGrowthList.add(dailyGrowthResponse);
+            } else {
+                dailyGrowthList.add(null);
+            }
+        }
+
+        return dailyGrowthList;
     }
 
     private static Float getStatisticValue(List<Statistic> statistics, int index) {
