@@ -102,6 +102,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         OrderHistory orderHistory = new OrderHistory();
         orderHistory.setOrder(orderResult);
         orderHistory.setNote(orderResult.getNote());
+        orderHistory.setActionStatus(OrderStatus.PENDING);
         orderHistory.setActionDescription(OrderStatus.PENDING.action_description);
         adminOrderHistoryRepository.save(orderHistory);
 
