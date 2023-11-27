@@ -5,6 +5,8 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductResp
 import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductService;
+import com.ndt.be_stepupsneaker.core.client.dto.response.product.ClientProductResponse;
+import com.ndt.be_stepupsneaker.core.client.mapper.product.ClientProductMapper;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
@@ -14,9 +16,12 @@ import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -34,12 +39,21 @@ public class AdminProductServiceImpl implements AdminProductService {
     private PaginationUtil paginationUtil;
 
     @Override
-    public PageableObject<AdminProductResponse> findAllEntity(AdminProductRequest productRequest) {
+    public PageableObject<AdminProductResponse> findAllEntity(AdminProductRequest request) {
 
-        Pageable pageable = paginationUtil.pageable(productRequest);
-        Page<Product> resp = adminProductRepository.findAllProduct(productRequest, productRequest.getStatus(), pageable);
-        Page<AdminProductResponse> adminProductResponses = resp.map(AdminProductMapper.INSTANCE::productToAdminProductResponse);
-        return new PageableObject<>(adminProductResponses);
+        Pageable pageable = paginationUtil.pageable(request);
+        List<AdminProductResponse> adminProductResponses = new ArrayList<>();
+
+        Page<Object[]> resp = adminProductRepository.findAllProduct(request, request.getStatus(), pageable);
+        for (Object[] result : resp) {
+            Product product = (Product) result[0];
+            AdminProductResponse adminProductResponse = AdminProductMapper.INSTANCE.productToAdminProductResponse(product);
+            adminProductResponse.setSaleCount((Long) result[1]);
+            adminProductResponses.add(adminProductResponse);
+        }
+        Page<AdminProductResponse> adminProductResponsePage = new PageImpl<>(adminProductResponses, pageable, resp.getTotalElements());
+
+        return new PageableObject<>(adminProductResponsePage);
     }
 
     @Override

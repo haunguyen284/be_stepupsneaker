@@ -17,11 +17,12 @@ public interface BaseUtilRepository<T> extends JpaRepository<T, String> {
     @Query("UPDATE #{#entityName} e " +
             "SET e.status = " +
             "   CASE " +
-            "       WHEN :currentTime < e.startDate THEN 1 " +
+            "       WHEN :currentTime < e.startDate AND :currentTime < e.endDate THEN 3 " +
             "       WHEN :currentTime BETWEEN e.startDate AND e.endDate THEN 0 " +
+            "       WHEN :currentTime > e.endDate THEN 1 " +
             "       ELSE 2 " +
             "   END " +
-            "WHERE e.deleted = FALSE")
+            "WHERE e.deleted = FALSE AND e.status != 4")
     @Transactional
     void updateStatusAutomatically(@Param("currentTime") Long currentTime);
 
@@ -30,6 +31,7 @@ public interface BaseUtilRepository<T> extends JpaRepository<T, String> {
             "SET x.status = "+
             "   CASE " +
             "       WHEN (:startDate < CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP < :endDate) THEN 0 "+
+            "       WHEN (:startDate > CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP < :endDate) THEN 3 " +
             "       ELSE 1 " +
             "   END "+
             "WHERE x.id = :id")
