@@ -55,6 +55,10 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.maxQuantity} AS int))) 
     AND 
+    (:#{#request.fromCreatedAt} IS NULL OR :#{#request.fromCreatedAt} ILIKE '' OR x.createdAt >= CAST(:#{#request.fromCreatedAt} as int)) 
+    AND 
+    (:#{#request.toCreatedAt} IS NULL OR :#{#request.toCreatedAt} ILIKE '' OR x.createdAt >= CAST(:#{#request.toCreatedAt} as int)) 
+    AND 
     x.deleted=false 
     GROUP BY x.id
     """)

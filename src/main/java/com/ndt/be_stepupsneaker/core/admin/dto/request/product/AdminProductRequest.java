@@ -52,5 +52,9 @@ public class AdminProductRequest extends PageableRequest {
     private String brand;
 
     private String sole;
+
+    private String fromCreatedAt;
+
+    private String toCreatedAt;
 }
 
