@@ -4,6 +4,8 @@ import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentMethodRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDetailRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.order.Order;
@@ -11,6 +13,8 @@ import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.config.VNPayConfig;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
@@ -33,6 +37,8 @@ public class VNPayServiceImpl implements VNPayService {
     private final ClientOrderRepository clientOrderRepository;
     private final ClientPaymentRepository clientPaymentRepository;
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
+    private final ClientProductDetailRepository clientProductDetailRepository;
+    private final ClientVoucherRepository clientVoucherRepository;
 
     @Override
     public String createOrder(int total, String orderInfor) {
@@ -141,16 +147,16 @@ public class VNPayServiceImpl implements VNPayService {
     @Override
     public Order authenticateVnPay(HttpServletRequest request) {
         int result = orderReturn(request);
+        TransactionInfo transactionInfo = new TransactionInfo();
+        transactionInfo.setTransactionCode(request.getParameter("vnp_TransactionNo"));
+        transactionInfo.setOrderInfo(request.getParameter("vnp_OrderInfo"));
+        transactionInfo.setPaymentTime(request.getParameter("vnp_PayDate"));
+        transactionInfo.setTotalPrice(request.getParameter("vnp_Amount"));
+        Optional<Order> orderOptional = clientOrderRepository.findById(transactionInfo.getOrderInfo());
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Order Not Found!");
+        }
         if (result == 1) {
-            TransactionInfo transactionInfo = new TransactionInfo();
-            transactionInfo.setTransactionCode(request.getParameter("vnp_TransactionNo"));
-            transactionInfo.setOrderInfo(request.getParameter("vnp_OrderInfo"));
-            transactionInfo.setPaymentTime(request.getParameter("vnp_PayDate"));
-            transactionInfo.setTotalPrice(request.getParameter("vnp_Amount"));
-            Optional<Order> orderOptional = clientOrderRepository.findById(transactionInfo.getOrderInfo());
-            if (orderOptional.isEmpty()) {
-                throw new ResourceNotFoundException("Order Not Found!");
-            }
             PaymentMethod paymentMethod = clientPaymentMethodRepository.findByName("Card")
                     .orElseThrow(() -> new ResourceNotFoundException("Payment Method Not Found !"));
             Payment payment = new Payment();
@@ -163,6 +169,18 @@ public class VNPayServiceImpl implements VNPayService {
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
             return clientOrderRepository.save(order);
+        } else {
+            for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {
+                ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+                productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+                clientProductDetailRepository.save(productDetail);
+            }
+            Voucher voucher = orderOptional.get().getVoucher();
+            if (voucher != null) {
+                voucher.setQuantity(voucher.getQuantity() + 1);
+                clientVoucherRepository.save(voucher);
+            }
         }
         return null;
     }
