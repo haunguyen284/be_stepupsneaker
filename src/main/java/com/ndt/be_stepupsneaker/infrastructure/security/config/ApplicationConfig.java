@@ -27,8 +27,6 @@ import java.util.Optional;
 public class ApplicationConfig {
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final AdminCustomerRepository adminCustomerRepository;
-
-    // Tìm kiếm thông tin người dùng dựa trên email
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
@@ -43,7 +41,6 @@ public class ApplicationConfig {
             }
         };
     }
-
     // Cấu hình nhiệm vụ là xác minh phương thức đăng nhập của người dùng
     @Bean
     public AuthenticationProvider authenticationProvider() {

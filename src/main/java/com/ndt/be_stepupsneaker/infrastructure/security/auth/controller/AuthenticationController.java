@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/login-v2/")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
@@ -27,16 +27,16 @@ public class AuthenticationController {
 
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest request, HttpServletResponse response) {
         AuthenticationResponse authenticate = authenticationService.authenticate(request);
         String jwt = authenticate.getToken();
-        Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setMaxAge(7 * 24 * 60 * 60);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        response.addCookie(cookie);
+//        Cookie cookie = new Cookie("jwt", jwt);
+//        cookie.setMaxAge(7 * 24 * 60 * 60);
+//        cookie.setHttpOnly(true);
+//        cookie.setPath("/");
+//        response.addCookie(cookie);
         return ResponseEntity.ok(authenticate);
 
     }

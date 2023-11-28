@@ -90,8 +90,6 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    // Trích xuất thời điểm hết hạn của JWT
-    // Output : Thời điểm hết hạn (kiểu Date)
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }

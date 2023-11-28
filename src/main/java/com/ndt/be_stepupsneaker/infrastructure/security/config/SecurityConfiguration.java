@@ -17,8 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 @EnableMethodSecurity
-//@RequiredArgsConstructor: Tạo một constructor có tham số cho tất cả các trường final được đánh dấu bởi @NonNull.
-// Trong trường hợp này, các bean JwtAuthenticationFilter và AuthenticationProvider được inject vào thông qua constructor.
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -26,12 +24,12 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) //Tắt bảo vệ CSRF. CSRF là một loại tấn công khi kẻ tấn công sử dụng quyền đăng nhập của người dùng
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/login-v2/**", "/client/**")
+                                .requestMatchers("/auth/**", "/client/**")
                                 .permitAll()
-                                .requestMatchers("/admin/**").hasRole("STAFF")
+                                .requestMatchers("/admin/**").hasAnyRole("ADMIN","STAFF")
                                 .anyRequest()
                                 .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
