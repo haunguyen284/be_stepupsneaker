@@ -5,15 +5,18 @@ import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepo
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -26,65 +29,63 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 @Service
 public class JwtService {
-    //    private static final String SECRET_KEY = "";
-    private static final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
     private final AdminCustomerRepository adminCustomerRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
 
-    // Tạo JWT từ thông tin người dùng
-    // UserDetails là một giao diện Spring security chứa thông tin về người dùng
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
-
-    // Tạo một chuỗi JWT với claims bổ sung và UserDetail chứa thông tin người dùng
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         Optional<Employee> optionalEmployee = adminEmployeeRepository.findByEmail(userDetails.getUsername());
         Optional<Customer> optionalCustomer = adminCustomerRepository.findByEmail(userDetails.getUsername());
-        if(optionalCustomer.isPresent()){
+        Map<String, Object> extraClaims = new HashMap<>();
+        if (optionalCustomer.isPresent()) {
             extraClaims.put("id", optionalCustomer.get().getId());
-            extraClaims.put("email",optionalCustomer.get().getEmail());
-            extraClaims.put("role","ROLE_CUSTOMER");
+            extraClaims.put("email", optionalCustomer.get().getEmail());
+            extraClaims.put("role", "ROLE_CUSTOMER");
             extraClaims.put("fullName", optionalCustomer.get().getFullName());
-        }else if(optionalEmployee.isPresent()){
+        } else if (optionalEmployee.isPresent()) {
             extraClaims.put("id", optionalEmployee.get().getId());
-            extraClaims.put("email",optionalEmployee.get().getEmail());
-            extraClaims.put("role",optionalEmployee.get().getRole().getName());
+            extraClaims.put("email", optionalEmployee.get().getEmail());
+            extraClaims.put("role", optionalEmployee.get().getRole().getName());
             extraClaims.put("fullName", optionalEmployee.get().getFullName());
-        }else {
+        } else {
             throw new ResourceNotFoundException("User Not Found!");
         }
-        PrivateKey privateKey = keyPair.getPrivate(); // một cặp khóa (public key or private key ) kí và xác minh JWT
-        return Jwts
-                .builder()
-                .setClaims(extraClaims) //
-                .setSubject(userDetails.getUsername())// set name người dùng
-                .setIssuedAt(new Date(System.currentTimeMillis())) // Đặt thời điểm bắt đầu của JWT
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24)) //Thời điểm hết hạn của JWT
-                .signWith(privateKey, SignatureAlgorithm.ES256)// Tạo JWT bằng thuật toán ECDSA với private key
-                .compact();// Kết thúc quá trình xây dụng JWT  và trả về chuỗi JWT hoàn chỉnh
 
+        return Jwts.builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 60 * 1000))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
-    // Trích xuất thông tin từ một claim cụ thể trong chuỗi JWT sử dụng một ClaimsResolver
-    // Function<Claims, T> claimsResolver : Hàm chuyển đổi Claims sang đối tượng T
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
         final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
+        return claimsResolvers.apply(claims);
     }
 
-    // Kiểm tra chuỗi JWT hợp lệ hay không từ người dùng cung cấp(tên và hết hạn)
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUserName(token);
-        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
-    // Trích xuất tên người dùng từ chuỗi JWT
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Kiểm tra chuỗi JWT hết hạn hay không
+    private Key getSigningKey() {
+        byte[] key = Decoders.BASE64.decode(EntityProperties.SECRET);
+        return Keys.hmacShaKeyFor(key);
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUserName(token);
+        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -95,26 +96,5 @@ public class JwtService {
         return extractClaim(token, Claims::getExpiration);
     }
 
-
-    // Trả về đối tượng Claims
-    // Claims chứa tất cả các claims có trong chuỗi JWT
-    // claims chứa tên người dùng, thời gian hết hạn,...
-    private Claims extractAllClaims(String token) {
-        PublicKey publicKey = keyPair.getPublic();
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(publicKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-    }
-
-    // Cấu trúc JWT : 3 phần (HEADER , PAYLOAD , SIGNATURE)
-    // HEADER : chứa 2 phần ( alg và typ)
-    // alg : Xác định thuật toán mã hóa cho chuỗi JWT như : HS256,ES256,...
-    // typ : Chỉ ra đối tượng JWT
-    // PAYLOAD : Chứa thông tin người dùng đặt trong chuỗi Token, ví dụ như name,id,role,...
-    // SIGNATURE : Tạo ra JWT bằng cách mã hóa phần HEADER và PAYLOAD kèm theo mội cặp chuỗi secret
 
 }

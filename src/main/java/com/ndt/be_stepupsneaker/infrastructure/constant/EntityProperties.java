@@ -21,4 +21,6 @@ public final class EntityProperties {
     public static final String GHN_API_FEE_URL  = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
     public static final String VITE_GHN_USER_TOKEN = "2bddbda8-7165-11ee-af43-6ead57e9219a";
     public static final String VITE_GHN_SHOP_ID = "4649903";
+    public static final String SECRET = "QHMBQfsViR66wU3Yx/MOdkKcHdmJeRy4JdbDbrjmZdfu35Q7yzH6b3vJCrQcNgoOEFfsGyhOeF5Pby7R+YzG0w==";
+
 }

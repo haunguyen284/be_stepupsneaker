@@ -31,7 +31,7 @@ public class SecurityConfiguration {
                         req -> req
                                 .requestMatchers("/login-v2/**", "/client/**")
                                 .permitAll()
-                                .requestMatchers("/admin/").hasRole("Staff")
+                                .requestMatchers("/admin/**").hasRole("STAFF")
                                 .anyRequest()
                                 .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
