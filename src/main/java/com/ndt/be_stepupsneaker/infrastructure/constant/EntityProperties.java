@@ -10,7 +10,7 @@ public final class EntityProperties {
     public static final short LENGTH_ADDRESS = 500;
     public static final byte LENGTH_CODE = 10;
     public static final byte LENGTH_GENDER = 50;
-    public static final byte LENGTH_PASSWORD = 50;
+    public static final byte LENGTH_PASSWORD = 100;
     public static final byte LENGTH_ACCOUNT = 20;
     public static final byte LENGTH_EMAIL = 50;
     public static final byte LENGTH_PHONE = 20;

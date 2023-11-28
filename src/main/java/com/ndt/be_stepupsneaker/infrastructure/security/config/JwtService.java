@@ -1,9 +1,16 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.config;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +20,16 @@ import java.security.PublicKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
+@RequiredArgsConstructor
 @Service
 public class JwtService {
     //    private static final String SECRET_KEY = "";
     private static final KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.ES256);
+    private final AdminCustomerRepository adminCustomerRepository;
+    private final AdminEmployeeRepository adminEmployeeRepository;
 
     // Tạo JWT từ thông tin người dùng
     // UserDetails là một giao diện Spring security chứa thông tin về người dùng
@@ -28,6 +39,21 @@ public class JwtService {
 
     // Tạo một chuỗi JWT với claims bổ sung và UserDetail chứa thông tin người dùng
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        Optional<Employee> optionalEmployee = adminEmployeeRepository.findByEmail(userDetails.getUsername());
+        Optional<Customer> optionalCustomer = adminCustomerRepository.findByEmail(userDetails.getUsername());
+        if(optionalCustomer.isPresent()){
+            extraClaims.put("id", optionalCustomer.get().getId());
+            extraClaims.put("email",optionalCustomer.get().getEmail());
+            extraClaims.put("role","ROLE_CUSTOMER");
+            extraClaims.put("fullName", optionalCustomer.get().getFullName());
+        }else if(optionalEmployee.isPresent()){
+            extraClaims.put("id", optionalEmployee.get().getId());
+            extraClaims.put("email",optionalEmployee.get().getEmail());
+            extraClaims.put("role",optionalEmployee.get().getRole().getName());
+            extraClaims.put("fullName", optionalEmployee.get().getFullName());
+        }else {
+            throw new ResourceNotFoundException("User Not Found!");
+        }
         PrivateKey privateKey = keyPair.getPrivate(); // một cặp khóa (public key or private key ) kí và xác minh JWT
         return Jwts
                 .builder()

@@ -27,10 +27,14 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) //Tắt bảo vệ CSRF. CSRF là một loại tấn công khi kẻ tấn công sử dụng quyền đăng nhập của người dùng
-                .authorizeHttpRequests(req->req.requestMatchers("/admin/**").hasRole("ADMIN")
-                .anyRequest()
-                .authenticated())
-                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        req -> req
+                                .requestMatchers("/login-v2/**", "/client/**")
+                                .permitAll()
+                                .requestMatchers("/admin/").hasRole("Staff")
+                                .anyRequest()
+                                .authenticated())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

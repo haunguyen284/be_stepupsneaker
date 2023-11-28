@@ -1,8 +1,8 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.auth.controller;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.AuthenticationResponse;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.AuthenticationRequest;
-import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.RegisterRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.AuthenticationService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/login-v2/")
 @RequiredArgsConstructor
 public class AuthenticationController {
 
@@ -22,7 +22,7 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody RegisterRequest request) {
+            @RequestBody AdminEmployeeRequest request) {
         return ResponseEntity.ok(authenticationService.register(request));
 
     }

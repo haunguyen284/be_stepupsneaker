@@ -23,13 +23,12 @@ import java.util.List;
 @Setter
 @Table(name = "employee")
 @Entity
-@Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class Employee extends PrimaryEntity implements UserDetails {
     @JoinColumn(name = "role_id", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Role role;
 
     @Column(name = "full_name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
@@ -39,7 +38,7 @@ public class Employee extends PrimaryEntity implements UserDetails {
     @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", length = EntityProperties.LENGTH_PASSWORD, nullable = false)
+    @Column(name = "password", length = EntityProperties.LENGTH_DESCRIPTION, nullable = false)
     private String password;
 
     @Column(name = "status")
