@@ -10,18 +10,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Nationalized;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
 @Table(name = "employee")
 @Entity
-public class Employee extends PrimaryEntity {
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+public class Employee extends PrimaryEntity implements UserDetails {
     @JoinColumn(name = "role_id", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private Role role;
 
     @Column(name = "full_name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
@@ -31,7 +38,7 @@ public class Employee extends PrimaryEntity {
     @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", length = EntityProperties.LENGTH_PASSWORD, nullable = false)
+    @Column(name = "password", length = EntityProperties.LENGTH_DESCRIPTION, nullable = false)
     private String password;
 
     @Column(name = "status")
@@ -51,4 +58,38 @@ public class Employee extends PrimaryEntity {
     @Column(name = "url_image")
     private String image;
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.getName()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
