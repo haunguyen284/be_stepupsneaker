@@ -62,15 +62,15 @@ public class AuthenticationService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
-                            request.getPassWord()
+                            request.getPassword()
                     )
             );
         } catch (AuthenticationException exception) {
             throw new ApiException("Invalid credentials!");
         }
-        if (employee != null && passwordEncoder.matches(request.getPassWord(), employee.getPassword())) {
+        if (employee != null && passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
             jwtToken = jwtService.generateToken(employee);
-        } else if (customer != null && passwordEncoder.matches(request.getPassWord(), customer.getPassword())) {
+        } else if (customer != null && passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
             jwtToken = jwtService.generateToken(customer);
         } else {
             throw new ApiException("Invalid credentials!");
