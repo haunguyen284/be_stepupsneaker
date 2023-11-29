@@ -43,6 +43,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.sse.SSEEmitterManager;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -68,7 +69,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final ClientOrderHistoryRepository clientOrderHistoryRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final ClientAddressRepository clientAddressRepository;
-    private final AdminEmployeeRepository adminEmployeeRepository;
     private final ClientVoucherRepository clientVoucherRepository;
     private final ClientVoucherHistoryRepository clientVoucherHistoryRepository;
     private final PaginationUtil paginationUtil;
@@ -78,14 +78,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
     private final ClientPaymentRepository clientPaymentRepository;
     private final VNPayService vnPayService;
+    private final SSEEmitterManager sseEmitterManager;
 
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
+                                  SSEEmitterManager sseEmitterManager,
                                   ClientOrderHistoryRepository clientOrderHistoryRepository,
                                   ClientCustomerRepository clientCustomerRepository,
                                   ClientAddressRepository clientAddressRepository,
-                                  AdminEmployeeRepository adminEmployeeRepository,
                                   ClientVoucherRepository clientVoucherRepository,
                                   ClientVoucherHistoryRepository clientVoucherHistoryRepository,
                                   PaginationUtil paginationUtil,
@@ -95,7 +96,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.clientOrderHistoryRepository = clientOrderHistoryRepository;
         this.clientCustomerRepository = clientCustomerRepository;
         this.clientAddressRepository = clientAddressRepository;
-        this.adminEmployeeRepository = adminEmployeeRepository;
         this.clientVoucherRepository = clientVoucherRepository;
         this.clientVoucherHistoryRepository = clientVoucherHistoryRepository;
         this.paginationUtil = paginationUtil;
@@ -104,6 +104,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.clientPaymentMethodRepository = clientPaymentMethodRepository;
         this.clientPaymentRepository = clientPaymentRepository;
         this.vnPayService = vnPayService;
+        this.sseEmitterManager = sseEmitterManager;
     }
 
     @Override
@@ -143,6 +144,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
+
+        sseEmitterManager.sendMessage(clientOrderResponse);
+
         return clientOrderResponse;
     }
 
@@ -242,9 +246,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     private void setOrderDetails(Order order, ClientOrderRequest orderRequest) {
         String customerId = orderRequest.getCustomer();
-        String employeeId = orderRequest.getEmployee();
         order.setCustomer(customerId != null ? clientCustomerRepository.findById(customerId).orElse(null) : null);
-        order.setEmployee(employeeId != null ? adminEmployeeRepository.findById(employeeId).orElse(null) : null);
+        order.setEmployee(null);
     }
 
     private void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
