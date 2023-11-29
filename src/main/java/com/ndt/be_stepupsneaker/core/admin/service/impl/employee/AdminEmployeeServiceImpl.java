@@ -9,31 +9,37 @@ import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import com.ndt.be_stepupsneaker.util.RandomStringUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
-    @Autowired
-    private CloudinaryUpload cloudinaryUpload;
+    private final CloudinaryUpload cloudinaryUpload;
 
-    @Autowired
-    private AdminEmployeeRepository adminEmployeeRepository;
+    private final AdminEmployeeRepository adminEmployeeRepository;
 
-    @Autowired
-    private AdminRoleRepository adminRoleRepository;
+    private final AdminRoleRepository adminRoleRepository;
 
-    @Autowired
-    private PaginationUtil paginationUtil;
+    private final PaginationUtil paginationUtil;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final EmailService emailService;
 
     @Override
     public PageableObject<AdminEmployeeResponse> findAllEntity(AdminEmployeeRequest employeeRequest) {
@@ -54,9 +60,12 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         if (employeeOptional.isPresent()) {
             throw new ApiException("PhoneNumber is exist");
         }
+        String passWordRandom = RandomStringUtil.generateRandomPassword(6);
+        employeeDTO.setPassword(passwordEncoder.encode(passWordRandom));
         employeeDTO.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
-
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoPassWord(null,passWordRandom,employee);
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }
 

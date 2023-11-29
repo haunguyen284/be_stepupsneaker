@@ -83,7 +83,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWordToCustomer(customer);
+        sendMailAutoEntity.sendMailAutoPassWord(customer,passWordRandom,null);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
     }
 

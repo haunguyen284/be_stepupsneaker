@@ -14,37 +14,35 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class ClientCustomerServiceImpl implements ClientCustomerService {
 
-    @Autowired
-    private CloudinaryUpload cloudinaryUpload;
 
-    private ClientCustomerRepository clientCustomerRepository;
+    private final CloudinaryUpload cloudinaryUpload;
 
-    private PaginationUtil paginationUtil;
+    private final ClientCustomerRepository clientCustomerRepository;
 
-    private EmailService emailService;
+    private final PaginationUtil paginationUtil;
 
-    @Autowired
-    public ClientCustomerServiceImpl(ClientCustomerRepository ClientCustomerRepository, PaginationUtil paginationUtil, EmailService emailService) {
-        this.clientCustomerRepository = ClientCustomerRepository;
-        this.paginationUtil = paginationUtil;
-        this.emailService = emailService;
-    }
+    private final EmailService emailService;
+
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
     public PageableObject<ClientCustomerResponse> findAllCustomer(ClientCustomerRequest customerRequest, String voucher, String noVoucher) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = clientCustomerRepository.findAllCustomer(customerRequest,voucher,noVoucher,customerRequest.getStatus(), pageable);
+        Page<Customer> resp = clientCustomerRepository.findAllCustomer(customerRequest, voucher, noVoucher, customerRequest.getStatus(), pageable);
         Page<ClientCustomerResponse> ClientCustomerResponses = resp.map(ClientCustomerMapper.INSTANCE::customerToClientCustomerResponse);
 
         return new PageableObject<>(ClientCustomerResponses);
@@ -63,11 +61,11 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
             throw new ApiException("EMAIL IS EXIT !");
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
-        customerDTO.setPassword(passWordRandom);
+        customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
         customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(customerDTO));
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWordToCustomer(customer);
+        sendMailAutoEntity.sendMailAutoPassWord(customer,passWordRandom,null);
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);
     }
 
@@ -97,7 +95,7 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
     public ClientCustomerResponse findById(String id) {
         Optional<Customer> customerOptional = clientCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
-            throw new RuntimeException("LOOI");
+            throw new ResourceNotFoundException("Customer Not Found !");
         }
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customerOptional.get());
     }

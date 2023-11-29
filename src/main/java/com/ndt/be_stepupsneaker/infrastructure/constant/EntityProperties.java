@@ -10,7 +10,7 @@ public final class EntityProperties {
     public static final short LENGTH_ADDRESS = 500;
     public static final byte LENGTH_CODE = 10;
     public static final byte LENGTH_GENDER = 50;
-    public static final byte LENGTH_PASSWORD = 50;
+    public static final byte LENGTH_PASSWORD = 100;
     public static final byte LENGTH_ACCOUNT = 20;
     public static final byte LENGTH_EMAIL = 50;
     public static final byte LENGTH_PHONE = 20;
@@ -21,4 +21,6 @@ public final class EntityProperties {
     public static final String GHN_API_FEE_URL  = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
     public static final String VITE_GHN_USER_TOKEN = "2bddbda8-7165-11ee-af43-6ead57e9219a";
     public static final String VITE_GHN_SHOP_ID = "4649903";
+    public static final String SECRET = "QHMBQfsViR66wU3Yx/MOdkKcHdmJeRy4JdbDbrjmZdfu35Q7yzH6b3vJCrQcNgoOEFfsGyhOeF5Pby7R+YzG0w==";
+
 }
