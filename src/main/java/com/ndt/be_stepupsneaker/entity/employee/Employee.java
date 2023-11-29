@@ -38,7 +38,7 @@ public class Employee extends PrimaryEntity implements UserDetails {
     @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", length = EntityProperties.LENGTH_DESCRIPTION, nullable = false)
+    @Column(name = "password", length = EntityProperties.LENGTH_PASSWORD, nullable = false)
     private String password;
 
     @Column(name = "status")
