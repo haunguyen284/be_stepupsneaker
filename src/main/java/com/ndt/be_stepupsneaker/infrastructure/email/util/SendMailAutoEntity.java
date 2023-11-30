@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.infrastructure.email.util;
 
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.email.model.Email;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,29 @@ public class SendMailAutoEntity {
         } else {
             toEmail[0] = employee.getEmail();
         }
+        email.setToEmail(toEmail);
+        emailService.sendEmail(email);
+    }
+
+    public void sendMailAutoVoucherToCustomer(CustomerVoucher customerVoucher) {
+        String[] toEmail = new String[1];
+        Email email = new Email();
+        email.setSubject("STEP UP SNEAKER sends you the new Voucher ...");
+        email.setTitleEmail("<div style='text-align: center; margin-top: 20px; margin-bottom: 20px;'><h1 style='color: red;'>STEP UP SNEAKER sends you the new Voucher </h1></div>");
+        String voucherInfo = "<div style='text-align: center; margin-top: 20px; margin-bottom: 20px;'>";
+        voucherInfo += "<div style='border: 2px dotted #000; padding: 10px; display: inline-block;'>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Code: <strong>" + customerVoucher.getVoucher().getCode() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Name: <strong>" + customerVoucher.getVoucher().getName() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Status: <strong>" + customerVoucher.getVoucher().getStatus() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Type: <strong>" + customerVoucher.getVoucher().getType() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Value: <strong>" + customerVoucher.getVoucher().getValue() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Constraint: <strong>" + customerVoucher.getVoucher().getConstraint() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Quantity: <strong>" + customerVoucher.getVoucher().getQuantity() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Start Date: <strong>" + customerVoucher.getVoucher().getStartDate() + "</strong></p>";
+        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>End Date: <strong>" + customerVoucher.getVoucher().getEndDate() + "</strong></p>";
+        voucherInfo += "</div></div>";
+        email.setBody(voucherInfo);
+        toEmail[0] = customerVoucher.getCustomer().getEmail();
         email.setToEmail(toEmail);
         emailService.sendEmail(email);
     }

@@ -75,5 +75,6 @@ public interface AdminCustomerRepository extends CustomerRepository {
     )
     List<Statistic> getDailyCustomerBetween(@Param("start") Long start, @Param("end") Long end);
 
-    List<Customer> getAllByDeleted(Boolean check);
+    @Query(value = "SELECT x FROM Customer x WHERE x.deleted=FALSE ", nativeQuery = true)
+    List<Customer> getAllByDeleted();
 }
