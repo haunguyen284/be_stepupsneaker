@@ -7,6 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.publisher.Flux;
+
+import java.time.Duration;
+import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/sse")
@@ -19,11 +23,9 @@ public class SSEController {
     }
 
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter connect() {
-        SseEmitter emitter = new SseEmitter();
-        sseEmitterManager.addEmitter(emitter);
-        emitter.onCompletion(() -> sseEmitterManager.removeEmitter(emitter));
-        return emitter;
+    public Flux<String> streamFlux() {
+        return Flux.interval(Duration.ofSeconds(1))
+                .map(sequence -> "Flux - " + LocalTime.now().toString());
     }
 
 }

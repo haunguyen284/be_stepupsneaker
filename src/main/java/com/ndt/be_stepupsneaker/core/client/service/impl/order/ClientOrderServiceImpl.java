@@ -78,12 +78,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
     private final ClientPaymentRepository clientPaymentRepository;
     private final VNPayService vnPayService;
-    private final SSEEmitterManager sseEmitterManager;
 
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
-                                  SSEEmitterManager sseEmitterManager,
                                   ClientOrderHistoryRepository clientOrderHistoryRepository,
                                   ClientCustomerRepository clientCustomerRepository,
                                   ClientAddressRepository clientAddressRepository,
@@ -104,7 +102,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.clientPaymentMethodRepository = clientPaymentMethodRepository;
         this.clientPaymentRepository = clientPaymentRepository;
         this.vnPayService = vnPayService;
-        this.sseEmitterManager = sseEmitterManager;
     }
 
     @Override
@@ -144,8 +141,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
-
-        sseEmitterManager.sendMessage(clientOrderResponse);
 
         return clientOrderResponse;
     }

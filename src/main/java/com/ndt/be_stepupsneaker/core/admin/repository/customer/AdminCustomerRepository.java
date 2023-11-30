@@ -20,29 +20,29 @@ import java.util.UUID;
 @Transactional
 public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
-    SELECT x FROM Customer x
-    WHERE
-        (:#{#request.q} IS NULL OR :#{#request.q} ILIKE ''  OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
-        OR
-        x.email ILIKE CONCAT('%', :#{#request.q}, '%') OR x.gender ILIKE CONCAT('%', :#{#request.q}, '%')
-        OR
-        EXISTS
-        (SELECT 1 FROM x.addressList a WHERE a.wardName ILIKE CONCAT('%', :#{#request.q}, '%')
-        OR
-        a.districtName ILIKE CONCAT('%', :#{#request.q}, '%')OR a.provinceName ILIKE CONCAT('%', :#{#request.q}, '%')
-        OR
-        a.more ILIKE CONCAT('%', :#{#request.q}, '%')OR a.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%')))
-        AND
-        (:status IS NULL OR x.status = :status)
-        AND
-        (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
-        AND
-        (:voucher IS NULL OR :voucher ILIKE '' OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :voucher))
-        AND
-        (:noVoucher IS NULL OR :noVoucher ILIKE '' OR x.id NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :noVoucher))
-        AND
-        (x.deleted = FALSE)
-    """)
+            SELECT x FROM Customer x
+            WHERE
+                (:#{#request.q} IS NULL OR :#{#request.q} ILIKE ''  OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
+                OR
+                x.email ILIKE CONCAT('%', :#{#request.q}, '%') OR x.gender ILIKE CONCAT('%', :#{#request.q}, '%')
+                OR
+                EXISTS
+                (SELECT 1 FROM x.addressList a WHERE a.wardName ILIKE CONCAT('%', :#{#request.q}, '%')
+                OR
+                a.districtName ILIKE CONCAT('%', :#{#request.q}, '%')OR a.provinceName ILIKE CONCAT('%', :#{#request.q}, '%')
+                OR
+                a.more ILIKE CONCAT('%', :#{#request.q}, '%')OR a.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%')))
+                AND
+                (:status IS NULL OR x.status = :status)
+                AND
+                (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
+                AND
+                (:voucher IS NULL OR :voucher ILIKE '' OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :voucher))
+                AND
+                (:noVoucher IS NULL OR :noVoucher ILIKE '' OR x.id NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :noVoucher))
+                AND
+                (x.deleted = FALSE)
+            """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request,
                                    @Param("voucher") String voucher,
                                    @Param("noVoucher") String noVoucher,
@@ -57,21 +57,23 @@ public interface AdminCustomerRepository extends CustomerRepository {
 
     @Query(
             value = """
-                SELECT
-                    extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
-                    COUNT(*) AS value
-                FROM
-                    customer
-                WHERE
-                    deleted = false AND
-                    created_at >= :start AND
-                    created_at <= :end
-                GROUP BY
-                    date
-                ORDER BY
-                    date
-                """,
+                    SELECT
+                        extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
+                        COUNT(*) AS value
+                    FROM
+                        customer
+                    WHERE
+                        deleted = false AND
+                        created_at >= :start AND
+                        created_at <= :end
+                    GROUP BY
+                        date
+                    ORDER BY
+                        date
+                    """,
             nativeQuery = true
     )
     List<Statistic> getDailyCustomerBetween(@Param("start") Long start, @Param("end") Long end);
+
+    List<Customer> getAllByDeleted(Boolean check);
 }
