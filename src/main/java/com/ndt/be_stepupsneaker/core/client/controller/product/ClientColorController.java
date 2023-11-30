@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/client/colors")
+@RequestMapping("/client/products/colors")
 public class ClientColorController {
     @Autowired
     private ClientColorService clientColorService;

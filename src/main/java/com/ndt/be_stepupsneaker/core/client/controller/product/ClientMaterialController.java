@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/client/materials")
+@RequestMapping("/client/products/materials")
 public class ClientMaterialController {
     @Autowired
     private ClientMaterialService clientMaterialService;
