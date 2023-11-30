@@ -1,6 +1,5 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.order;
 
-import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
@@ -27,8 +26,8 @@ import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepo
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.cart.CartDetail;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
+import com.ndt.be_stepupsneaker.entity.notification.NotificationEmployee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
@@ -38,12 +37,13 @@ import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
+import com.ndt.be_stepupsneaker.infrastructure.constant.NotificationEmployeeType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.infrastructure.sse.SSEEmitterManager;
+import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -54,7 +54,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.view.RedirectView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,12 +77,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
     private final ClientPaymentRepository clientPaymentRepository;
     private final VNPayService vnPayService;
-    private final SSEEmitterManager sseEmitterManager;
+
+    private final NotificationEmployeeRepository notificationEmployeeRepository;
 
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
-                                  SSEEmitterManager sseEmitterManager,
                                   ClientOrderHistoryRepository clientOrderHistoryRepository,
                                   ClientCustomerRepository clientCustomerRepository,
                                   ClientAddressRepository clientAddressRepository,
@@ -91,7 +90,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                                   ClientVoucherHistoryRepository clientVoucherHistoryRepository,
                                   PaginationUtil paginationUtil,
                                   ClientProductDetailRepository clientProductDetailRepository,
-                                  ClientOrderDetailRepository clientOrderDetailRepository, ClientPaymentMethodRepository clientPaymentMethodRepository, ClientPaymentRepository clientPaymentRepository, VNPayService vnPayService) {
+                                  ClientOrderDetailRepository clientOrderDetailRepository, ClientPaymentMethodRepository clientPaymentMethodRepository, ClientPaymentRepository clientPaymentRepository, VNPayService vnPayService, NotificationEmployeeRepository notificationEmployeeRepository) {
         this.clientOrderRepository = clientOrderRepository;
         this.clientOrderHistoryRepository = clientOrderHistoryRepository;
         this.clientCustomerRepository = clientCustomerRepository;
@@ -104,7 +103,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.clientPaymentMethodRepository = clientPaymentMethodRepository;
         this.clientPaymentRepository = clientPaymentRepository;
         this.vnPayService = vnPayService;
-        this.sseEmitterManager = sseEmitterManager;
+        this.notificationEmployeeRepository = notificationEmployeeRepository;
     }
 
     @Override
@@ -145,8 +144,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
 
-        sseEmitterManager.sendMessage(clientOrderResponse);
-
+        // Notification new order
+        NotificationEmployee notificationEmployee = new NotificationEmployee();
+        notificationEmployee.setContent(clientOrderResponse.getFullName());
+        notificationEmployee.setCustomer(orderSave.getCustomer());
+        notificationEmployee.setNotificationType(NotificationEmployeeType.ORDER_PLACED);
+        notificationEmployee.setHref("/orders/" + orderSave.getId());
+        notificationEmployeeRepository.save(notificationEmployee);
         return clientOrderResponse;
     }
 

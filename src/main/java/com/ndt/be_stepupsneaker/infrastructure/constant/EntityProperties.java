@@ -7,6 +7,7 @@ public final class EntityProperties {
     public static final short LENGTH_URL = 255;
     public static final short LENGTH_NAME = 255;
     public static final short LENGTH_DESCRIPTION = 1000;
+    public static final short LENGTH_HREF = 400;
     public static final short LENGTH_ADDRESS = 500;
     public static final byte LENGTH_CODE = 10;
     public static final byte LENGTH_GENDER = 50;
