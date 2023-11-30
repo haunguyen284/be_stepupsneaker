@@ -13,4 +13,6 @@ public interface NotificationEmployeeService {
 
     PageableObject<NotificationEmployeeResponse> findAllEntity(NotificationEmployeeRequest request);
 
+    NotificationEmployeeResponse changeNotificationToRead(String id);
+
 }

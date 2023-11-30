@@ -10,6 +10,9 @@ import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
@@ -35,5 +38,10 @@ public class NotificationEmployeeController {
     @GetMapping("/sse")
     public Flux<ServerSentEvent<List<NotificationEmployeeResponse>>> steamNotification() {
         return notificationEmployeeService.findAllNotificationFlux();
+    }
+
+    @PutMapping("/read/{id}")
+    public Object changeNotificationToRead(@PathVariable String id) {
+        return ResponseHelper.getResponse(notificationEmployeeService.changeNotificationToRead(id), HttpStatus.OK);
     }
 }
