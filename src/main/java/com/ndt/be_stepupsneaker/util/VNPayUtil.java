@@ -1,4 +1,4 @@
-package com.ndt.be_stepupsneaker.infrastructure.config;
+package com.ndt.be_stepupsneaker.util;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Random;
 
 @Component
-public class VNPayConfig {
+public class VNPayUtil {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
