@@ -146,10 +146,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
         // Notification new order
         NotificationEmployee notificationEmployee = new NotificationEmployee();
-        notificationEmployee.setContent(clientOrderResponse.getFullName());
+        notificationEmployee.setContent(clientOrderResponse.getFullName() + " " + orderSave.getCode());
         notificationEmployee.setCustomer(orderSave.getCustomer());
         notificationEmployee.setNotificationType(NotificationEmployeeType.ORDER_PLACED);
-        notificationEmployee.setHref("/orders/" + orderSave.getId());
+        notificationEmployee.setHref("orders/show/" + orderSave.getId());
         notificationEmployeeRepository.save(notificationEmployee);
         return clientOrderResponse;
     }
