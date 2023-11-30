@@ -12,6 +12,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.notification.NotificationEmployee;
 import com.ndt.be_stepupsneaker.entity.product.Brand;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,5 +56,13 @@ public class NotificationEmployeeServiceImpl implements NotificationEmployeeServ
         Page<NotificationEmployee> resp = notificationEmployeeRepository.findAll(pageable);
         Page<NotificationEmployeeResponse> notificationEmployeeResponses = resp.map(NotificationEmployeeMapper.INSTANCE::notificationEmployeeToNotificationEmployeeResponse);
         return new PageableObject<>(notificationEmployeeResponses);
+    }
+
+    @Override
+    public NotificationEmployeeResponse changeNotificationToRead(String id) {
+        NotificationEmployee notificationEmployee = notificationEmployeeRepository.findById(id).orElseThrow(() -> new ApiException("Notification not found"));
+        notificationEmployee.setRead(true);
+
+        return NotificationEmployeeMapper.INSTANCE.notificationEmployeeToNotificationEmployeeResponse(notificationEmployeeRepository.save(notificationEmployee));
     }
 }
