@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/client/soles")
+@RequestMapping("/client/products/soles")
 public class ClientSoleController {
     @Autowired
     private ClientSoleService clientSoleService;

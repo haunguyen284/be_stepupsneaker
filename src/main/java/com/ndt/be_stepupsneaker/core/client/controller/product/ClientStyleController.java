@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/client/styles")
+@RequestMapping("/client/products/styles")
 public class ClientStyleController {
     @Autowired
     private ClientStyleService clientStyleService;
