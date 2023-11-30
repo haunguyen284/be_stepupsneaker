@@ -1,10 +1,14 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.auth.service;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
 import com.ndt.be_stepupsneaker.core.admin.mapper.empolyee.AdminEmployeeMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminRoleRepository;
+import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientCustomerRequest;
+import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper;
+import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
@@ -32,10 +36,10 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final AdminEmployeeRepository adminEmployeeRepository;
-    private final AdminCustomerRepository adminCustomerRepository;
+    private final ClientCustomerRepository clientCustomerRepository;
     private final CloudinaryUpload cloudinaryUpload;
 
-    public AuthenticationResponse register(AdminEmployeeRequest request) {
+    public AuthenticationResponse registerEmployee(AdminEmployeeRequest request) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
         if (employeeOptional.isPresent()) {
             throw new ApiException("Email is exist");
@@ -54,9 +58,25 @@ public class AuthenticationService {
                 .build();
 
     }
+
+    public AuthenticationResponse registerCustomer(ClientCustomerRequest request) {
+        Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(request.getEmail());
+        if (customerOptional.isPresent()) {
+            throw new ApiException("Email is exist");
+        }
+//        request.setImage(cloudinaryUpload.upload(request.getImage()));
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(request));
+        clientCustomerRepository.save(customer);
+        var jwtToken = jwtService.generateToken(customer);
+        return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .build();
+
+    }
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Employee employee = adminEmployeeRepository.findByEmail(request.getEmail()).orElse(null);
-        Customer customer = adminCustomerRepository.findByEmail(request.getEmail()).orElse(null);
+        Customer customer = clientCustomerRepository.findByEmail(request.getEmail()).orElse(null);
         String jwtToken;
         try {
             authenticationManager.authenticate(
@@ -75,11 +95,6 @@ public class AuthenticationService {
         } else {
             throw new ApiException("Invalid credentials!");
         }
-//        Cookie cookie = new Cookie("jwt", jwtToken);
-//        cookie.setMaxAge(7 * 24 * 60 * 60);
-//        cookie.setHttpOnly(true);
-//        cookie.setPath("/");
-//        response.addCookie(cookie);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
                 .build();
