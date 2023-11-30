@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.auth.controller;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientCustomerRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.AuthenticationResponse;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.AuthenticationRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.AuthenticationService;
@@ -20,23 +21,25 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(
+    @PostMapping("/register-employees")
+    public ResponseEntity<AuthenticationResponse> registerEmployee(
             @RequestBody AdminEmployeeRequest request) {
-        return ResponseEntity.ok(authenticationService.register(request));
+        return ResponseEntity.ok(authenticationService.registerEmployee(request));
 
     }
 
+    @PostMapping("/register-customers")
+    public ResponseEntity<AuthenticationResponse> registerCustomer(
+            @RequestBody ClientCustomerRequest request) {
+        return ResponseEntity.ok(authenticationService.registerCustomer(request));
+
+    }
+
+
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(
-            @RequestBody AuthenticationRequest request, HttpServletResponse response) {
+            @RequestBody AuthenticationRequest request) {
         AuthenticationResponse authenticate = authenticationService.authenticate(request);
-        String jwt = authenticate.getToken();
-//        Cookie cookie = new Cookie("jwt", jwt);
-//        cookie.setMaxAge(7 * 24 * 60 * 60);
-//        cookie.setHttpOnly(true);
-//        cookie.setPath("/");
-//        response.addCookie(cookie);
         return ResponseEntity.ok(authenticate);
 
     }

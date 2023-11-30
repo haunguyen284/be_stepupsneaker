@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -37,6 +38,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/auth/**", "/client/products/**",
                                         "/client/product-details/**", "/sse/connect")
                                 .permitAll()
+                                .requestMatchers(HttpMethod.POST,"/client/orders/").permitAll()
                                 .requestMatchers("/admin/**").hasAnyRole("ADMIN","STAFF")
                                 .requestMatchers("/client/**").hasAnyRole("CUSTOMER")
                                 .anyRequest()

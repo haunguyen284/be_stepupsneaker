@@ -84,20 +84,32 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     @Override
     public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
         List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
+        CustomerVoucher newCustomerVoucher = new CustomerVoucher();
         for (String voucherId : voucherIds) {
-            for (String customerId : customerIds) {
-                Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
-                Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
-                if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
-                    throw new ResourceNotFoundException("VOUCHER OR CUSTOMER NOT FOUND !");
-                }
-                CustomerVoucher newCustomerVoucher = new CustomerVoucher();
-                newCustomerVoucher.setVoucher(optionalVoucher.get());
-                newCustomerVoucher.setCustomer(optionalCustomer.get());
-                CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
-                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
-
+            Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
+            if (optionalVoucher.isEmpty()) {
+                throw new ResourceNotFoundException("VOUCHER NOT FOUND !");
             }
+            if (customerIds == null || customerIds.size() == 0) {
+                for (Customer customer : adminCustomerRepository.getAllByDeleted(false)) {
+                    newCustomerVoucher.setCustomer(customer);
+                    newCustomerVoucher.setVoucher(optionalVoucher.get());
+                    CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
+                    adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
+                }
+            } else {
+                for (String customerId : customerIds) {
+                    Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
+                    if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
+                        throw new ResourceNotFoundException("CUSTOMER NOT FOUND !");
+                    }
+                    newCustomerVoucher.setVoucher(optionalVoucher.get());
+                    newCustomerVoucher.setCustomer(optionalCustomer.get());
+                    CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
+                    adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
+                }
+            }
+
         }
         return adminCustomerVoucherResponseList;
     }
