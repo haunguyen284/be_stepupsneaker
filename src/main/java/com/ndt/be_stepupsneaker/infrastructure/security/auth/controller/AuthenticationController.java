@@ -5,14 +5,14 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientCustomerR
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.AuthenticationResponse;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.AuthenticationRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.AuthenticationService;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
+import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
+    private final MySessionInfo mySessionInfo;
 
     @PostMapping("/register-employees")
     public ResponseEntity<AuthenticationResponse> registerEmployee(
@@ -43,4 +44,5 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticate);
 
     }
+
 }
