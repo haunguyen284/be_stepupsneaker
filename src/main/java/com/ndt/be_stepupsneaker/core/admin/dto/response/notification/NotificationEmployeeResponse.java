@@ -33,4 +33,6 @@ public class NotificationEmployeeResponse {
     private boolean read;
 
     private boolean delivered;
+
+    private Long createdAt;
 }
