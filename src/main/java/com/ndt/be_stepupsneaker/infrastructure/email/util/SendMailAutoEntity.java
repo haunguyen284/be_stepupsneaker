@@ -45,7 +45,6 @@ public class SendMailAutoEntity {
         voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Type: <strong>" + customerVoucher.getVoucher().getType() + "</strong></p>";
         voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Value: <strong>" + customerVoucher.getVoucher().getValue() + "</strong></p>";
         voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Constraint: <strong>" + customerVoucher.getVoucher().getConstraint() + "</strong></p>";
-        voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Quantity: <strong>" + customerVoucher.getVoucher().getQuantity() + "</strong></p>";
         voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>Start Date: <strong>" + customerVoucher.getVoucher().getStartDate() + "</strong></p>";
         voucherInfo += "<p style='font-size: 16px; font-family: Arial, sans-serif;'>End Date: <strong>" + customerVoucher.getVoucher().getEndDate() + "</strong></p>";
         voucherInfo += "</div></div>";

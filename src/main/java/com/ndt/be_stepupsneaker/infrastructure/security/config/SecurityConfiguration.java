@@ -36,10 +36,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req -> req
                                 .requestMatchers("/auth/**", "/client/products/**",
-                                        "/client/product-details/**", "/admin/notifications/sse")
+                                        "/client/product-details/**", "/admin/notifications/sse","/client/orders/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.POST,"/client/orders/**")
-                                .permitAll()
+//                                .requestMatchers(HttpMethod.POST,"/client/orders/**")
+//                                .permitAll()
                                 .requestMatchers("/admin/**").hasAnyRole("ADMIN","STAFF")
                                 .requestMatchers("/client/**").hasAnyRole("CUSTOMER")
                                 .anyRequest()

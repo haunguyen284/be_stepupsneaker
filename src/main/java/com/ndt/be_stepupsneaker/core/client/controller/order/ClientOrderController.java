@@ -23,7 +23,6 @@ public class ClientOrderController {
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id")String id){
         ClientOrderResponse ClientOrderResponse = clientOrderService.findById(id);
-
         return ResponseHelper.getResponse(ClientOrderResponse, HttpStatus.OK);
     }
 
@@ -39,10 +38,8 @@ public class ClientOrderController {
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid ClientOrderRequest ClientOrderRequest, BindingResult bindingResult){
         ClientOrderRequest.setId(id);
-
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-
         return ResponseHelper.getResponse(clientOrderService.update(ClientOrderRequest), HttpStatus.OK);
     }
 
