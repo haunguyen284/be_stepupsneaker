@@ -10,4 +10,6 @@ public interface ClientOrderService extends BaseService<ClientOrderResponse, Str
 
     ClientOrderResponse findByIdAndCustomer(String orderId, Customer customer);
 
+    ClientOrderResponse findByCode(String code);
+
 }
