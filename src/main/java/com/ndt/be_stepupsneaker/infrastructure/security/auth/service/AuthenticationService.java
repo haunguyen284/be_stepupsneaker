@@ -101,6 +101,5 @@ public class AuthenticationService {
         Claims claims = Jwts.parser().setSigningKey(EntityProperties.SECRET).parseClaimsJws(token).getBody();
         String id = (String) claims.get("id");
         return clientCustomerRepository.findById(id).get();
-
     }
 }

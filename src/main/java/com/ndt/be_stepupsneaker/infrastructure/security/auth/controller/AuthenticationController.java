@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-    private final MySessionInfo mySessionInfo;
 
     @PostMapping("/register-employees")
     public ResponseEntity<AuthenticationResponse> registerEmployee(

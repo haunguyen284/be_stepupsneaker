@@ -25,7 +25,7 @@ public class MySessionInfo {
         if (customer == null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
-            customer = clientCustomerRepository.findByEmail(userName).orElseThrow(() -> new ResourceNotFoundException("User Not Found!"));
+            customer = clientCustomerRepository.findByEmail(userName).orElse(null);
         }
         return customer;
     }
@@ -34,7 +34,7 @@ public class MySessionInfo {
         if (employee == null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
-            employee = adminEmployeeRepository.findByEmail(userName).orElseThrow(() -> new ResourceNotFoundException("User Not Found!"));
+            employee = adminEmployeeRepository.findByEmail(userName).orElse(null);
         }
         return employee;
     }

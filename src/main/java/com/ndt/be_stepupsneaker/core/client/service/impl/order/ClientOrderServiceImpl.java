@@ -27,6 +27,7 @@ import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.notification.NotificationEmployee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
@@ -46,6 +47,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -396,5 +398,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 .stream()
                 .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public ClientOrderResponse findByIdAndCustomer(String orderId, Customer customer) {
+        Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer(orderId, customer);
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Order Not Found!");
+        }
+        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
     }
 }
