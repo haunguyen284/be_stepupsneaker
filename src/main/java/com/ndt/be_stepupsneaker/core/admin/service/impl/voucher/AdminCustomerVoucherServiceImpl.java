@@ -11,6 +11,8 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,16 +31,19 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     private PaginationUtil paginationUtil;
     private AdminCustomerRepository adminCustomerRepository;
     private AdminVoucherRepository adminVoucherRepository;
+    private EmailService emailService;
 
     @Autowired
     public AdminCustomerVoucherServiceImpl(AdminCustomerVoucherRepository adminCustomerVoucherRepository,
                                            PaginationUtil paginationUtil,
                                            AdminCustomerRepository adminCustomerRepository,
-                                           AdminVoucherRepository adminVoucherRepository) {
+                                           AdminVoucherRepository adminVoucherRepository,
+                                           EmailService emailService) {
         this.adminCustomerVoucherRepository = adminCustomerVoucherRepository;
         this.paginationUtil = paginationUtil;
         this.adminCustomerRepository = adminCustomerRepository;
         this.adminVoucherRepository = adminVoucherRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -84,32 +89,28 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     @Override
     public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
         List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
-        CustomerVoucher newCustomerVoucher = new CustomerVoucher();
+        if (customerIds == null || customerIds.isEmpty() || customerIds.size() == 0) {
+            List<Customer> customers = adminCustomerRepository.getAllByDeleted();
+            customers.stream().forEach(customer -> {
+                customerIds.add(customer.getId());
+            });
+        }
         for (String voucherId : voucherIds) {
-            Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
-            if (optionalVoucher.isEmpty()) {
-                throw new ResourceNotFoundException("VOUCHER NOT FOUND !");
-            }
-            if (customerIds == null || customerIds.size() == 0) {
-                for (Customer customer : adminCustomerRepository.getAllByDeleted(false)) {
-                    newCustomerVoucher.setCustomer(customer);
-                    newCustomerVoucher.setVoucher(optionalVoucher.get());
-                    CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
-                    adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
+            for (String customerId : customerIds) {
+                Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
+                Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
+                if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
+                    throw new ResourceNotFoundException("VOUCHER OR CUSTOMER NOT FOUND !");
                 }
-            } else {
-                for (String customerId : customerIds) {
-                    Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
-                    if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
-                        throw new ResourceNotFoundException("CUSTOMER NOT FOUND !");
-                    }
-                    newCustomerVoucher.setVoucher(optionalVoucher.get());
-                    newCustomerVoucher.setCustomer(optionalCustomer.get());
-                    CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
-                    adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
-                }
-            }
+                CustomerVoucher newCustomerVoucher = new CustomerVoucher();
+                newCustomerVoucher.setVoucher(optionalVoucher.get());
+                newCustomerVoucher.setCustomer(optionalCustomer.get());
+                CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
+                SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+                sendMailAutoEntity.sendMailAutoVoucherToCustomer(savedCustomerVoucher);
+                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
 
+            }
         }
         return adminCustomerVoucherResponseList;
     }

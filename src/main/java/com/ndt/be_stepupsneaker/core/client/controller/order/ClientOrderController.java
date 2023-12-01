@@ -1,8 +1,11 @@
 package com.ndt.be_stepupsneaker.core.client.controller.order;
+
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,20 +18,23 @@ import org.springframework.web.bind.annotation.*;
 public class ClientOrderController {
 
     private final ClientOrderService clientOrderService;
+    private final MySessionInfo mySessionInfo;
 
     @Autowired
-    public ClientOrderController(ClientOrderService clientOrderService) {
+    public ClientOrderController(ClientOrderService clientOrderService, MySessionInfo mySessionInfo) {
         this.clientOrderService = clientOrderService;
+        this.mySessionInfo = mySessionInfo;
     }
-    @GetMapping("/{id}")
-    public Object findById(@PathVariable("id")String id){
-        ClientOrderResponse ClientOrderResponse = clientOrderService.findById(id);
 
-        return ResponseHelper.getResponse(ClientOrderResponse, HttpStatus.OK);
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id") String id) {
+        Customer customer = mySessionInfo.getCurrentCustomer();
+        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomer(id, customer);
+        return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid ClientOrderRequest ClientOrderRequest, BindingResult bindingResult){
+    public Object create(@RequestBody @Valid ClientOrderRequest ClientOrderRequest, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -37,12 +43,10 @@ public class ClientOrderController {
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id")String id, @RequestBody @Valid ClientOrderRequest ClientOrderRequest, BindingResult bindingResult){
+    public Object update(@PathVariable("id") String id, @RequestBody @Valid ClientOrderRequest ClientOrderRequest, BindingResult bindingResult) {
         ClientOrderRequest.setId(id);
-
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-
         return ResponseHelper.getResponse(clientOrderService.update(ClientOrderRequest), HttpStatus.OK);
     }
 

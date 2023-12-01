@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.client.repository.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
@@ -14,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ClientOrderRepository extends OrderRepository {
@@ -51,46 +53,48 @@ public interface ClientOrderRepository extends OrderRepository {
 
 
     @Query(
-        value = """
-                SELECT
-                    extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
-                    SUM(total_money) AS value
-                FROM
-                    shop_order
-                WHERE
-                    deleted = false AND
-                    status = 4 AND
-                    created_at >= :start AND
-                    created_at <= :end
-                GROUP BY
-                    date
-                ORDER BY
-                    date
-                """,
+            value = """
+                    SELECT
+                        extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
+                        SUM(total_money) AS value
+                    FROM
+                        shop_order
+                    WHERE
+                        deleted = false AND
+                        status = 4 AND
+                        created_at >= :start AND
+                        created_at <= :end
+                    GROUP BY
+                        date
+                    ORDER BY
+                        date
+                    """,
             nativeQuery = true
     )
     List<Statistic> getDailyRevenueBetween(@Param("start") Long start, @Param("end") Long end);
 
     @Query(
-        value = """
-                SELECT
-                    extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
-                    COUNT(*) AS value
-                FROM
-                    shop_order
-                WHERE
-                    deleted = false AND
-                    status = 4 AND
-                    created_at >= :start AND
-                    created_at <= :end
-                GROUP BY
-                    date
-                ORDER BY
-                    date
-                """,
+            value = """
+                    SELECT
+                        extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
+                        COUNT(*) AS value
+                    FROM
+                        shop_order
+                    WHERE
+                        deleted = false AND
+                        status = 4 AND
+                        created_at >= :start AND
+                        created_at <= :end
+                    GROUP BY
+                        date
+                    ORDER BY
+                        date
+                    """,
             nativeQuery = true
     )
     List<Statistic> getDailyOrderBetween(@Param("start") Long start, @Param("end") Long end);
+
+    Optional<Order> findByIdAndCustomer(String orderId, Customer customer);
 
 
 }

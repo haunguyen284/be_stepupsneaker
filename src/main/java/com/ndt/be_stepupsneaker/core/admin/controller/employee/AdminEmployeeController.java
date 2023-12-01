@@ -5,8 +5,10 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeRe
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -23,42 +25,50 @@ import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/employees")
+@RequiredArgsConstructor
 public class AdminEmployeeController {
-    @Autowired
-    private AdminEmployeeService adminEmployeeService;
+
+    private final AdminEmployeeService adminEmployeeService;
+    private final MySessionInfo mySessionInfo;
 
     @GetMapping("")
-    public Object findAllEmployee(AdminEmployeeRequest employeeDTO){
-        PageableObject<AdminEmployeeResponse> listEmplouyee = adminEmployeeService.findAllEntity(employeeDTO);
-        return ResponseHelper.getResponse(listEmplouyee, HttpStatus.OK);
+    public Object findAllEmployee(AdminEmployeeRequest employeeDTO) {
+        PageableObject<AdminEmployeeResponse> listEmployee = adminEmployeeService.findAllEntity(employeeDTO);
+        return ResponseHelper.getResponse(listEmployee, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Object findById(@PathVariable("id")String id){
+    public Object findById(@PathVariable("id") String id) {
         AdminEmployeeResponse employeeResponse = adminEmployeeService.findById(id);
 
         return ResponseHelper.getResponse(employeeResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/me")
+    public Object getMe() {
+        return ResponseHelper.getResponse(mySessionInfo.getCurrentEmployee(), HttpStatus.OK);
+    }
+
     @PostMapping("")
-    public Object create(@RequestBody @Valid AdminEmployeeRequest employeeDTO, BindingResult bindingResult){
-        if (bindingResult.hasErrors()){
+    public Object create(@RequestBody @Valid AdminEmployeeRequest employeeDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
         return ResponseHelper.getResponse(adminEmployeeService.create(employeeDTO), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminEmployeeRequest employeeRequest, BindingResult  bindingResult){
+    public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminEmployeeRequest employeeRequest, BindingResult bindingResult) {
         employeeRequest.setId(id);
-        if (bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
         return ResponseHelper.getResponse(adminEmployeeService.update(employeeRequest), HttpStatus.OK);
 
     }
+
     @DeleteMapping("/{id}")
-    public Object delete(@PathVariable("id") String id){
+    public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminEmployeeService.delete(id), HttpStatus.OK);
     }
 }

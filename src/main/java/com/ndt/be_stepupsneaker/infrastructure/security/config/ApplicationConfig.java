@@ -30,12 +30,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ApplicationConfig {
     private final AdminEmployeeRepository adminEmployeeRepository;
-    private final AdminCustomerRepository adminCustomerRepository;
+    private final ClientCustomerRepository clientCustomerRepository;
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
             Optional<Employee> employee = adminEmployeeRepository.findByEmail(username);
-            Optional<Customer> customer = adminCustomerRepository.findByEmail(username);
+            Optional<Customer> customer = clientCustomerRepository.findByEmail(username);
             if (employee.isPresent()) {
                 return employee.get();
             } else if (customer.isPresent()) {

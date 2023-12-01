@@ -38,7 +38,9 @@ public class SecurityConfiguration {
                                 .requestMatchers("/auth/**", "/client/products/**",
                                         "/client/product-details/**", "/admin/notifications/sse")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.POST,"/client/orders/**").permitAll()
+                                .requestMatchers(HttpMethod.POST,"/client/orders/**")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET,"/client/orders/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyRole("ADMIN","STAFF")
                                 .requestMatchers("/client/**").hasAnyRole("CUSTOMER")
                                 .anyRequest()
