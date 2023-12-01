@@ -402,7 +402,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     @Override
     public ClientOrderResponse findByIdAndCustomer(String orderId, String customerId) {
-        Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer_Id(orderId, customerId);
+        Optional<Order> orderOptional = clientOrderRepository.findById(orderId);
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException("Order Not Found!");
         }
