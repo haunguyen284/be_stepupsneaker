@@ -90,11 +90,11 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
 
     @Override
     public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
-        List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
         if (customerIds == null || customerIds.isEmpty()) {
             List<Customer> customers = adminCustomerRepository.getAllByDeleted();
             customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
         }
+        List<CustomerVoucher> customerVouchers = new ArrayList<>();
         for (String voucherId : voucherIds) {
             for (String customerId : customerIds) {
                 Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
@@ -105,14 +105,16 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
                 CustomerVoucher newCustomerVoucher = new CustomerVoucher();
                 newCustomerVoucher.setVoucher(optionalVoucher.get());
                 newCustomerVoucher.setCustomer(optionalCustomer.get());
-                CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
-//                SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-//                sendMailAutoEntity.sendMailAutoVoucherToCustomer(savedCustomerVoucher);
-                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
-
+                customerVouchers.add(newCustomerVoucher);
             }
         }
-        return adminCustomerVoucherResponseList;
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoVoucherToCustomer(customerVouchers);
+        return adminCustomerVoucherRepository
+                .saveAll(customerVouchers)
+                .stream()
+                .map(AdminCustomerVoucherMapper.INSTANCE::customerVoucherToAdminCustomerVoucherResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
