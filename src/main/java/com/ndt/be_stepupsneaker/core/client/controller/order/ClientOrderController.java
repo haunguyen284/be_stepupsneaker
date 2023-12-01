@@ -1,7 +1,9 @@
 package com.ndt.be_stepupsneaker.core.client.controller.order;
 
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
+import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper;
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
@@ -28,8 +30,14 @@ public class ClientOrderController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        Customer customer = mySessionInfo.getCurrentCustomer();
-        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomer(id, customer);
+        ClientCustomerResponse response = mySessionInfo.getCurrentCustomer();
+        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomer(id, response.getId());
+        return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/tracking/{code}")
+    public Object findByCode(@PathVariable("code") String code) {
+        ClientOrderResponse clientOrderResponse = clientOrderService.findByCode(code);
         return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
     }
 

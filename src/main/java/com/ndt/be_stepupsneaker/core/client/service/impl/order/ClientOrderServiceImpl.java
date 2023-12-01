@@ -401,11 +401,23 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     @Override
-    public ClientOrderResponse findByIdAndCustomer(String orderId, Customer customer) {
-        Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer(orderId, customer);
+    public ClientOrderResponse findByIdAndCustomer(String orderId, String customerId) {
+        Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer_Id(orderId, customerId);
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException("Order Not Found!");
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
     }
+
+    @Override
+    public ClientOrderResponse findByCode(String code) {
+        Order order = clientOrderRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Order Not Found!"));
+
+        if (order.getStatus() == OrderStatus.COMPLETED) {
+            throw new ResourceNotFoundException("Order tracking is expired!");
+        }
+        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+    }
+
 }

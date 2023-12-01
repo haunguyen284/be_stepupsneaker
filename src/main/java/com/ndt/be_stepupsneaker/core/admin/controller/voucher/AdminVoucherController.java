@@ -39,13 +39,6 @@ public class AdminVoucherController {
     public Object create(@RequestBody @Valid AdminVoucherRequest voucherRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-//        @ModelAttribute
-//        @RequestParam("file") MultipartFile file
-//        String folder = "image_voucher/";
-//        if (file != null) {
-//            storageService.uploadFile(file, folder);
-//            voucherRequest.setImage(file.getOriginalFilename());
-//        }
         return ResponseHelper.getResponse(adminVoucherService.create(voucherRequest), HttpStatus.OK);
     }
 

@@ -21,8 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherService {
@@ -88,13 +90,11 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
 
     @Override
     public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
-        List<AdminCustomerVoucherResponse> adminCustomerVoucherResponseList = new ArrayList<>();
-        if (customerIds == null || customerIds.isEmpty() || customerIds.size() == 0) {
+        if (customerIds == null || customerIds.isEmpty()) {
             List<Customer> customers = adminCustomerRepository.getAllByDeleted();
-            customers.stream().forEach(customer -> {
-                customerIds.add(customer.getId());
-            });
+            customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
         }
+        List<CustomerVoucher> customerVouchers = new ArrayList<>();
         for (String voucherId : voucherIds) {
             for (String customerId : customerIds) {
                 Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
@@ -105,14 +105,16 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
                 CustomerVoucher newCustomerVoucher = new CustomerVoucher();
                 newCustomerVoucher.setVoucher(optionalVoucher.get());
                 newCustomerVoucher.setCustomer(optionalCustomer.get());
-                CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
-                SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-                sendMailAutoEntity.sendMailAutoVoucherToCustomer(savedCustomerVoucher);
-                adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
-
+                customerVouchers.add(newCustomerVoucher);
             }
         }
-        return adminCustomerVoucherResponseList;
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoVoucherToCustomer(customerVouchers);
+        return adminCustomerVoucherRepository
+                .saveAll(customerVouchers)
+                .stream()
+                .map(AdminCustomerVoucherMapper.INSTANCE::customerVoucherToAdminCustomerVoucherResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
