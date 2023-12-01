@@ -8,7 +8,7 @@ import com.ndt.be_stepupsneaker.entity.order.Order;
 
 public interface ClientOrderService extends BaseService<ClientOrderResponse, String, ClientOrderRequest> {
 
-    ClientOrderResponse findByIdAndCustomer(String orderId, Customer customer);
+    ClientOrderResponse findByIdAndCustomer(String orderId, String customerId);
 
     ClientOrderResponse findByCode(String code);
 

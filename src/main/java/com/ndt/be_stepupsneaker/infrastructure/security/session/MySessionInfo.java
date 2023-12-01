@@ -1,6 +1,10 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.session;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.empolyee.AdminEmployeeMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
+import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
@@ -21,21 +25,21 @@ public class MySessionInfo {
     private Customer customer;
     private Employee employee;
 
-    public Customer getCurrentCustomer() {
+    public ClientCustomerResponse getCurrentCustomer() {
         if (customer == null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
             customer = clientCustomerRepository.findByEmail(userName).orElse(null);
         }
-        return customer;
+        return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);
     }
 
-    public Employee getCurrentEmployee() {
+    public AdminEmployeeResponse getCurrentEmployee() {
         if (employee == null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
             employee = adminEmployeeRepository.findByEmail(userName).orElse(null);
         }
-        return employee;
+        return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }
 }
