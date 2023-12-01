@@ -414,7 +414,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         Order order = clientOrderRepository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Order Not Found!"));
 
-        if (order.getStatus() != OrderStatus.COMPLETED) {
+        if (order.getStatus() == OrderStatus.COMPLETED) {
             throw new ResourceNotFoundException("Order tracking is expired!");
         }
 
