@@ -106,8 +106,8 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
                 newCustomerVoucher.setVoucher(optionalVoucher.get());
                 newCustomerVoucher.setCustomer(optionalCustomer.get());
                 CustomerVoucher savedCustomerVoucher = adminCustomerVoucherRepository.save(newCustomerVoucher);
-                SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-                sendMailAutoEntity.sendMailAutoVoucherToCustomer(savedCustomerVoucher);
+//                SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+//                sendMailAutoEntity.sendMailAutoVoucherToCustomer(savedCustomerVoucher);
                 adminCustomerVoucherResponseList.add(AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(savedCustomerVoucher));
 
             }
