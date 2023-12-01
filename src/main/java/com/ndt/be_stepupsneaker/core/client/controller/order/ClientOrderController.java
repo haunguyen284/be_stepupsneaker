@@ -33,6 +33,12 @@ public class ClientOrderController {
         return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/tracking/{code}")
+    public Object findByCode(@PathVariable("code") String code) {
+        ClientOrderResponse clientOrderResponse = clientOrderService.findByCode(code);
+        return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
+    }
+
     @PostMapping("")
     public Object create(@RequestBody @Valid ClientOrderRequest ClientOrderRequest, BindingResult bindingResult) {
 
