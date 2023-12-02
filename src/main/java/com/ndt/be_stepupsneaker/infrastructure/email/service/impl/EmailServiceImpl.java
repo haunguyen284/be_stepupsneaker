@@ -36,11 +36,6 @@ public class EmailServiceImpl implements EmailService {
         sendSimpleMail(details.getToEmail(), htmlBody, details.getSubject());
     }
 
-    @Override
-    public String sendMailWithAttachment(Email details) {
-        return null;
-    }
-
     private void sendSimpleMail(String[] recipients, String msgBody, String subject) {
         try {
             MimeMessage mimeMessage = javaMailSender.createMimeMessage();

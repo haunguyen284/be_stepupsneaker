@@ -11,7 +11,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
-import com.ndt.be_stepupsneaker.infrastructure.scheduled.AutoScheduledService;
+import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @Service
 public class AdminPromotionServiceImpl implements AdminPromotionService {
     private CloudinaryUpload cloudinaryUpload;
-    private AutoScheduledService autoScheduledService;
+    private ScheduledService scheduledService;
     private AdminPromotionRepository adminPromotionRepository;
     private PaginationUtil paginationUtil;
     private AdminProductDetailRepository adminProductDetailRepository;
@@ -37,13 +37,13 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
 
     @Autowired
     public AdminPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
-                                     AutoScheduledService autoScheduledService,
+                                     ScheduledService scheduledService,
                                      AdminPromotionRepository adminPromotionRepository,
                                      PaginationUtil paginationUtil,
                                      AdminProductDetailRepository adminProductDetailRepository,
                                      AdminPromotionProductDetailRepository adminPromotionProductDetailRepository) {
         this.cloudinaryUpload = cloudinaryUpload;
-        this.autoScheduledService = autoScheduledService;
+        this.scheduledService = scheduledService;
         this.adminPromotionRepository = adminPromotionRepository;
         this.paginationUtil = paginationUtil;
         this.adminProductDetailRepository = adminProductDetailRepository;

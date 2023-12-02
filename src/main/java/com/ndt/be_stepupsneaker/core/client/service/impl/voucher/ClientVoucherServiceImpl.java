@@ -7,7 +7,7 @@ import com.ndt.be_stepupsneaker.core.client.service.voucher.ClientVoucherService
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.infrastructure.scheduled.AutoScheduledService;
+import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -27,19 +27,19 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     private ClientVoucherRepository ClientVoucherRepository;
     private PaginationUtil paginationUtil;
     private CustomerVoucherRepository customerVoucherRepository;
-    private AutoScheduledService autoScheduledService;
+    private ScheduledService scheduledService;
     private CloudinaryUpload cloudinaryUpload;
 
     @Autowired
     public ClientVoucherServiceImpl(ClientVoucherRepository ClientVoucherRepository,
                                     PaginationUtil paginationUtil,
                                     CustomerVoucherRepository customerVoucherRepository,
-                                    AutoScheduledService autoScheduledService,
+                                    ScheduledService scheduledService,
                                     CloudinaryUpload cloudinaryUpload) {
         this.ClientVoucherRepository = ClientVoucherRepository;
         this.paginationUtil = paginationUtil;
         this.customerVoucherRepository = customerVoucherRepository;
-        this.autoScheduledService = autoScheduledService;
+        this.scheduledService = scheduledService;
         this.cloudinaryUpload = cloudinaryUpload;
     }
 

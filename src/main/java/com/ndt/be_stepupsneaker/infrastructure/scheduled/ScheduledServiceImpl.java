@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AutoScheduledServiceImpl implements AutoScheduledService {
+public class ScheduledServiceImpl implements ScheduledService {
     private final AdminVoucherRepository adminVoucherRepository;
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
@@ -36,7 +36,7 @@ public class AutoScheduledServiceImpl implements AutoScheduledService {
 
 
     @Autowired
-    public AutoScheduledServiceImpl(
+    public ScheduledServiceImpl(
             AdminVoucherRepository adminVoucherRepository,
             AdminOrderRepository adminOrderRepository,
             AdminOrderHistoryRepository adminOrderHistoryRepository,

@@ -1,14 +1,11 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
+import com.ndt.be_stepupsneaker.entity.cart.Cart;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Lob;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,6 +55,9 @@ public class Customer extends PrimaryEntity implements UserDetails {
     @OneToMany(mappedBy = "customer")
     List<CustomerVoucher> customerVoucherList;
 
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL)
+    private Cart cart;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
@@ -92,6 +92,13 @@ public class Customer extends PrimaryEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    @PrePersist
+    private void createCart() {
+        Cart cart = new Cart();
+        cart.setCustomer(this);
+        this.cart = cart;
     }
 }
 

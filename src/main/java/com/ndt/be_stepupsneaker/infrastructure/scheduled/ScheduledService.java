@@ -1,6 +1,6 @@
 package com.ndt.be_stepupsneaker.infrastructure.scheduled;
 
-public interface AutoScheduledService {
+public interface ScheduledService {
 
     void updateVoucherStatusAutomatically();
 

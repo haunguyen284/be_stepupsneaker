@@ -9,7 +9,7 @@ import com.ndt.be_stepupsneaker.core.client.service.voucher.ClientPromotionServi
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.infrastructure.scheduled.AutoScheduledService;
+import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +21,19 @@ import java.util.Optional;
 @Service
 public class ClientPromotionServiceImpl implements ClientPromotionService {
     private CloudinaryUpload cloudinaryUpload;
-    private AutoScheduledService autoScheduledService;
+    private ScheduledService scheduledService;
     private ClientPromotionRepository clientPromotionRepository;
     private PaginationUtil paginationUtil;
     private ClientProductDetailRepository clientProductDetailRepository;
 
     @Autowired
     public ClientPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
-                                      AutoScheduledService autoScheduledService,
+                                      ScheduledService scheduledService,
                                       ClientPromotionRepository ClientPromotionRepository,
                                       PaginationUtil paginationUtil,
                                       ClientProductDetailRepository clientProductDetailRepository) {
         this.cloudinaryUpload = cloudinaryUpload;
-        this.autoScheduledService = autoScheduledService;
+        this.scheduledService = scheduledService;
         this.clientPromotionRepository = ClientPromotionRepository;
         this.paginationUtil = paginationUtil;
         this.clientProductDetailRepository = clientProductDetailRepository;
