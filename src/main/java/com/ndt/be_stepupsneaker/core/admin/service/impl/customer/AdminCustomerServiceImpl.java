@@ -21,6 +21,7 @@ import com.ndt.be_stepupsneaker.util.RandomStringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +30,6 @@ import java.util.Optional;
 @Service
 public class AdminCustomerServiceImpl implements AdminCustomerService {
 
-    @Autowired
     private CloudinaryUpload cloudinaryUpload;
 
     private AdminCustomerRepository adminCustomerRepository;
@@ -38,18 +38,27 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     private EmailService emailService;
 
+    private PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AdminCustomerServiceImpl(AdminCustomerRepository adminCustomerRepository, PaginationUtil paginationUtil, EmailService emailService) {
+    public AdminCustomerServiceImpl(CloudinaryUpload cloudinaryUpload,
+                                    AdminCustomerRepository adminCustomerRepository,
+                                    PaginationUtil paginationUtil,
+                                    EmailService emailService,
+                                    PasswordEncoder passwordEncoder
+    ) {
+        this.cloudinaryUpload = cloudinaryUpload;
         this.adminCustomerRepository = adminCustomerRepository;
         this.paginationUtil = paginationUtil;
         this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
     @Override
-    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,String voucher,String noVoucher) {
+    public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, String voucher, String noVoucher) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
-        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest,voucher,noVoucher,customerRequest.getStatus(), pageable);
+        Page<Customer> resp = adminCustomerRepository.findAllCustomer(customerRequest, voucher, noVoucher, customerRequest.getStatus(), pageable);
         Page<AdminCustomerResponse> adminCustomerResponses = resp.map(AdminCustomerMapper.INSTANCE::customerToAdminCustomerResponse);
 
         return new PageableObject<>(adminCustomerResponses);
@@ -79,11 +88,11 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             throw new ApiException("EMAIL IS EXIT !");
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
-        customerDTO.setPassword(passWordRandom);
+        customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
         customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWord(customer,passWordRandom,null);
+        sendMailAutoEntity.sendMailAutoPassWord(customer, passWordRandom, null);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
     }
 
