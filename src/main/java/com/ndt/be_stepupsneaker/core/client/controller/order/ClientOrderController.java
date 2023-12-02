@@ -31,7 +31,7 @@ public class ClientOrderController {
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
         ClientCustomerResponse response = mySessionInfo.getCurrentCustomer();
-        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomer(id, response.getId());
+        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomerId(id, response.getId());
         return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
     }
 
