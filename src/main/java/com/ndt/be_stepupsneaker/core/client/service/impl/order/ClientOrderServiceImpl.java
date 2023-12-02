@@ -4,6 +4,7 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRe
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientShippingRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.*;
 import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherHistoryResponse;
@@ -44,6 +45,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -75,13 +77,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final PaginationUtil paginationUtil;
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientOrderDetailRepository clientOrderDetailRepository;
-    private static final Logger logger = LoggerFactory.getLogger(ClientOrderServiceImpl.class);
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
     private final ClientPaymentRepository clientPaymentRepository;
     private final VNPayService vnPayService;
-
+    private final MySessionInfo mySessionInfo;
     private final NotificationEmployeeRepository notificationEmployeeRepository;
-
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
@@ -92,7 +92,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                                   ClientVoucherHistoryRepository clientVoucherHistoryRepository,
                                   PaginationUtil paginationUtil,
                                   ClientProductDetailRepository clientProductDetailRepository,
-                                  ClientOrderDetailRepository clientOrderDetailRepository, ClientPaymentMethodRepository clientPaymentMethodRepository, ClientPaymentRepository clientPaymentRepository, VNPayService vnPayService, NotificationEmployeeRepository notificationEmployeeRepository) {
+                                  ClientOrderDetailRepository clientOrderDetailRepository,
+                                  ClientPaymentMethodRepository clientPaymentMethodRepository,
+                                  ClientPaymentRepository clientPaymentRepository,
+                                  VNPayService vnPayService,
+                                  NotificationEmployeeRepository notificationEmployeeRepository,
+                                  MySessionInfo mySessionInfo) {
         this.clientOrderRepository = clientOrderRepository;
         this.clientOrderHistoryRepository = clientOrderHistoryRepository;
         this.clientCustomerRepository = clientCustomerRepository;
@@ -106,6 +111,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.clientPaymentRepository = clientPaymentRepository;
         this.vnPayService = vnPayService;
         this.notificationEmployeeRepository = notificationEmployeeRepository;
+        this.mySessionInfo = mySessionInfo;
     }
 
     @Override
@@ -251,8 +257,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     private void setOrderDetails(Order order, ClientOrderRequest orderRequest) {
-        String customerId = orderRequest.getCustomer();
-        order.setCustomer(customerId != null ? clientCustomerRepository.findById(customerId).orElse(null) : null);
+        ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
+        if (customerResponse == null) {
+            order.setCustomer(null);
+        } else {
+            Customer customer = clientCustomerRepository.findById(customerResponse.getId()).orElseThrow(() -> new ResourceNotFoundException("Customer Not Found!"));
+            order.setCustomer(customer);
+        }
+
         order.setEmployee(null);
     }
 
