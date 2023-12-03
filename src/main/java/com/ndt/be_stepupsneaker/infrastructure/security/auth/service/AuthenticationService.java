@@ -1,18 +1,23 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.auth.service;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.empolyee.AdminEmployeeMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientCustomerRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.AuthenticationResponse;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.AuthenticationRequest;
+import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePasswordRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.config.JwtService;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -34,17 +39,18 @@ public class AuthenticationService {
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final CloudinaryUpload cloudinaryUpload;
+    private final MySessionInfo mySessionInfo;
 
     public AuthenticationResponse registerEmployee(AdminEmployeeRequest request) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("Email is exist");
+            throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
         employeeOptional = adminEmployeeRepository.findByPhoneNumber(request.getPhoneNumber());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("PhoneNumber is exist");
+            throw new ApiException("PhoneNumber" + EntityProperties.IS_EXIST);
         }
-//        request.setImage(cloudinaryUpload.upload(request.getImage()));
+        request.setImage(cloudinaryUpload.upload(request.getImage()));
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(request));
         adminEmployeeRepository.save(employee);
@@ -58,9 +64,9 @@ public class AuthenticationService {
     public AuthenticationResponse registerCustomer(ClientCustomerRequest request) {
         Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(request.getEmail());
         if (customerOptional.isPresent()) {
-            throw new ApiException("Email is exist");
+            throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
-//        request.setImage(cloudinaryUpload.upload(request.getImage()));
+        request.setImage(cloudinaryUpload.upload(request.getImage()));
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(request));
         clientCustomerRepository.save(customer);
@@ -70,6 +76,7 @@ public class AuthenticationService {
                 .build();
 
     }
+
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         Employee employee = adminEmployeeRepository.findByEmail(request.getEmail()).orElse(null);
         Customer customer = clientCustomerRepository.findByEmail(request.getEmail()).orElse(null);
@@ -96,10 +103,30 @@ public class AuthenticationService {
                 .build();
     }
 
-    // mã hóa và trích xuất thông tin người dùng khi đăng nhập thành công
-    public Customer customer(String token) {
-        Claims claims = Jwts.parser().setSigningKey(EntityProperties.SECRET).parseClaimsJws(token).getBody();
-        String id = (String) claims.get("id");
-        return clientCustomerRepository.findById(id).get();
+    public Object changePassword(ChangePasswordRequest request) {
+        ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
+        AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
+        if (employeeResponse != null) {
+            Employee employee = adminEmployeeRepository.findById(employeeResponse.getId()).orElse(null);
+            if (employee != null) {
+                passwordCompare(request, employee.getPassword());
+                employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(adminEmployeeRepository.save(employee));
+            }
+        }
+        Customer customer = clientCustomerRepository.findById(customerResponse.getId()).orElse(null);
+        passwordCompare(request, customer.getPassword());
+        customer.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(clientCustomerRepository.save(customer));
+
     }
+
+    public void passwordCompare(ChangePasswordRequest request, String passwordUser) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), passwordUser)) {
+            throw new ApiException("Current password is incorrect!");
+        } else if (!request.getEnterThePassword().equals(request.getNewPassword())) {
+            throw new ApiException("The re-entered password does not match!");
+        }
+    }
+
 }

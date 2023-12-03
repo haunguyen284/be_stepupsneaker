@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminAddressService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -34,23 +35,22 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     // Not user funciton
     @Override
     public PageableObject<AdminAddressResponse> findAllEntity(AdminAddressRequest addressRequest) {
-       return null;
+        return null;
     }
 
-    // Tạo address bắt buộc phải cho id customer
     @Override
     public Object create(AdminAddressRequest addressDTO) {
         Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
         if (addressOptional.isPresent()) {
-            throw new ResourceNotFoundException("PHONE IS EXISTS ! TAO QUÁ BUỒN ....");
+            throw new ApiException("Phone" + EntityProperties.IS_EXIST);
         }
         Optional<Customer> customerOptional = adminCustomerRepository.findById(addressDTO.getCustomer());
         if (!customerOptional.isPresent()) {
-            throw new ResourceNotFoundException("CUSTOMER NOT FOUND ! TAO QUÁ BUỒN ....");
+            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
         }
         List<Address> addressList = adminAddressRepository.findByCustomer(customerOptional.get());
         if (addressList.size() >= 3) {
-            throw new ResourceNotFoundException("Customers can only create a maximum of 3 addresses ! LEW LEW");
+            throw new ApiException("Customers can only create a maximum of 3 addresses !");
         }
         boolean hasAddress = adminAddressRepository.existsByCustomer(customerOptional.get());
         Address address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(addressDTO);
@@ -69,11 +69,11 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     public AdminAddressResponse update(AdminAddressRequest addressDTO) {
         Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getId(), addressDTO.getPhoneNumber());
         if (addressOptional.isPresent()) {
-            throw new ApiException(("Phone is exit"));
+            throw new ApiException("Phone" + EntityProperties.IS_EXIST);
         }
         addressOptional = adminAddressRepository.findById(addressDTO.getId());
         if (addressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address is not exit");
+            throw new ResourceNotFoundException("Address" + EntityProperties.NOT_EXIST);
         }
         Address addressSave = addressOptional.get();
         addressSave.setDistrictId(addressDTO.getDistrictId());
@@ -93,7 +93,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     public AdminAddressResponse findById(String id) {
         Optional<Address> addressOptional = adminAddressRepository.findById(id);
         if (addressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address Not Found");
+            throw new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND);
         }
 
         return AdminAddressMapper.INSTANCE.addressToAdminAddressResponse(addressOptional.get());
@@ -103,7 +103,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     public Boolean delete(String id) {
         Optional<Address> addressOptional = adminAddressRepository.findById(id);
         if (addressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address Not Found");
+            throw new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND);
         }
 
         Address address = addressOptional.get();
@@ -124,7 +124,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
     public Boolean updateDefaultAddressByCustomer(String addressId) {
         Optional<Address> newDefaultAddressOptional = adminAddressRepository.findById(addressId);
         if (newDefaultAddressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address Not Found ! TAO QUÁ MỆT MỎI !");
+            throw new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND);
         }
         Address existingDefaultAddress = adminAddressRepository.findDefaultAddressByCustomer(newDefaultAddressOptional.get().getCustomer().getId());
         if (existingDefaultAddress != null) {

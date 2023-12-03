@@ -43,15 +43,14 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.NotificationEmployeeType
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -82,6 +81,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final VNPayService vnPayService;
     private final MySessionInfo mySessionInfo;
     private final NotificationEmployeeRepository notificationEmployeeRepository;
+    private final EmailService emailService;
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
@@ -97,7 +97,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                                   ClientPaymentRepository clientPaymentRepository,
                                   VNPayService vnPayService,
                                   NotificationEmployeeRepository notificationEmployeeRepository,
-                                  MySessionInfo mySessionInfo) {
+                                  MySessionInfo mySessionInfo, EmailService emailService) {
         this.clientOrderRepository = clientOrderRepository;
         this.clientOrderHistoryRepository = clientOrderHistoryRepository;
         this.clientCustomerRepository = clientCustomerRepository;
@@ -112,6 +112,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.vnPayService = vnPayService;
         this.notificationEmployeeRepository = notificationEmployeeRepository;
         this.mySessionInfo = mySessionInfo;
+        this.emailService = emailService;
     }
 
     @Override
@@ -151,6 +152,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse);
 
         // Notification new order
         NotificationEmployee notificationEmployee = new NotificationEmployee();

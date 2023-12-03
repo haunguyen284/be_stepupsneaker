@@ -10,6 +10,7 @@ import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
@@ -85,7 +86,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public Object create(AdminCustomerRequest customerDTO) {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
         if (customerOptional.isPresent()) {
-            throw new ApiException("EMAIL IS EXIT !");
+            throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
         customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
@@ -101,11 +102,11 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getId(), customerDTO.getEmail());
         if (customerOptional.isPresent()) {
-            throw new ApiException("Email is exit !");
+            throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
         customerOptional = adminCustomerRepository.findById(customerDTO.getId());
         if (customerOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Customer is not exits !");
+            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
         }
         Customer customer = customerOptional.get();
         customer.setFullName(customerDTO.getFullName());
@@ -122,7 +123,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public AdminCustomerResponse findById(String id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
-            throw new RuntimeException("LOOI");
+            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
         }
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customerOptional.get());
     }
@@ -131,7 +132,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public Boolean delete(String id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Customer not found");
+            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
         }
         Customer customer = customerOptional.get();
         customer.setDeleted(true);

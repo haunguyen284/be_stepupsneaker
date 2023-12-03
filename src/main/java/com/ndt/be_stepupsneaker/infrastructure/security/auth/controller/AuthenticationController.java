@@ -4,11 +4,13 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeReq
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientCustomerRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.AuthenticationResponse;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.AuthenticationRequest;
+import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePasswordRequest;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.AuthenticationService;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +44,12 @@ public class AuthenticationController {
         AuthenticationResponse authenticate = authenticationService.authenticate(request);
         return ResponseEntity.ok(authenticate);
 
+    }
+
+    // test
+    @PutMapping("/change-password")
+    public Object changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        return ResponseHelper.getResponse(authenticationService.changePassword(request), HttpStatus.OK);
     }
 
 }

@@ -12,7 +12,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherHist
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
-import com.ndt.be_stepupsneaker.util.ConvertTime;
+import com.ndt.be_stepupsneaker.util.ConvertUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -60,21 +60,21 @@ public class ScheduledServiceImpl implements ScheduledService {
     @Override
     public void updateVoucherStatusAutomatically() {
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
+        Long currentLongTime = ConvertUtil.convertLocalDateTimeToLong(currentDateTime);
         adminVoucherRepository.updateStatusAutomatically(currentLongTime);
     }
 
     @Override
     public void updatePromotionStatusAutomatically() {
         LocalDateTime currentDateTime = LocalDateTime.now();
-        Long currentLongTime = ConvertTime.convertLocalDateTimeToLong(currentDateTime);
+        Long currentLongTime = ConvertUtil.convertLocalDateTimeToLong(currentDateTime);
         adminPromotionRepository.updateStatusAutomatically(currentLongTime);
     }
 
     @Override
     public void deleteCartDetailsByDate() {
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
-        Long thirtyDaysAgoTimestamp = ConvertTime.convertLocalDateTimeToLong(thirtyDaysAgo);
+        Long thirtyDaysAgoTimestamp = ConvertUtil.convertLocalDateTimeToLong(thirtyDaysAgo);
         clientCartDetailRepository.deleteByUpdatedAtBefore(thirtyDaysAgoTimestamp);
     }
     @Transactional

@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.vnpay;
 
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
+import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentMethodRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
@@ -13,6 +14,8 @@ import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.util.VNPayUtil;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
@@ -34,6 +37,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientVoucherRepository clientVoucherRepository;
+    private final EmailService emailService;
 
     @Override
     public String createOrder(int total, String orderInfor) {
@@ -163,6 +167,8 @@ public class VNPayServiceImpl implements VNPayService {
             clientPaymentRepository.save(payment);
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
+            SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+            sendMailAutoEntity.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order));
             return clientOrderRepository.save(order);
         } else {
             for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {

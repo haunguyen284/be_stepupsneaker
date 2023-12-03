@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
@@ -71,7 +72,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     public AdminCustomerVoucherResponse findById(String id) {
         Optional<CustomerVoucher> optionalCustomerVoucher = adminCustomerVoucherRepository.findById(id);
         if (optionalCustomerVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("CustomerVoucher IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException("CustomerVoucher" + EntityProperties.NOT_FOUND);
         }
         return AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(optionalCustomerVoucher.get());
     }
@@ -80,7 +81,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     public Boolean delete(String id) {
         Optional<CustomerVoucher> optionalCustomerVoucher = adminCustomerVoucherRepository.findById(id);
         if (optionalCustomerVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("CustomerVoucher NOT FOUND :" + id);
+            throw new ResourceNotFoundException("CustomerVoucher" + EntityProperties.NOT_FOUND);
         }
         CustomerVoucher newCustomerVoucher = optionalCustomerVoucher.get();
         newCustomerVoucher.setDeleted(true);
@@ -100,7 +101,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
                 Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
                 Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
                 if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
-                    throw new ResourceNotFoundException("VOUCHER OR CUSTOMER NOT FOUND !");
+                    throw new ResourceNotFoundException("VOUCHER OR CUSTOMER" + EntityProperties.NOT_FOUND);
                 }
                 CustomerVoucher newCustomerVoucher = new CustomerVoucher();
                 newCustomerVoucher.setVoucher(optionalVoucher.get());
