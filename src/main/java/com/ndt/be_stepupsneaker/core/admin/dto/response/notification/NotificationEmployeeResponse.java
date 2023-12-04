@@ -1,5 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.notification;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
@@ -22,9 +24,9 @@ public class NotificationEmployeeResponse {
 
     private String content;
 
-    private Employee employee;
+    private AdminEmployeeResponse employee;
 
-    private Customer customer;
+    private AdminCustomerResponse customer;
 
     private String href;
 

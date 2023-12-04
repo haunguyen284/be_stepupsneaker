@@ -38,6 +38,8 @@ public interface ClientProductRepository extends ProductRepository {
     AND 
     (:#{#request.size} IS NULL OR :#{#request.size} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id = :#{#request.size} GROUP BY pd.product.id)) 
     AND 
+    (:#{#request.product} IS NULL OR :#{#request.product} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.product.id = :#{#request.product} GROUP BY pd.product.id)) 
+    AND 
     (:#{#request.material} IS NULL OR :#{#request.material} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id = :#{#request.material} GROUP BY pd.product.id)) 
     AND 
     (:#{#request.color} IS NULL OR :#{#request.color} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.color.id = :#{#request.color} GROUP BY pd.product.id)) 
