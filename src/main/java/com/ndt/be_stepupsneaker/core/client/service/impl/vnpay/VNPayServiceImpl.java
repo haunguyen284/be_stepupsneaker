@@ -168,7 +168,7 @@ public class VNPayServiceImpl implements VNPayService {
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
             SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-            sendMailAutoEntity.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order));
+            sendMailAutoEntity.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
             return clientOrderRepository.save(order);
         } else {
             for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {

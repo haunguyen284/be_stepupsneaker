@@ -68,7 +68,7 @@ public class SendMailAutoEntity {
         emailService.sendEmail(email);
     }
 
-    public void sendMailAutoInfoOrderToClient(ClientOrderResponse clientOrderResponse) {
+    public void sendMailAutoInfoOrderToClient(ClientOrderResponse clientOrderResponse, String emailReq) {
         String[] toEmail = new String[1];
         Email email = new Email();
         email.setSubject("Your Order Information from STEP UP SNEAKER");
@@ -130,7 +130,27 @@ public class SendMailAutoEntity {
         emailBody += "<tr><td><strong>Created At    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        toEmail[0] = clientOrderResponse.getCustomer().getEmail();
+        if (clientOrderResponse.getCustomer() == null) {
+            toEmail[0] = emailReq;
+        } else {
+            toEmail[0] = clientOrderResponse.getCustomer().getEmail();
+        }
+        email.setToEmail(toEmail);
+        emailService.sendEmail(email);
+    }
+
+    public void sendMailAutoResetPassword(String recipientEmail, String resetLink) {
+        String[] toEmail = new String[1];
+        Email email = new Email();
+        email.setSubject("STEP UP SNEAKER sends you the forget password ...");
+        email.setTitleEmail("<div style='text-align: center; margin-top: 20px; margin-bottom: 20px;'><h1 style='color: red;'>Password Reset</h1></div>");
+        String emailBodyLink = "<h3>Reset Your Password</h3>"
+                + "<p>To reset your password, please click on the link below:</p>"
+                + "<p><a href=\"" + resetLink + "\">Reset Password</a></p>"
+                + "<p>If you did not request this, please ignore this email.</p>"
+                + "<p>Thank you!</p>";
+        email.setBody(emailBodyLink);
+        toEmail[0] = recipientEmail;
         email.setToEmail(toEmail);
         emailService.sendEmail(email);
     }

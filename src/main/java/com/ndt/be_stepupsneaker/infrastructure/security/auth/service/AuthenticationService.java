@@ -128,5 +128,4 @@ public class AuthenticationService {
             throw new ApiException("The re-entered password does not match!");
         }
     }
-
 }

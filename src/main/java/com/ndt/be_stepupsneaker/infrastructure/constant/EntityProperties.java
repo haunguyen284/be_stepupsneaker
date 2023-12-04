@@ -34,4 +34,7 @@ public final class EntityProperties {
     public static final String ADMIN = "ADMIN";
     public static final String STAFF = "STAFF";
     public static final String CUSTOMER = "CUSTOMER";
+    public static final String URL_RESET = "http://localhost:8080/auth/reset-password?token=";
+    public static final int EXPIRATION = 5;
+
 }

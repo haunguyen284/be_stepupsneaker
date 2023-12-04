@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.infrastructure.scheduled;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.cart.ClientCartDetailRepository;
@@ -10,6 +11,8 @@ import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientAddressRep
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +37,7 @@ public class ScheduledServiceImpl implements ScheduledService {
     private final ClientAddressRepository clientAddressRepository;
     private final ClientPaymentRepository clientPaymentRepository;
     private final ClientVoucherHistoryRepository clientVoucherHistoryRepository;
+    private final AdminProductDetailRepository adminProductDetailRepository;
 
 
     @Autowired
@@ -45,7 +50,8 @@ public class ScheduledServiceImpl implements ScheduledService {
             ClientCartDetailRepository clientCartDetailRepository,
             ClientAddressRepository clientAddressRepository,
             ClientPaymentRepository clientPaymentRepository,
-            ClientVoucherHistoryRepository clientVoucherHistoryRepository) {
+            ClientVoucherHistoryRepository clientVoucherHistoryRepository,
+            AdminProductDetailRepository adminProductDetailRepository) {
         this.adminVoucherRepository = adminVoucherRepository;
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
@@ -55,6 +61,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         this.clientAddressRepository = clientAddressRepository;
         this.clientPaymentRepository = clientPaymentRepository;
         this.clientVoucherHistoryRepository = clientVoucherHistoryRepository;
+        this.adminProductDetailRepository = adminProductDetailRepository;
     }
 
     @Override
@@ -77,6 +84,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         Long thirtyDaysAgoTimestamp = ConvertUtil.convertLocalDateTimeToLong(thirtyDaysAgo);
         clientCartDetailRepository.deleteByUpdatedAtBefore(thirtyDaysAgoTimestamp);
     }
+
     @Transactional
     @Override
     public void deleteOrderAutomaticallyByTypeAndStatus() {
@@ -104,15 +112,22 @@ public class ScheduledServiceImpl implements ScheduledService {
         long currentMillis = Instant.now().toEpochMilli();
         // Calculate the time 30 minutes ago in milliseconds
         long thirtyMinutesAgo = currentMillis - (30 * 60 * 1000); // 30 minutes * 60 seconds/minute * 1000 milliseconds/second
-
+        List<ProductDetail> productDetails = new ArrayList<>();
         List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBefore(OrderStatus.PENDING, thirtyMinutesAgo);
 
         if (!expiredOrders.isEmpty()) {
-            System.out.println("========================== AUTO UPDATE ORDER =======================");
             List<String> expiredOrderIds = expiredOrders.stream()
                     .map(Order::getId)
                     .collect(Collectors.toList());
-
+            for (Order order : expiredOrders) {
+                List<OrderDetail> orderDetails = order.getOrderDetails();
+                for (OrderDetail orderDetail : orderDetails) {
+                    ProductDetail productDetail = orderDetail.getProductDetail();
+                    productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+                    productDetails.add(productDetail);
+                }
+            }
+            adminProductDetailRepository.saveAll(productDetails);
             adminOrderHistoryRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderDetailRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderRepository.deleteAllInBatch(expiredOrders);

@@ -133,12 +133,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setAddress(newAddress);
         float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
         orderSave.setShippingMoney(shippingFee);
-        setOrderDetails(orderSave, clientOrderRequest);
+        setOrderInfo(orderSave, clientOrderRequest);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
         newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + 86_400_000L);
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
@@ -153,7 +153,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse);
+        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
 
         // Notification new order
         NotificationEmployee notificationEmployee = new NotificationEmployee();
@@ -187,7 +187,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         newOrder.setFullName(orderRequest.getFullName());
         newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
         newOrder.setNote(orderRequest.getNote());
-        setOrderDetails(newOrder, orderRequest);
+        setOrderInfo(newOrder, orderRequest);
         float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder.getOrderDetails());
         applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
         Order order = clientOrderRepository.save(newOrder);
@@ -259,7 +259,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return total;
     }
 
-    private void setOrderDetails(Order order, ClientOrderRequest orderRequest) {
+    private void setOrderInfo(Order order, ClientOrderRequest orderRequest) {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         if (customerResponse == null) {
             order.setCustomer(null);
@@ -400,6 +400,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
+                if (productDetail.getQuantity() < clientCartItemRequest.getQuantity()) {
+                    throw new ApiException("The quantity of products you purchased exceeds the quantity in stock : "+productDetail.getProduct().getName());
+                }
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
                 orderDetail.setQuantity(clientCartItemRequest.getQuantity());
