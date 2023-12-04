@@ -30,20 +30,13 @@ public interface ClientOrderRepository extends OrderRepository {
             AND 
             ((:status IS NULL) OR (o.status = :status)) 
             AND 
-            ((:type IS NULL) OR (o.type = :type)) 
-            AND 
             ((:#{#request.customer} IS NULL) OR (o.customer.id = :#{#request.customer})) 
-            AND
-            (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} = 0 OR o.totalMoney >= :#{#request.priceMin})
-            AND
-            (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} = 0 OR o.totalMoney <= :#{#request.priceMax})
             AND
             o.deleted=false 
             """)
     Page<Order> findAllOrder(
             @Param("request") ClientOrderRequest request,
             @Param("status") OrderStatus status,
-            @Param("type") OrderType type,
             Pageable pageable
     );
 

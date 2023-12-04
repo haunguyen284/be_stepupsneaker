@@ -1,5 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.order;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
@@ -51,6 +53,8 @@ import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -110,7 +114,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     @Override
     public PageableObject<ClientOrderResponse> findAllEntity(ClientOrderRequest orderRequest) {
-        return null;
+        Pageable pageable = paginationUtil.pageable(orderRequest);
+        Page<Order> resp = clientOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), pageable);
+        Page<ClientOrderResponse> clientOrderResponses = resp.map(ClientOrderMapper.INSTANCE::orderToClientOrderResponse);
+        return new PageableObject<>(clientOrderResponses);
     }
 
     @Override

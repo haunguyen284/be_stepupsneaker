@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.client.dto.request.order;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -40,5 +41,6 @@ public class ClientOrderRequest extends PageableRequest {
 
     private String paymentMethod;
 
+    private OrderStatus status;
 
 }

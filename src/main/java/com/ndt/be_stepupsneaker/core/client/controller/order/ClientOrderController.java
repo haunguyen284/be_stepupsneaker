@@ -1,5 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.controller.order;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
@@ -26,6 +28,13 @@ public class ClientOrderController {
     public ClientOrderController(ClientOrderService clientOrderService, MySessionInfo mySessionInfo) {
         this.clientOrderService = clientOrderService;
         this.mySessionInfo = mySessionInfo;
+    }
+
+    @GetMapping("")
+    public Object findAllOrder(ClientOrderRequest orderRequest){
+        PageableObject<ClientOrderResponse> listOrder = clientOrderService.findAllEntity(orderRequest);
+
+        return ResponseHelper.getResponse(listOrder, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
