@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.email.model.Email;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
@@ -115,19 +116,19 @@ public class SendMailAutoEntity {
         emailBody += "</table>";
         emailBody += "</td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
-        emailBody += "<tr><td colspan='4'><strong>Address     :</strong> "
+        emailBody += "<tr><td colspan='4'><strong>Delivery address     :</strong> "
                 + clientOrderResponse.getAddress().getMore() + ", "
                 + clientOrderResponse.getAddress().getDistrictName() + ", "
                 + clientOrderResponse.getAddress().getProvinceName() + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><strong>Phone Number:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Phone number:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
-        emailBody += "<tr><td><strong>ShippingMoney :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getShippingMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Shipping money :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getShippingMoney()) + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Voucher       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(totalVoucher) + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Order Total   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getTotalMoney()) + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Order Code    :</strong></td><td colspan='3'>" + clientOrderResponse.getCode() + "</td></tr>";
-        emailBody += "<tr><td><strong>Full Name     :</strong></td><td colspan='3'>" + clientOrderResponse.getFullName() + "</td></tr>";
+        emailBody += "<tr><td><strong>Order total   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getTotalMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Order code    :</strong></td><td colspan='3'><a href='" + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "'>" + clientOrderResponse.getCode() + "</a></td></tr>";
+        emailBody += "<tr><td><strong>Full name     :</strong></td><td colspan='3'>" + clientOrderResponse.getFullName() + "</td></tr>";
         emailBody += "<tr><td><strong>Status        :</strong></td><td colspan='3'>" + clientOrderResponse.getStatus() + "</td></tr>";
-        emailBody += "<tr><td><strong>Created At    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
+        emailBody += "<tr><td><strong>Created at    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
         if (clientOrderResponse.getCustomer() == null) {
@@ -144,12 +145,12 @@ public class SendMailAutoEntity {
         Email email = new Email();
         email.setSubject("STEP UP SNEAKER sends you the forget password ...");
         email.setTitleEmail("<div style='text-align: center; margin-top: 20px; margin-bottom: 20px;'><h1 style='color: red;'>Password Reset</h1></div>");
-        String emailBodyLink = "<h3>Reset Your Password</h3>"
+        String emailBody = "<h3>Reset Your Password</h3>"
                 + "<p>To reset your password, please click on the link below:</p>"
                 + "<p><a href=\"" + resetLink + "\">Reset Password</a></p>"
                 + "<p>If you did not request this, please ignore this email.</p>"
                 + "<p>Thank you!</p>";
-        email.setBody(emailBodyLink);
+        email.setBody(emailBody);
         toEmail[0] = recipientEmail;
         email.setToEmail(toEmail);
         emailService.sendEmail(email);

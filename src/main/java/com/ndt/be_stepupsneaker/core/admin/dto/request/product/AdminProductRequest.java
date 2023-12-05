@@ -53,8 +53,8 @@ public class AdminProductRequest extends PageableRequest {
 
     private String sole;
 
-    private String fromCreatedAt;
+    private String start;
 
-    private String toCreatedAt;
+    private String end;
 }
 

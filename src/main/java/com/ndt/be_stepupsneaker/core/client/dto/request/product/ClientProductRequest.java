@@ -50,5 +50,9 @@ public class ClientProductRequest extends PageableRequest {
     private String brand;
 
     private String sole;
+
+    private String start;
+
+    private String end;
 }
 
