@@ -118,6 +118,7 @@ public class SendMailAutoEntity {
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Delivery address     :</strong> "
                 + clientOrderResponse.getAddress().getMore() + ", "
+                + clientOrderResponse.getAddress().getWardName() + ", "
                 + clientOrderResponse.getAddress().getDistrictName() + ", "
                 + clientOrderResponse.getAddress().getProvinceName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Phone number:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";

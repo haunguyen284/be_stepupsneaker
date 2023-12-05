@@ -1,7 +1,7 @@
 package com.ndt.be_stepupsneaker.infrastructure.constant;
 
 public class MailConstant {
-    public static final String LOGO_PATH = "/static/images/logo.jpg";
+    public static final String LOGO_PATH = "/static/images/logo_brand.psd";
     public static final String BODY_STARTS = "<html xmlns=\"http://www.w3.org/1999/xhtml\" xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:o=\"urn:schemas-microsoft-com:office:office\">\n" +
             "<head>\n" +
             "  </style>\n" +
@@ -36,7 +36,7 @@ public class MailConstant {
             "                              <td>\n" +
             "                                <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" style=\"border:none;border-collapse:collapse;mso-table-lspace:0;mso-table-rspace:0;\" width=\"100%\" class=\"wrapper\" bgcolor=\"#ffffff\">\n" +
             "                                  <tr>\n" +
-            "                                    <td width=\"173\"><a href=\"https://www.fitbit.com/home?utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=HeaderLink&utm_medium=EM&utm_source=ET\"><img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/1/2016_Large_logo.gif\" width=\"175\" height=\"80\" style=\"display:block; border:none;\" alt=\"Step Up Sneaker\" class=\"logoimage\"></a></td>\n" +
+            "                                    <td width=\"173\"><a href=\"https://www.fitbit.com/home?utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=HeaderLink&utm_medium=EM&utm_source=ET\"><img src=\"https://step-up-sneaker.s3.us-east-2.amazonaws.com/logoStep.png\" width=\"auto\" height=\"80\" style=\"display:block; border:none;\" alt=\"Step Up Sneaker\" class=\"logoimage\"></a></td>\n" +
             "                                    <td width=\"242\" class=\"hidden\"><img src=\"http://image.e.fitbit.com/lib/fe9413727564027a70/m/1/header_spacer.jpg\" width=\"200\" height=\"80\" style=\"display:block; border:none;\" alt=\"Share\"></td>\n" +
             "                                    <td width=\"104\" class=\"hidden\"><a href=\"https://www.fitbit.com/store?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=CartLink\"><img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/2/ShoppingCart_US.gif\" height=\"60\" style=\"display:block; border:none;\" alt=\"Store\"></a></td>\n" +
             "                                  </tr>\n" +
@@ -73,7 +73,7 @@ public class MailConstant {
             "                      </tr>\n" +
             "                    </table>\n" +
             "                    <!-- HERO Images-->\n" +
-                "                    <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
+            "                    <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
             "                      <tr>\n" +
             "                        <td width=\"100%\" bgcolor=\"#4D7268\" style=\"width:100%;\">\n" +
             "                          <div class=\"no-mobile\">\n" +
@@ -126,16 +126,16 @@ public class MailConstant {
             "\n" +
             "                      <tr>\n" +
             "                        <td valign=\"top\" style=\"padding:0px 1px 0px 20px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px;  text-align:center; line-height: 20px;\">\n" +
-            "                          Amazon Alexa Built-in**\n" +
+            "                          Connect famous brands\n" +
             "                        </td>\n" +
             "                        <td valign=\"top\" style=\"padding:0px 5px 0px 5px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px; text-align:center; line-height: 20px; text-decoration: none;\">\n" +
-            "                          6+ day <br>battery life<sup style=\"font-size: 8px;\">◆</sup>\n" +
+            "                          365+ day <br>Full of energy every day<sup style=\"font-size: 8px;\">◆</sup>\n" +
             "                        </td>\n" +
             "                        <td valign=\"top\" style=\"padding:0px 6px 0px 6px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px;  text-align:center; line-height: 20px;\">\n" +
-            "                          24/7 heart <br>rate tracking\n" +
+            "                          SuS<br>Give each other love\n" +
             "                        </td>\n" +
             "                        <td valign=\"top\" style=\"padding:0px 4px 0px 6px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px;  text-align:center; line-height: 20px;\">\n" +
-            "                          Sleep Score\n" +
+            "                          Sleep with shoes on\n" +
             "                        </td>\n" +
             "                        <td valign=\"top\" style=\"padding:0px 25px 0px 7px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif; font-weight: 300; font-size: 16px; text-align:center; line-height: 20px;\">\n" +
             "                          Always-on <br>display<br> mode<sup style=\"font-size: 8px;\">◆</sup>\n" +
@@ -163,7 +163,7 @@ public class MailConstant {
             "                            </table>\n" +
             "                          </td>\n" +
             "                          <td style=\"padding:0px 73px 0px 16px;color:#ffffff;font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 18px; line-height: 22px; text-align:left; \">\n" +
-            "                            Amazon Alexa Built-in**\n" +
+            "                            Connect famous brands\n" +
             "                          </td>\n" +
             "                        </tr>\n" +
             "                        <tr>\n" +
@@ -182,7 +182,7 @@ public class MailConstant {
             "                            </table>\n" +
             "                          </td>\n" +
             "                          <td style=\"padding:0px 73px 0px 16px;color:#ffffff;font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 18px; line-height: 22px; text-align:left;\">\n" +
-            "                            6+ day battery life<sup style=\"font-size: 8px;\">◆</sup>\n" +
+            "                            Full of energy every day<sup style=\"font-size: 8px;\">◆</sup>\n" +
             "                          </td>\n" +
             "                        </tr>\n" +
             "                        <tr>\n" +
@@ -204,7 +204,7 @@ public class MailConstant {
             + "                            </table>\n"
             + "                          </td>\n"
             + "                          <td style=\"padding:0px 73px 0px 16px;color:#ffffff;font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 18px; line-height: 22px; text-align:left;\">\n"
-            + "                            Always-on display mode<sup style=\"font-size: 8px;\">◆</sup>\n"
+            + "                            Operates 24/7<sup style=\"font-size: 8px;\">◆</sup>\n"
             + "                          </td>\n"
             + "                        </tr>\n"
             + "                        <tr>\n"
