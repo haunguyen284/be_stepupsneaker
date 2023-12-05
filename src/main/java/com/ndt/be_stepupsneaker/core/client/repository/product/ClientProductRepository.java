@@ -48,6 +48,10 @@ public interface ClientProductRepository extends ProductRepository {
     AND 
     (:#{#request.sole} IS NULL OR :#{#request.sole} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id = :#{#request.sole} GROUP BY pd.product.id)) 
     AND 
+    (:#{#request.start} IS NULL OR :#{#request.start} ILIKE '' OR x.createdAt >= CAST(:#{#request.start} as long)) 
+    AND 
+    (:#{#request.end} IS NULL OR :#{#request.end} ILIKE '' OR x.createdAt <= CAST(:#{#request.end} as long)) 
+    AND 
     (:#{#request.minQuantity} IS NULL OR :#{#request.minQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) >= CAST(:#{#request.minQuantity} AS int)))
     AND 
     (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.maxQuantity} AS int))) 
