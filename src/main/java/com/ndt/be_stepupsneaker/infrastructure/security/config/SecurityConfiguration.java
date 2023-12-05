@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.config;
 
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,14 +36,13 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/auth/**", "/client/products/**",
-                                        "/client/product-details/**", "/admin/notifications/sse")
+                                .requestMatchers("/auth/**", "/client/products/**","/client/product-details/**", "/admin/notifications/sse")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.POST,"/client/orders/**")
+                                .requestMatchers(HttpMethod.POST, "/client/orders/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET,"/client/orders/**").permitAll()
-                                .requestMatchers("/admin/**").hasAnyRole("ADMIN","STAFF")
-                                .requestMatchers("/client/**").hasAnyRole("CUSTOMER")
+                                .requestMatchers(HttpMethod.GET, "/client/orders/**").permitAll()
+                                .requestMatchers("/admin/**").hasAnyRole(EntityProperties.ADMIN, EntityProperties.STAFF)
+                                .requestMatchers("/client/**").hasAnyRole(EntityProperties.CUSTOMER)
                                 .anyRequest()
                                 .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

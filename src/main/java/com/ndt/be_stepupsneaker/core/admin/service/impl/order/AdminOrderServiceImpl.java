@@ -163,7 +163,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
 
         // Voucher history
-        if (orderRequest.getVoucher() != null) {
+        if (order.getVoucher() != null) {
             float totalMoney = order.getTotalMoney();
             float voucherValue = order.getVoucher().getValue();
             float reduceMoney = order.getVoucher().getType() == VoucherType.CASH ? voucherValue : ((totalMoney * voucherValue) / 100);
