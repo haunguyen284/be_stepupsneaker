@@ -31,6 +31,8 @@ public class ClientOrderRequest extends PageableRequest {
 
     private String fullName;
 
+    private String email;
+
     private float shippingMoney;
 
     private String note;

@@ -45,15 +45,14 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.NotificationEmployeeType
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +85,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final VNPayService vnPayService;
     private final MySessionInfo mySessionInfo;
     private final NotificationEmployeeRepository notificationEmployeeRepository;
+    private final EmailService emailService;
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
@@ -101,7 +101,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                                   ClientPaymentRepository clientPaymentRepository,
                                   VNPayService vnPayService,
                                   NotificationEmployeeRepository notificationEmployeeRepository,
-                                  MySessionInfo mySessionInfo) {
+                                  MySessionInfo mySessionInfo, EmailService emailService) {
         this.clientOrderRepository = clientOrderRepository;
         this.clientOrderHistoryRepository = clientOrderHistoryRepository;
         this.clientCustomerRepository = clientCustomerRepository;
@@ -116,6 +116,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         this.vnPayService = vnPayService;
         this.notificationEmployeeRepository = notificationEmployeeRepository;
         this.mySessionInfo = mySessionInfo;
+        this.emailService = emailService;
     }
 
     @Override
@@ -139,12 +140,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setAddress(newAddress);
         float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
         orderSave.setShippingMoney(shippingFee);
-        setOrderDetails(orderSave, clientOrderRequest);
+        setOrderInfo(orderSave, clientOrderRequest);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
         newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + 86_400_000L);
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
@@ -158,6 +159,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
 
         // Notification new order
         NotificationEmployee notificationEmployee = new NotificationEmployee();
@@ -191,7 +194,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         newOrder.setFullName(orderRequest.getFullName());
         newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
         newOrder.setNote(orderRequest.getNote());
-        setOrderDetails(newOrder, orderRequest);
+        setOrderInfo(newOrder, orderRequest);
         float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder.getOrderDetails());
         applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
         Order order = clientOrderRepository.save(newOrder);
@@ -263,7 +266,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return total;
     }
 
-    private void setOrderDetails(Order order, ClientOrderRequest orderRequest) {
+    private void setOrderInfo(Order order, ClientOrderRequest orderRequest) {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         if (customerResponse == null) {
             order.setCustomer(null);
@@ -404,6 +407,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
+                if (productDetail.getQuantity() < clientCartItemRequest.getQuantity()) {
+                    throw new ApiException("The quantity of products you purchased exceeds the quantity in stock : "+productDetail.getProduct().getName());
+                }
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
                 orderDetail.setQuantity(clientCartItemRequest.getQuantity());

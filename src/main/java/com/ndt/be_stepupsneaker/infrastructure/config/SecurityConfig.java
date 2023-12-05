@@ -11,8 +11,9 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("Content-Type", "Authorization", "X-Requested-With")
-                .allowedOrigins("*");
+                .allowedHeaders("Content-Type", "Authorization", "X-Requested-With");
+
     }
 }
