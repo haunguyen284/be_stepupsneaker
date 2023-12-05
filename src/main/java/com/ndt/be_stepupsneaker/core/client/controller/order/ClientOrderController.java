@@ -1,5 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.controller.order;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
@@ -28,10 +30,18 @@ public class ClientOrderController {
         this.mySessionInfo = mySessionInfo;
     }
 
+    @GetMapping("")
+    public Object findAllOrder(ClientOrderRequest orderRequest){
+        PageableObject<ClientOrderResponse> listOrder = clientOrderService.findAllEntity(orderRequest);
+
+        return ResponseHelper.getResponse(listOrder, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        ClientCustomerResponse response = mySessionInfo.getCurrentCustomer();
-        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomerId(id, response.getId());
+        ClientCustomerResponse clientCustomerResponse = mySessionInfo.getCurrentCustomer();
+        String customerId = clientCustomerResponse != null ? clientCustomerResponse.getId() : null;
+        ClientOrderResponse clientOrderResponse = clientOrderService.findByIdAndCustomerId(id, customerId);
         return ResponseHelper.getResponse(clientOrderResponse, HttpStatus.OK);
     }
 
