@@ -30,6 +30,8 @@ public class ClientOrderResponse {
     private ClientAddressResponse address;
 
     private String fullName;
+    
+    private String email;
 
     private float totalMoney;
 

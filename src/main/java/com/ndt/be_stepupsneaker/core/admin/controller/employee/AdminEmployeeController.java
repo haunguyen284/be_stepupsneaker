@@ -5,6 +5,8 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeRe
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePasswordRequest;
+import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.AuthenticationService;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
@@ -30,6 +32,7 @@ public class AdminEmployeeController {
 
     private final AdminEmployeeService adminEmployeeService;
     private final MySessionInfo mySessionInfo;
+    private final AuthenticationService authenticationService;
 
     @GetMapping("")
     public Object findAllEmployee(AdminEmployeeRequest employeeDTO) {
@@ -40,7 +43,6 @@ public class AdminEmployeeController {
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
         AdminEmployeeResponse employeeResponse = adminEmployeeService.findById(id);
-
         return ResponseHelper.getResponse(employeeResponse, HttpStatus.OK);
     }
 
@@ -49,6 +51,10 @@ public class AdminEmployeeController {
         return ResponseHelper.getResponse(mySessionInfo.getCurrentEmployee(), HttpStatus.OK);
     }
 
+    @PutMapping("/change-password")
+    public Object changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        return ResponseHelper.getResponse(authenticationService.changePassword(request), HttpStatus.OK);
+    }
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminEmployeeRequest employeeDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {

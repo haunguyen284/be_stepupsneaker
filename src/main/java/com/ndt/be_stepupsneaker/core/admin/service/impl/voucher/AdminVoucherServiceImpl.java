@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherReposi
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
@@ -54,7 +55,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public Object create(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException("Code" + EntityProperties.IS_EXIST);
         }
         voucherRequest.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         Voucher voucher = adminVoucherRepository.save(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
@@ -66,12 +67,12 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public AdminVoucherResponse update(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getId(), voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException("Code" + EntityProperties.IS_EXIST);
         }
 
         optionalVoucher = adminVoucherRepository.findById(voucherRequest.getId());
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER IS NOT EXIST");
+            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setName(voucherRequest.getName());
@@ -91,7 +92,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public AdminVoucherResponse findById(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
         }
 
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(optionalVoucher.get());
@@ -101,7 +102,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public Boolean delete(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER NOT FOUND :" + id);
+            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setDeleted(true);

@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherHistor
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
@@ -24,6 +25,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +45,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminAddressRepository adminAddressRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final AdminVoucherRepository adminVoucherRepository;
-
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
     private final PaginationUtil paginationUtil;
+    private final MySessionInfo mySessionInfo;
 
     @Autowired
     public AdminOrderServiceImpl(
@@ -56,8 +58,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminEmployeeRepository adminEmployeeRepository,
             AdminVoucherRepository adminVoucherRepository,
             AdminVoucherHistoryRepository adminVoucherHistoryRepository,
-            PaginationUtil paginationUtil
-    ) {
+            PaginationUtil paginationUtil,
+            MySessionInfo mySessionInfo) {
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.adminCustomerRepository = adminCustomerRepository;
@@ -66,6 +68,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         this.adminVoucherRepository = adminVoucherRepository;
         this.adminVoucherHistoryRepository = adminVoucherHistoryRepository;
         this.paginationUtil = paginationUtil;
+        this.mySessionInfo = mySessionInfo;
     }
 
     @Override
@@ -88,15 +91,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (orderRequest.getCustomer() == null) {
             orderSave.setCustomer(null);
         }
-        if (orderRequest.getEmployee() == null) {
-            orderSave.setEmployee(null);
-        }
         if (orderRequest.getVoucher() == null) {
             orderSave.setVoucher(null);
         }
         if (orderRequest.getAddress() == null) {
             orderSave.setAddress(null);
         }
+        Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+        orderSave.setEmployee(employee);
         Order orderResult = adminOrderRepository.save(orderSave);
 
         OrderHistory orderHistory = new OrderHistory();
@@ -137,11 +140,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         } else {
             orderSave.setCustomer(null);
         }
-        if (orderRequest.getEmployee() != null) {
-            orderSave.setEmployee(adminEmployeeRepository.findById(orderRequest.getEmployee()).orElse(null));
-        } else {
-            orderSave.setEmployee(null);
-        }
+        Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+        orderSave.setEmployee(employee);
         if (orderRequest.getAddress() != null) {
             orderSave.setAddress(adminAddressRepository.findById(orderRequest.getAddress()).orElse(null));
         } else {

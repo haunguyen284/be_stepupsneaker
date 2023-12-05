@@ -58,6 +58,9 @@ public class Order extends PrimaryEntity {
     @Nationalized
     private String fullName;
 
+    @Column(name = "email", length = EntityProperties.LENGTH_EMAIL)
+    private String email;
+
     @Column(name = "total_money")
     private float totalMoney;
 

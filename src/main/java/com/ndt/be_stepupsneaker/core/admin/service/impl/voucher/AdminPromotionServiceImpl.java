@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
@@ -68,11 +69,11 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public Object create(AdminPromotionRequest request) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findByCode(request.getCode());
         if (promotionOptional.isPresent()) {
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException("Code" + EntityProperties.IS_EXIST);
         }
         request.setImage(cloudinaryUpload.upload(request.getImage()));
         Promotion promotion = adminPromotionRepository.save(AdminPromotionMapper.INSTANCE.adminPromotionRequestToPromotion(request));
-        adminPromotionRepository.updateStatusBasedOnTime(promotion.getId(), promotion.getStartDate(),promotion.getEndDate());
+        adminPromotionRepository.updateStatusBasedOnTime(promotion.getId(), promotion.getStartDate(), promotion.getEndDate());
         productDetailsInPromotion(promotion, request.getProductDetailIds());
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotion);
     }
@@ -81,12 +82,12 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse update(AdminPromotionRequest request) {
         Optional<Promotion> optionalPromotion = adminPromotionRepository.findByCode(request.getId(), request.getCode());
         if (optionalPromotion.isPresent()) {
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException("Code" + EntityProperties.IS_EXIST);
         }
 
         optionalPromotion = adminPromotionRepository.findById(request.getId());
         if (optionalPromotion.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER IS NOT EXIST");
+            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
         }
         Promotion newPromotion = optionalPromotion.get();
         newPromotion.setName(request.getName());
@@ -104,7 +105,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse findById(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PROMOTION IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
         }
 
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotionOptional.get());
@@ -114,7 +115,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public Boolean delete(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PROMOTION NOT FOUND :" + id);
+            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
         }
         Promotion newPromotion = promotionOptional.get();
         newPromotion.setDeleted(true);
@@ -124,7 +125,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
 
     public void productDetailsInPromotion(Promotion model, List<String> productDetailIds) {
         Promotion promotion = adminPromotionRepository.findById(model.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("PROMOTION NOT FOUND"));
+                .orElseThrow(() -> new ResourceNotFoundException("PROMOTION" + EntityProperties.NOT_FOUND));
         if (promotion.getPromotionProductDetailList() == null) {
             promotion.setPromotionProductDetailList(new ArrayList<>());
         }

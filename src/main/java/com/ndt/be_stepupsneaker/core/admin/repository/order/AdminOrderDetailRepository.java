@@ -20,35 +20,37 @@ import java.util.UUID;
 public interface AdminOrderDetailRepository extends OrderDetailRepository {
 
     @Query("""
-    SELECT od FROM OrderDetail od
-    WHERE (
-    (:#{#request.order} IS NULL OR od.order.id = :#{#request.order}) 
-    AND 
-    (:#{#request.product} IS NULL OR od.productDetail.product.id = :#{#request.product}) 
-    AND 
-    (:#{#request.brand} IS NULL OR od.productDetail.brand.id = :#{#request.brand}) 
-    AND 
-    (:#{#request.color} IS NULL OR od.productDetail.color.id = :#{#request.color}) 
-    AND 
-    (:#{#request.material} IS NULL OR od.productDetail.material.id = :#{#request.material}) 
-    AND 
-    (:#{#request.size} IS NULL OR od.productDetail.size.id = :#{#request.size}) 
-    AND 
-    (:#{#request.sole} IS NULL OR od.productDetail.sole.id = :#{#request.sole}) 
-    AND 
-    (:#{#request.style} IS NULL OR od.productDetail.style.id = :#{#request.style}) 
-    AND 
-    (:#{#request.tradeMark} IS NULL OR od.productDetail.tradeMark.id = :#{#request.tradeMark}) 
-    AND 
-    ((:status IS NULL) OR (od.status = :status)) 
-    AND
-    od.deleted=false 
-    ) 
-    """)
-    Page<OrderDetail> findAllOrderDetail(@Param("request")AdminOrderDetailRequest request, @Param("status") OrderStatus status, Pageable pageable);
+            SELECT od FROM OrderDetail od
+            WHERE (
+            (:#{#request.order} IS NULL OR od.order.id = :#{#request.order}) 
+            AND 
+            (:#{#request.product} IS NULL OR od.productDetail.product.id = :#{#request.product}) 
+            AND 
+            (:#{#request.brand} IS NULL OR od.productDetail.brand.id = :#{#request.brand}) 
+            AND 
+            (:#{#request.color} IS NULL OR od.productDetail.color.id = :#{#request.color}) 
+            AND 
+            (:#{#request.material} IS NULL OR od.productDetail.material.id = :#{#request.material}) 
+            AND 
+            (:#{#request.size} IS NULL OR od.productDetail.size.id = :#{#request.size}) 
+            AND 
+            (:#{#request.sole} IS NULL OR od.productDetail.sole.id = :#{#request.sole}) 
+            AND 
+            (:#{#request.style} IS NULL OR od.productDetail.style.id = :#{#request.style}) 
+            AND 
+            (:#{#request.tradeMark} IS NULL OR od.productDetail.tradeMark.id = :#{#request.tradeMark}) 
+            AND 
+            ((:status IS NULL) OR (od.status = :status)) 
+            AND
+            od.deleted=false 
+            ) 
+            """)
+    Page<OrderDetail> findAllOrderDetail(@Param("request") AdminOrderDetailRequest request, @Param("status") OrderStatus status, Pageable pageable);
 
     @Modifying
     @Transactional
     @Query("DELETE FROM OrderDetail x WHERE x.order.id IN :orderIds")
     void deleteAllByOrder(List<String> orderIds);
+
+    List<OrderDetail> findAllByOrder_Id(String orderId);
 }
