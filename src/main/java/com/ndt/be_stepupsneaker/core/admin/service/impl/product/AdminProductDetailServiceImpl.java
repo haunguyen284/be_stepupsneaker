@@ -129,7 +129,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
         productDetailSave.setSole(adminSoleRepository.findById(productDetailRequest.getSole()).orElse(null));
         productDetailSave.setImage(productDetailRequest.getImage());
         productDetailSave.setPrice(productDetailRequest.getPrice());
-        productDetailSave.setQuantity(productDetailSave.getQuantity());
+        productDetailSave.setQuantity(productDetailRequest.getQuantity());
         productDetailSave.setStatus(productDetailRequest.getStatus());
         return AdminProductDetailMapper.INSTANCE.productDetailToAdminProductDetailResponse(adminProductDetailRepository.save(productDetailSave));
     }

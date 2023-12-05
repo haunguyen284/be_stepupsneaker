@@ -20,7 +20,7 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String customer;
 
-    private String employee;
+//    private String employee;
 
     private String voucher;
 

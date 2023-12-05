@@ -15,7 +15,6 @@ public interface AdminOrderMapper {
     AdminOrderResponse orderToAdminOrderResponse(Order order);
 
     @Mapping(target = "customer.id", source = "customer")
-    @Mapping(target = "employee.id", source = "employee")
     @Mapping(target = "voucher.id", source = "voucher")
     @Mapping(target = "address.id", source = "address")
     Order adminOrderRequestToOrder(AdminOrderRequest orderRequest);
