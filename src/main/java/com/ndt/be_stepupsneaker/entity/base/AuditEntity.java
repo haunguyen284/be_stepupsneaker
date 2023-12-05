@@ -28,21 +28,21 @@ public abstract class AuditEntity {
 
     @Column(name = "updated_by")
     private String updatedBy;
+    @PrePersist
+    protected void onCreate() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            this.createdBy = userDetails.getUsername();
+        }
+    }
 
-//    @PrePersist
-//    protected void onCreate() {
-//        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        if (userDetails != null) {
-//            this.createdBy = userDetails.getUsername();
-//        }
-//    }
-//
-//    @PreUpdate
-//    protected void onUpdate() {
-//        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        if (userDetails != null) {
-//            this.updatedBy = userDetails.getUsername();
-//        }
-//
-//    }
+    @PreUpdate
+    protected void onUpdate() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            this.updatedBy = userDetails.getUsername();
+        }
+    }
 }
