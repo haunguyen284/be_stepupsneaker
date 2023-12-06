@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.dto.response.customer;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.cart.ClientCartResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,6 @@ public class ClientCustomerResponse {
     private CustomerStatus status;
     private String gender;
     private String image;
+    private ClientCartResponse cart;
     List<ClientAddressNoCustomerResponse> addressList;
-//    List<AdminCustomerVoucherResponse> customerVoucherList;
 }

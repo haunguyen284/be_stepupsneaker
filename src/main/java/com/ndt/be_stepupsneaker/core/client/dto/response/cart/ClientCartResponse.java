@@ -15,6 +15,4 @@ public class ClientCartResponse {
 
     private String id;
 
-    private ClientCustomerResponse customer;
-
 }

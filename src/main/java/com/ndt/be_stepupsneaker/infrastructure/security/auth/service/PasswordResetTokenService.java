@@ -1,8 +1,6 @@
 package com.ndt.be_stepupsneaker.infrastructure.security.auth.service;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
-import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientCustomerRequest;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.entity.auth.PasswordResetToken;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
@@ -16,7 +14,6 @@ import com.ndt.be_stepupsneaker.repository.auth.PasswordResetTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;

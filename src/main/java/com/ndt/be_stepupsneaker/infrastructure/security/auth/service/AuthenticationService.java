@@ -50,7 +50,6 @@ public class AuthenticationService {
         if (employeeOptional.isPresent()) {
             throw new ApiException("PhoneNumber" + EntityProperties.IS_EXIST);
         }
-        request.setImage(cloudinaryUpload.upload(request.getImage()));
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(request));
         adminEmployeeRepository.save(employee);
@@ -66,7 +65,6 @@ public class AuthenticationService {
         if (customerOptional.isPresent()) {
             throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
-        request.setImage(cloudinaryUpload.upload(request.getImage()));
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(request));
         clientCustomerRepository.save(customer);

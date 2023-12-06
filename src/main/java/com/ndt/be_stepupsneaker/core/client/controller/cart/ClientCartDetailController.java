@@ -14,8 +14,13 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/client/cart-details")
 public class ClientCartDetailController {
+    private final ClientCartDetailService clientCartDetailService;
+
     @Autowired
-    private ClientCartDetailService clientCartDetailService;
+    public ClientCartDetailController(ClientCartDetailService clientCartDetailService) {
+        this.clientCartDetailService = clientCartDetailService;
+    }
+
 
     @GetMapping("")
     public Object findAllCartDetail(ClientCartDetailRequest CartDetailDTO) {

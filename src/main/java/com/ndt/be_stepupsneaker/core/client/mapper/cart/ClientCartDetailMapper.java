@@ -14,6 +14,5 @@ public interface ClientCartDetailMapper {
     ClientCartDetailResponse cartDetailToClientCartDetailResponse(CartDetail cartDetail);
 
     @Mapping(target = "productDetail.id",source = "productDetail")
-    @Mapping(target = "cart.id",source = "cart")
     CartDetail clientCartDetailRequestToCartDetail(ClientCartDetailRequest cartDetailRequest);
 }

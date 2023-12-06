@@ -33,17 +33,20 @@ public interface ClientCartDetailRepository extends CartDetailRepository {
             OR x.productDetail.size.name ILIKE CONCAT('%', :#{#request.q}, '%')
             OR x.productDetail.material.name ILIKE CONCAT('%', :#{#request.q}, '%'))
             AND 
-            (:#{#request.customer} IS NULL OR x.cart.customer = :#{#request.customer}) 
+            (x.cart = :cart) 
             AND
             x.deleted = FALSE
             """)
-    Page<CartDetail> findAllCartDetail(@Param("request") ClientCartDetailRequest request, Pageable pageable);
+    Page<CartDetail> findAllCartDetail(@Param("request") ClientCartDetailRequest request,
+                                       @Param("cart") Cart cart, Pageable pageable);
 
     CartDetail findByProductDetailAndCart(ProductDetail productDetail, Cart cart);
 
+    CartDetail findByIdAndCart(String id, Cart cart);
+
     @Modifying
     @Transactional
-    void deleteAllByIdIn(List<String> cartDetailIds);
+    void deleteAllByIdInAndCart(List<String> cartDetailIds, Cart cart);
 
     @Modifying
     @Transactional
