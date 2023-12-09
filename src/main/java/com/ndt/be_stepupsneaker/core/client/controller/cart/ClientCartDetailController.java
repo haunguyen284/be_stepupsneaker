@@ -9,7 +9,17 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/client/cart-details")
@@ -23,9 +33,8 @@ public class ClientCartDetailController {
 
 
     @GetMapping("")
-    public Object findAllCartDetail(ClientCartDetailRequest CartDetailDTO) {
-        PageableObject<ClientCartDetailResponse> listCartDetail = clientCartDetailService.findAllEntity(CartDetailDTO);
-        return ResponseHelper.getResponse(listCartDetail, HttpStatus.OK);
+    public Object findAllCartDetail() {
+        return ResponseHelper.getResponse(clientCartDetailService.findAll(), HttpStatus.OK);
 
     }
 
@@ -44,23 +53,46 @@ public class ClientCartDetailController {
         return ResponseHelper.getResponse(clientCartDetailService.create(CartDetailDTO), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public Object update(@PathVariable("id") String id, @RequestBody @Valid ClientCartDetailRequest CartDetailRequest, BindingResult bindingResult) {
-        CartDetailRequest.setId(id);
+    @PostMapping("/merge")
+    public Object merge(
+            @RequestBody List<@Valid ClientCartDetailRequest> cartDetailRequests,
+            BindingResult bindingResult
+    ) {
         if (bindingResult.hasErrors()) {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
-        return ResponseHelper.getResponse(clientCartDetailService.update(CartDetailRequest), HttpStatus.OK);
+        return ResponseHelper.getResponse(clientCartDetailService.merge(cartDetailRequests), HttpStatus.OK);
+    }
 
+    @PutMapping("/decrease/{id}")
+    public Object decreaseQty(@PathVariable("id") String id, @RequestBody @Valid ClientCartDetailRequest CartDetailRequest, BindingResult bindingResult) {
+        CartDetailRequest.setId(id);
+
+        if (bindingResult.hasErrors()) {
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        }
+
+        return ResponseHelper.getResponse(clientCartDetailService.decreaseQuantity(CartDetailRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/update/{id}")
+    public Object updateQty(@PathVariable("id") String id, @RequestBody @Valid ClientCartDetailRequest CartDetailRequest, BindingResult bindingResult) {
+        CartDetailRequest.setId(id);
+
+        if (bindingResult.hasErrors()) {
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        }
+
+        return ResponseHelper.getResponse(clientCartDetailService.updateQuantity(CartDetailRequest), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
-        return ResponseHelper.getResponse(clientCartDetailService.delete(id), HttpStatus.OK);
+        return ResponseHelper.getResponse(clientCartDetailService.deleteFromCart(id), HttpStatus.OK);
     }
 
     @DeleteMapping("")
-    public Object deleteCartDetails(@RequestBody ClientCartDetailRequest request) {
-        return ResponseHelper.getResponse(clientCartDetailService.deleteCartDetails(request), HttpStatus.OK);
+    public Object deleteCartDetails() {
+        return ResponseHelper.getResponse(clientCartDetailService.deleteAllFromCart(), HttpStatus.OK);
     }
 }

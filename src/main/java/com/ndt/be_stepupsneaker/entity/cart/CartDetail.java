@@ -10,12 +10,13 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @Table(name = "cart_detail")
 @Entity
-public class CartDetail extends PrimaryEntity {
+public class CartDetail extends PrimaryEntity{
     @JoinColumn(name = "product_detail_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private ProductDetail productDetail;

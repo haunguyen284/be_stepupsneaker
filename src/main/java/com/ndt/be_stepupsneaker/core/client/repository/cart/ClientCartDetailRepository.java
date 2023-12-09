@@ -44,6 +44,8 @@ public interface ClientCartDetailRepository extends CartDetailRepository {
 
     CartDetail findByIdAndCart(String id, Cart cart);
 
+    List<CartDetail> findAllByCart(Cart cart);
+
     @Modifying
     @Transactional
     void deleteAllByIdInAndCart(List<String> cartDetailIds, Cart cart);
@@ -51,4 +53,8 @@ public interface ClientCartDetailRepository extends CartDetailRepository {
     @Modifying
     @Transactional
     void deleteByUpdatedAtBefore(Long date);
+
+    @Modifying
+    @Transactional
+    void deleteAllByCart(Cart cart);
 }

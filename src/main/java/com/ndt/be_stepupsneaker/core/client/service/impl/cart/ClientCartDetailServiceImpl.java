@@ -21,8 +21,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -44,38 +51,37 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
 
     @Override
     public Object create(ClientCartDetailRequest request) {
+        Cart thisSessionCart = cart();
+
         ProductDetail productDetail = adminProductDetailRepository.findById(request.getProductDetail())
-                .orElseThrow(() -> new ResourceNotFoundException("Product Detail NOT FOUND !"));
-        if (request.getQuantity() > productDetail.getQuantity()) {
-            throw new ApiException("The quantity of the product you added exceeds the quantity in stock of the product in stock !");
-        }
-        CartDetail cartDetail = clientCartDetailRepository.findByProductDetailAndCart(productDetail, cart());
+                .orElseThrow(() -> new ResourceNotFoundException("Product Detail not found"));
+
+        int requestedQuantity = request.getQuantity();
+        int availableQuantity = productDetail.getQuantity();
+
+        validateRequestedQuantity(requestedQuantity, availableQuantity);
+
+        CartDetail cartDetail = clientCartDetailRepository.findByProductDetailAndCart(productDetail, thisSessionCart);
+
         if (cartDetail != null) {
-            if (cartDetail.getQuantity() + request.getQuantity() > productDetail.getQuantity()) {
-                throw new ApiException("The updated quantity exceeds the available stock for this product !");
-            }
+            validateRequestedQuantity(cartDetail.getQuantity() + requestedQuantity, availableQuantity);
+
             cartDetail.setQuantity(cartDetail.getQuantity() + request.getQuantity());
-            return ClientCartDetailMapper.INSTANCE.cartDetailToClientCartDetailResponse(clientCartDetailRepository.save(cartDetail));
+            clientCartDetailRepository.save(cartDetail);
         } else {
             CartDetail newCartDetail = ClientCartDetailMapper.INSTANCE.clientCartDetailRequestToCartDetail(request);
-            newCartDetail.setCart(cart());
+            newCartDetail.setCart(thisSessionCart);
             newCartDetail.setProductDetail(productDetail);
-            return ClientCartDetailMapper.INSTANCE.cartDetailToClientCartDetailResponse(clientCartDetailRepository.save(newCartDetail));
+            newCartDetail.setQuantity(request.getQuantity() != 0 ? request.getQuantity() : 1);
+            clientCartDetailRepository.save(newCartDetail);
         }
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
     }
 
     @Override
     public ClientCartDetailResponse update(ClientCartDetailRequest request) {
-        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(), cart());
-        if (cartDetail == null) {
-            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
-        }
-        ProductDetail productDetail = cartDetail.getProductDetail();
-        if (request.getQuantity() + cartDetail.getQuantity() > productDetail.getQuantity()) {
-            throw new ApiException("The updated quantity exceeds the available stock for this product !");
-        }
-        cartDetail.setQuantity(request.getQuantity());
-        return ClientCartDetailMapper.INSTANCE.cartDetailToClientCartDetailResponse(clientCartDetailRepository.save(cartDetail));
+        return null;
     }
 
     @Override
@@ -89,24 +95,152 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
 
     @Override
     public Boolean delete(String id) {
-        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(id, cart());
-        if (cartDetail == null) {
-            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
-        }
-        clientCartDetailRepository.delete(cartDetail);
-        return true;
+        return null;
     }
 
     @Override
     public Boolean deleteCartDetails(ClientCartDetailRequest cartDetailRequest) {
-        clientCartDetailRepository.deleteAllByIdInAndCart(cartDetailRequest.getCartDetails(), cart());
-        return true;
+        return null;
     }
 
+    @Override
+    public List<ClientCartDetailResponse> merge(List<ClientCartDetailRequest> cartDetailRequests) {
+        Cart thisSessionCart = cart();
+
+        List<CartDetail> oldCartDetails = clientCartDetailRepository.findAllByCart(thisSessionCart);
+        List<CartDetail> newCartDetails = cartDetailRequests.stream()
+                .map(ClientCartDetailMapper.INSTANCE::clientCartDetailRequestToCartDetail)
+                .filter(this::isValidCartDetail)
+                .peek(detail -> {
+                    detail.setCart(thisSessionCart);
+                    detail.setProductDetail(adminProductDetailRepository.findById(detail.getProductDetail().getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("It never runs here lol")));
+                })
+                .collect(Collectors.toList());
+
+        Map<String, CartDetail> mergedMap = Stream.concat(newCartDetails.stream(), oldCartDetails.stream())
+                .collect(Collectors.toMap(
+                        CartDetail::getId,
+                        Function.identity(),
+                        this::mergeCartDetails
+                ));
+
+        List<CartDetail> mergedList = new ArrayList<>(mergedMap.values());
+
+        clientCartDetailRepository.deleteAllByCart(thisSessionCart);
+
+        clientCartDetailRepository.saveAll(mergedList);
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClientCartDetailResponse> findAll() {
+        Cart thisSessionCart = cart();
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object updateQuantity(ClientCartDetailRequest request) {
+        Cart thisSessionCart = cart();
+
+        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(),thisSessionCart);
+
+        if (cartDetail == null) {
+            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+        }
+
+        ProductDetail productDetail = adminProductDetailRepository.findById(request.getProductDetail())
+                .orElseThrow(() -> new ResourceNotFoundException("Product Detail not found"));
+
+        int requestedQuantity = request.getQuantity();
+        int availableQuantity = productDetail.getQuantity();
+
+        validateRequestedQuantity(requestedQuantity, availableQuantity);
+
+        cartDetail.setQuantity(request.getQuantity());
+        clientCartDetailRepository.save(cartDetail);
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object decreaseQuantity(ClientCartDetailRequest request) {
+        Cart thisSessionCart = cart();
+
+        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(),thisSessionCart);
+
+        if (cartDetail == null) {
+            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+        }
+
+        if(request.getQuantity() == 1){
+            clientCartDetailRepository.delete(cartDetail);
+        }else {
+            cartDetail.setQuantity(cartDetail.getQuantity() - 1);
+            clientCartDetailRepository.save(cartDetail);
+        }
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object deleteFromCart(String id) {
+        Cart thisSessionCart = cart();
+
+        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(id, thisSessionCart);
+
+        if (cartDetail == null) {
+            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+        }
+
+        clientCartDetailRepository.delete(cartDetail);
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object deleteAllFromCart() {
+        Cart thisSessionCart = cart();
+
+        clientCartDetailRepository.deleteAllByCart(thisSessionCart);
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    private CartDetail mergeCartDetails(CartDetail existing, CartDetail replacement) {
+        CartDetail mergedCart = new CartDetail();
+        mergedCart.setId(existing.getId());
+        mergedCart.setCart(existing.getCart());
+        mergedCart.setProductDetail(existing.getProductDetail());
+
+        int requestedQuantity = (Math.max(existing.getQuantity(), replacement.getQuantity()));
+        int availableQuantity = existing.getProductDetail().getQuantity();
+
+        mergedCart.setQuantity(Math.min(requestedQuantity, availableQuantity));
+
+        mergedCart.setDeleted(existing.getDeleted());
+        mergedCart.setCreatedAt(existing.getCreatedAt());
+        mergedCart.setCreatedBy(existing.getCreatedBy());
+        mergedCart.setUpdatedAt(existing.getUpdatedAt());
+        mergedCart.setUpdatedBy(existing.getUpdatedBy());
+        return mergedCart;
+    }
+
+    private boolean isValidCartDetail(CartDetail cartDetail) {
+        Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findById(cartDetail.getProductDetail().getId());
+
+        return productDetailOptional.isPresent() && cartDetail.getQuantity() <= productDetailOptional.get().getQuantity();
+    }
+
+    private void validateRequestedQuantity(int requestedQuantity, int availableQuantity) {
+        if (requestedQuantity > availableQuantity) {
+            throw new ApiException("The requested quantity exceeds the available stock for the product!");
+        }
+    }
     private Cart cart() {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
-        Cart cart = clientCartRepository.findById(customerResponse.getCart().getId())
+        return clientCartRepository.findById(customerResponse.getCart().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart" + EntityProperties.NOT_FOUND));
-        return cart;
     }
 }
