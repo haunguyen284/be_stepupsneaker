@@ -120,7 +120,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
 
         Map<String, CartDetail> mergedMap = Stream.concat(newCartDetails.stream(), oldCartDetails.stream())
                 .collect(Collectors.toMap(
-                        CartDetail::getId,
+                        cartDetail -> cartDetail.getProductDetail().getId(),
                         Function.identity(),
                         this::mergeCartDetails
                 ));
