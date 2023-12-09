@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 
 @Getter
 @Setter
@@ -54,5 +56,19 @@ public class ClientProductRequest extends PageableRequest {
     private String start;
 
     private String end;
+
+    private List<String> tradeMarks;
+
+    private List<String> styles;
+
+    private List<String> sizes;
+
+    private List<String> materials;
+
+    private List<String> colors;
+
+    private List<String> brands;
+
+    private List<String> soles;
 }
 

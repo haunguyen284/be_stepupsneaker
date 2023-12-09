@@ -35,21 +35,19 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND 
-    (:#{#request.tradeMark} IS NULL OR :#{#request.tradeMark} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.tradeMark.id = :#{#request.tradeMark} GROUP BY pd.product.id)) 
+    (:#{#request.tradeMarks} IS NULL OR :#{#request.tradeMarks == null ? true : #request.tradeMarks.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.tradeMark.id IN :#{#request.tradeMarks} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.style} IS NULL OR :#{#request.style} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.style.id = :#{#request.style} GROUP BY pd.product.id)) 
+    (:#{#request.styles} IS NULL OR :#{#request.styles == null ? true : #request.styles.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.style.id IN :#{#request.styles} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.size} IS NULL OR :#{#request.size} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id = :#{#request.size} GROUP BY pd.product.id)) 
+    (:#{#request.sizes} IS NULL OR :#{#request.size == null ? true : #request.sizes.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.size.id IN :#{#request.sizes} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.product} IS NULL OR :#{#request.product} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.product.id = :#{#request.product} GROUP BY pd.product.id)) 
+    (:#{#request.materials} IS NULL OR :#{#request.materials == null ? true : #request.materials.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id IN :#{#request.materials} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.material} IS NULL OR :#{#request.material} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.material.id = :#{#request.material} GROUP BY pd.product.id)) 
+    (:#{#request.colors} IS NULL OR :#{#request.colors == null ? true : #request.colors.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.color.id IN :#{#request.colors} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.color} IS NULL OR :#{#request.color} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.color.id = :#{#request.color} GROUP BY pd.product.id)) 
+    (:#{#request.brands} IS NULL OR :#{#request.brands == null ? true : #request.brands.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.brand.id IN :#{#request.brands} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.brand} IS NULL OR :#{#request.brand} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.brand.id = :#{#request.brand} GROUP BY pd.product.id)) 
-    AND 
-    (:#{#request.sole} IS NULL OR :#{#request.sole} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id = :#{#request.sole} GROUP BY pd.product.id)) 
+    (:#{#request.soles} IS NULL OR :#{#request.soles == null ? true : #request.soles.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id IN :#{#request.soles} GROUP BY pd.product.id)) 
     AND 
     (:#{#request.minQuantity} IS NULL OR :#{#request.minQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) >= CAST(:#{#request.minQuantity} AS int)))
     AND 
