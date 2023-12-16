@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
 
+import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
@@ -57,5 +58,7 @@ public class AdminOrderRequest extends PageableRequest {
     private String orderHistoryNote;
 
     private OrderStatus status;
+
+    private TransactionInfo transactionInfo;
 
 }
