@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 
@@ -58,5 +59,21 @@ public class AdminProductDetailRequest extends PageableRequest {
     private int quantity;
 
     private ProductStatus status;
+
+    private List<String> tradeMarks;
+
+    private List<String> styles;
+
+    private List<String> sizes;
+
+    private List<String> materials;
+
+    private List<String> colors;
+
+    private List<String> brands;
+
+    private List<String> soles;
+
+    private List<String> products;
 }
 

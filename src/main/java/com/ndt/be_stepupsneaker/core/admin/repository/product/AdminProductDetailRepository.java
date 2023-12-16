@@ -20,21 +20,21 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     @Query("""
     SELECT x FROM ProductDetail x 
     WHERE (
-    (:#{#request.product} IS NULL OR x.product.id = :#{#request.product}) 
+    (:#{#request.products} IS NULL OR :#{#request.products == null ? true : #request.products.empty} = true OR x.product.id IN :#{#request.products}) 
     AND 
-    (:#{#request.brand} IS NULL OR x.brand.id = :#{#request.brand}) 
+    (:#{#request.brands} IS NULL OR :#{#request.brands == null ? true : #request.brands.empty} = true OR x.brand.id IN :#{#request.brands}) 
     AND 
-    (:#{#request.color} IS NULL OR x.color.id = :#{#request.color}) 
+    (:#{#request.colors} IS NULL OR :#{#request.colors == null ? true : #request.colors.empty} = true OR x.color.id IN :#{#request.colors}) 
     AND 
-    (:#{#request.material} IS NULL OR x.material.id = :#{#request.material}) 
+    (:#{#request.materials} IS NULL OR :#{#request.materials == null ? true : #request.materials.empty} = true OR x.material.id IN :#{#request.materials}) 
     AND 
-    (:#{#request.size} IS NULL OR x.size.id = :#{#request.size}) 
+    (:#{#request.sizes} IS NULL OR :#{#request.sizes == null ? true : #request.sizes.empty} = true OR x.size.id IN :#{#request.sizes}) 
     AND 
-    (:#{#request.sole} IS NULL OR x.sole.id = :#{#request.sole}) 
+    (:#{#request.soles} IS NULL OR :#{#request.soles == null ? true : #request.soles.empty} = true OR x.sole.id IN :#{#request.soles}) 
     AND 
-    (:#{#request.style} IS NULL OR x.style.id = :#{#request.style}) 
+    (:#{#request.styles} IS NULL OR :#{#request.styles == null ? true : #request.styles.empty} = true OR x.style.id IN :#{#request.styles}) 
     AND 
-    (:#{#request.tradeMark} IS NULL OR x.tradeMark.id = :#{#request.tradeMark}) 
+    (:#{#request.tradeMarks} IS NULL OR :#{#request.tradeMarks == null ? true : #request.tradeMarks.empty} = true OR x.tradeMark.id IN :#{#request.tradeMarks}) 
     AND 
     (
     (:#{#request.promotion} IS NULL OR :#{#request.isInPromotion} = 1 AND x.id IN (SELECT y.productDetail.id FROM PromotionProductDetail y WHERE y.promotion.id = :#{#request.promotion})) 
