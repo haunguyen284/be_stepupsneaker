@@ -27,6 +27,8 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
                     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.code ILIKE CONCAT('%', :#{#request.q}, '%')) 
                     AND
                     (:status IS NULL OR x.status = :status) 
+                    AND 
+                    (:#{#request.code} IS NULL OR :#{#request.code} ILIKE '' OR x.code ILIKE  CONCAT('%', :#{#request.code}, '%')) 
                     AND
                     (:type IS NULL OR x.type = :type) 
                     AND
