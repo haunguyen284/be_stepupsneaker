@@ -73,9 +73,11 @@ public class SendMailAutoEntity {
         String[] toEmail = new String[1];
         Email email = new Email();
         email.setSubject("Your Order Information from STEP UP SNEAKER");
-        email.setTitleEmail("<div style='text-align: center; margin-top: 20px; margin-bottom: 20px;'><h1 style='color: red;'>Your Order Information from STEP UP SNEAKER</h1></div>");
+        String emailTitle = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailTitle += "<tr><td colspan='4' style='text-align: center;'><strong>Your Order Information from STEP UP SNEAKER</strong></td></tr>";
+        emailTitle += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        email.setTitleEmail(emailTitle);
         String emailBody = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
-        emailBody += "<tr><td colspan='4' style='text-align: center;'><strong>Order Summary</strong></td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<tr><td colspan='4'>";
         emailBody += "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
@@ -116,19 +118,18 @@ public class SendMailAutoEntity {
         emailBody += "</table>";
         emailBody += "</td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Full name:</strong> " + clientOrderResponse.getFullName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Delivery address     :</strong> "
                 + clientOrderResponse.getAddress().getMore() + ", "
                 + clientOrderResponse.getAddress().getWardName() + ", "
                 + clientOrderResponse.getAddress().getDistrictName() + ", "
                 + clientOrderResponse.getAddress().getProvinceName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Phone number:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Click here to track your order:</span><a href='" + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Track Your Order</a></td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<tr><td><strong>Shipping money :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getShippingMoney()) + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Voucher       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(totalVoucher) + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Order total   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getTotalMoney()) + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Order code    :</strong></td><td colspan='3'><a href='" + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "'>" + clientOrderResponse.getCode() + "</a></td></tr>";
-        emailBody += "<tr><td><strong>Full name     :</strong></td><td colspan='3'>" + clientOrderResponse.getFullName() + "</td></tr>";
-        emailBody += "<tr><td><strong>Status        :</strong></td><td colspan='3'>" + clientOrderResponse.getStatus() + "</td></tr>";
         emailBody += "<tr><td><strong>Created at    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
@@ -145,9 +146,8 @@ public class SendMailAutoEntity {
         String[] toEmail = new String[1];
         Email email = new Email();
         email.setSubject("STEP UP SNEAKER sends you the forget password ...");
-        email.setTitleEmail("<div style='text-align: center; margin-top: 20px; margin-bottom: 20px;'><h1 style='color: red;'>Password Reset</h1></div>");
-        String emailBody = "<h3>Reset Your Password</h3>"
-                + "<p>To reset your password, please click on the link below:</p>"
+        email.setTitleEmail("<h3>Reset Your Password</h3>");
+        String emailBody = "<p>To reset your password, please click on the link below:</p>"
                 + "<p><a href=\"" + resetLink + "\">Reset Password</a></p>"
                 + "<p>If you did not request this, please ignore this email.</p>"
                 + "<p>Thank you!</p>";

@@ -3,10 +3,12 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.employee;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.employee.AdminEmployeeRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.empolyee.AdminEmployeeMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminRoleRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.employee.AdminEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
@@ -41,6 +43,8 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     private final EmailService emailService;
 
+    private final AdminCustomerRepository adminCustomerRepository;
+
     @Override
     public PageableObject<AdminEmployeeResponse> findAllEntity(AdminEmployeeRequest employeeRequest) {
         Pageable pageable = paginationUtil.pageable(employeeRequest);
@@ -53,7 +57,8 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     @Override
     public Object create(AdminEmployeeRequest employeeDTO) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
-        if (employeeOptional.isPresent()) {
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
+        if (employeeOptional.isPresent() || customerOptional.isPresent()) {
             throw new ApiException("Email is exist");
         }
         employeeOptional = adminEmployeeRepository.findByPhoneNumber(employeeDTO.getPhoneNumber());
@@ -65,14 +70,15 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         employeeDTO.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWord(null,passWordRandom,employee);
+        sendMailAutoEntity.sendMailAutoPassWord(null, passWordRandom, employee);
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }
 
     @Override
     public AdminEmployeeResponse update(AdminEmployeeRequest employeeDTO) {
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getId(), employeeDTO.getEmail());
-        if (employeeOptional.isPresent()) {
+        if (employeeOptional.isPresent() || customerOptional.isPresent()) {
             throw new ApiException("Email is exist");
         }
         employeeOptional = adminEmployeeRepository.findById(employeeDTO.getId());
@@ -102,7 +108,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     public AdminEmployeeResponse findById(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
-            throw new RuntimeException("LOOI");
+            throw new ResourceNotFoundException("Employee is not found");
         }
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employeeOptional.get());
     }

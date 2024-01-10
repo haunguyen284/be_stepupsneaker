@@ -12,4 +12,6 @@ public interface ClientOrderService extends BaseService<ClientOrderResponse, Str
 
     ClientOrderResponse findByCode(String code);
 
+    Boolean cancelOrder(String code);
+
 }

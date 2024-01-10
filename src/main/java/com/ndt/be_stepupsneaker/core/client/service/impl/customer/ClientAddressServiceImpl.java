@@ -2,15 +2,19 @@ package com.ndt.be_stepupsneaker.core.client.service.impl.customer;
 
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientAddressResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientAddressRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.core.client.service.customer.ClientAddressService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.cart.Cart;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,13 +32,17 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Autowired
     private ClientCustomerRepository clientCustomerRepository;
+
     @Autowired
     private PaginationUtil paginationUtil;
+
+    @Autowired
+    private MySessionInfo mySessionInfo;
 
     // Not user funciton
     @Override
     public PageableObject<ClientAddressResponse> findAllEntity(ClientAddressRequest addressRequest) {
-       return null;
+        return null;
     }
 
     // Tạo address bắt buộc phải cho id customer
@@ -48,7 +56,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
         if (!customerOptional.isPresent()) {
             throw new ResourceNotFoundException("CUSTOMER NOT FOUND !");
         }
-        List<Address> addressList = clientAddressRepository.findByCustomer(customerOptional.get());
+        List<Address> addressList = clientAddressRepository.findByCustomerAndDeleted(customerOptional.get(),false);
         if (addressList.size() >= 3) {
             throw new ResourceNotFoundException("Customers can only create a maximum of 3 addresses !");
         }
@@ -89,7 +97,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Override
     public ClientAddressResponse findById(String id) {
-        Optional<Address> addressOptional = clientAddressRepository.findById(id);
+        Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id, currentCustomer());
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Address Not Found");
         }
@@ -99,7 +107,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Override
     public Boolean delete(String id) {
-        Optional<Address> addressOptional = clientAddressRepository.findById(id);
+        Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id,currentCustomer());
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException("Address Not Found");
         }
@@ -132,5 +140,12 @@ public class ClientAddressServiceImpl implements ClientAddressService {
         newDefaultAddress.setIsDefault(true);
         clientAddressRepository.save(newDefaultAddress);
         return true;
+    }
+
+    private Customer currentCustomer() {
+        ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
+        Customer customer = clientCustomerRepository.findById(customerResponse.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND));
+        return customer;
     }
 }

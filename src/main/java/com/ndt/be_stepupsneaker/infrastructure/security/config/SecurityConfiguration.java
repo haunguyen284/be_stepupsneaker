@@ -39,9 +39,7 @@ public class SecurityConfiguration {
                                 .requestMatchers("/error/**", "/auth/**", "/client/products/**",
                                         "/client/product-details/**", "/admin/notifications/sse")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.POST, "/client/orders/**")
-                                .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/client/orders/**").permitAll()
+                                .requestMatchers("/client/orders/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyRole(EntityProperties.ADMIN, EntityProperties.STAFF)
                                 .requestMatchers("/client/**").hasAnyRole(EntityProperties.CUSTOMER)
                                 .anyRequest()

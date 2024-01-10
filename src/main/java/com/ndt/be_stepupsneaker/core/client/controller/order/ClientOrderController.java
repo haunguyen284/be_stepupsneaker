@@ -31,7 +31,7 @@ public class ClientOrderController {
     }
 
     @GetMapping("")
-    public Object findAllOrder(ClientOrderRequest orderRequest){
+    public Object findAllOrder(ClientOrderRequest orderRequest) {
         PageableObject<ClientOrderResponse> listOrder = clientOrderService.findAllEntity(orderRequest);
 
         return ResponseHelper.getResponse(listOrder, HttpStatus.OK);
@@ -66,6 +66,11 @@ public class ClientOrderController {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(clientOrderService.update(ClientOrderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/cancel/{code}")
+    public Object cancelOrder(@PathVariable("code") String code) {
+        return ResponseHelper.getResponse(clientOrderService.cancelOrder(code), HttpStatus.OK);
     }
 
 
