@@ -28,6 +28,8 @@ public class AdminProductResponse {
 
     private Long saleCount;
 
+    private Long quantity;
+
     private Set<AdminProductDetailResponse> productDetails;
 
 }

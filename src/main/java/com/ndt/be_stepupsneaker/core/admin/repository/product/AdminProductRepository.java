@@ -20,7 +20,7 @@ import java.util.UUID;
 @Transactional
 public interface AdminProductRepository extends ProductRepository {
     @Query("""
-    SELECT x, COALESCE(SUM(od.quantity), 0) AS saleCount 
+    SELECT x, COALESCE(SUM(od.quantity), 0) AS saleCount, (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x) AS quantity 
     FROM Product x 
     LEFT JOIN x.productDetails pd 
     LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id 

@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.service.voucher.ClientVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -82,12 +84,21 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
 
 
     @Override
-    public PageableObject<ClientVoucherResponse> findAllVoucher(ClientVoucherRequest voucherReq, String customerId, String noCustomerId) {
+    public PageableObject<ClientVoucherResponse> findAllVoucher(ClientVoucherRequest voucherReq, String customerId) {
         Pageable pageable = paginationUtil.pageable(voucherReq);
-        Page<Voucher> resp = ClientVoucherRepository.findAllVoucher(voucherReq, pageable, voucherReq.getStatus(), voucherReq.getType(), customerId, noCustomerId);
+        Page<Voucher> resp = ClientVoucherRepository.findAllVoucher(voucherReq, pageable, voucherReq.getStatus(), voucherReq.getType(), customerId);
         Page<ClientVoucherResponse> ClientVoucherResponsePage = resp.map(ClientVoucherMapper.INSTANCE::voucherToClientVoucherResponse);
         return new PageableObject<>(ClientVoucherResponsePage);
     }
 
+    @Override
+    public PageableObject<ClientVoucherResponse> findLegitVouchers(String customerId, float totalMoney) {
+        ClientVoucherRequest request = new ClientVoucherRequest();
+        request.setPageSize(1000);
+        Pageable pageable = paginationUtil.pageable(request);
+        Page<Voucher> voucherPage = ClientVoucherRepository.findLegitVouchers(pageable, customerId, totalMoney);
+        Page<ClientVoucherResponse> clientVoucherResponses = voucherPage.map(ClientVoucherMapper.INSTANCE::voucherToClientVoucherResponse);
+        return new PageableObject<>(clientVoucherResponses);
+    }
 
 }

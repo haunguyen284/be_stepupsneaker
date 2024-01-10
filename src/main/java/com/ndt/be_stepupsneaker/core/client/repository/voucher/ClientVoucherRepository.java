@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,27 +26,24 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
                 WHERE 
                     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.code ILIKE CONCAT('%', :#{#request.q}, '%')) 
                     AND
-                    (:status IS NULL OR x.status = :status)
+                    (:status IS NULL OR x.status = :status) 
                     AND
-                    (:type IS NULL OR x.type = :type)
+                    (:type IS NULL OR x.type = :type) 
                     AND
-                    (:#{#request.quantity} = 0 OR x.quantity = :#{#request.quantity})
+                    (:#{#request.quantity} = 0 OR x.quantity = :#{#request.quantity}) 
                     AND
-                    (:#{#request.startDate} IS NULL OR :#{#request.startDate} BETWEEN x.startDate AND x.endDate)
-                    AND
+                    (:#{#request.startDate} IS NULL OR :#{#request.startDate} BETWEEN x.startDate AND x.endDate) 
+                    AND 
                     (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
-                    AND
-                    (:customer IS NULL OR :customer ILIKE '' OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customer))
-                    AND
-                    (:noCustomer IS NULL OR :noCustomer ILIKE '' OR x.id NOT IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :noCustomer))
-                    AND
+                    AND 
+                    (:customer IS NULL OR :customer ILIKE '' OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customer)) 
+                    AND 
                     (x.deleted = false)
             """)
     Page<Voucher> findAllVoucher(@Param("request") ClientVoucherRequest request, Pageable pageable,
                                  @Param("status") VoucherStatus voucherStatus,
                                  @Param("type") VoucherType voucherType,
-                                 @Param("customer") String customer,
-                                 @Param("noCustomer") String noCustomer);
+                                 @Param("customer") String customer);
 
     @Query("""
             SELECT x FROM Voucher x 
@@ -55,5 +53,20 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
 
     Optional<Voucher> findByCode(String code);
 
+
+    @Query("""
+    SELECT x FROM Voucher x WHERE 
+    (
+    :customerId IS NULL 
+    OR 
+    :customerId ILIKE '' 
+    OR 
+    x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customerId)
+    ) 
+    AND 
+    x.constraint <= :totalMoney 
+    ORDER BY x.value 
+    """)
+    Page<Voucher> findLegitVouchers(Pageable pageable, @Param("customerId") String customerId, @Param("totalMoney") float totalMoney);
 
 }
