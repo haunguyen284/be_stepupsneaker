@@ -140,7 +140,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setAddress(newAddress);
         float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
         orderSave.setShippingMoney(shippingFee);
-        setOrderInfo(orderSave, clientOrderRequest);
+        setOrderInfo(orderSave);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
         newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + 86_400_000L);
@@ -194,7 +194,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         newOrder.setFullName(orderRequest.getFullName());
         newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
         newOrder.setNote(orderRequest.getNote());
-        setOrderInfo(newOrder, orderRequest);
+        setOrderInfo(newOrder);
         float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder.getOrderDetails());
         applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
         Order order = clientOrderRepository.save(newOrder);
@@ -266,7 +266,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return total;
     }
 
-    private void setOrderInfo(Order order, ClientOrderRequest orderRequest) {
+    private void setOrderInfo(Order order) {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         if (customerResponse == null) {
             order.setCustomer(null);

@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableAsync
 public class BeStepupsneakerApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(BeStepupsneakerApplication.class, args);
     }
