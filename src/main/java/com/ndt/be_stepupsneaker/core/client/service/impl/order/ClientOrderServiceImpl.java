@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.order;
 
+import com.amazonaws.services.apigateway.model.Op;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
@@ -130,6 +131,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Override
     public Object create(ClientOrderRequest clientOrderRequest) {
         Order orderSave = ClientOrderMapper.INSTANCE.clientOrderRequestToOrder(clientOrderRequest);
+        for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
+            ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+            if (productDetail != null) {
+                if (productDetail.getQuantity() < clientCartItemRequest.getQuantity()) {
+                    throw new ApiException("The quantity of products you purchased exceeds the quantity in stock : " + productDetail.getProduct().getName());
+                }
+            }
+        }
         orderSave.setType(OrderType.ONLINE);
         orderSave.setStatus(clientOrderRequest.getPaymentMethod().equals("Cash") ? OrderStatus.WAIT_FOR_CONFIRMATION : OrderStatus.PENDING);
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(clientOrderRequest.getAddressShipping());
@@ -139,16 +149,21 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         Address newAddress = clientAddressRepository.save(address);
         orderSave.setAddress(newAddress);
         float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
-        orderSave.setShippingMoney(shippingFee);
+        float totalCart = totalCartItem(clientOrderRequest.getCartItems());
+        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
+            orderSave.setShippingMoney(0);
+        } else {
+            orderSave.setShippingMoney(shippingFee);
+        }
         setOrderInfo(orderSave);
-        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), orderSave.getShippingMoney());
+        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
         newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + 86_400_000L);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder);
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
-            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCartItem(clientOrderRequest.getCartItems()), shippingFee);
+            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
             String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             return vnpayUrl;
         }
@@ -177,26 +192,51 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
         Optional<Order> orderOptional = clientOrderRepository.findById(orderRequest.getId());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
+            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
         }
         Order newOrder = orderOptional.get();
         if (newOrder.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && newOrder.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
             throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
         }
         Address address = clientAddressRepository.findById(newOrder.getAddress().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Address Not Found !"));
+                .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
+        address.setMore(orderRequest.getAddressShipping().getMore());
+        address.setDistrictId(orderRequest.getAddressShipping().getDistrictId());
+        address.setDistrictName(orderRequest.getAddressShipping().getDistrictName());
+        address.setProvinceId(orderRequest.getAddressShipping().getProvinceId());
+        address.setProvinceName(orderRequest.getAddressShipping().getProvinceName());
+        address.setWardCode(orderRequest.getAddressShipping().getWardCode());
+        address.setWardName(orderRequest.getAddressShipping().getWardName());
         if (address.getCustomer() == null) {
             address.setCustomer(null);
         }
+        clientAddressRepository.save(address);
+        List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(newOrder);
+        List<ProductDetail> productDetails = new ArrayList<>();
+        for (OrderDetail orderDetail : orderDetails) {
+            ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail" + EntityProperties.NOT_FOUND));
+            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+            productDetails.add(productDetail);
+        }
+        clientProductDetailRepository.saveAll(productDetails);
+        clientOrderDetailRepository.deleteAll(orderDetails);
         float shippingFee = calculateShippingFee(orderRequest.getAddressShipping());
-        newOrder.setShippingMoney(shippingFee);
+        float totalCart = totalCartItem(orderRequest.getCartItems());
+        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
+            newOrder.setShippingMoney(0);
+        } else {
+            newOrder.setShippingMoney(shippingFee);
+        }
+        createOrderDetails(newOrder, orderRequest);
+        newOrder.setEmail(orderRequest.getEmail());
         newOrder.setType(OrderType.ONLINE);
         newOrder.setFullName(orderRequest.getFullName());
         newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
         newOrder.setNote(orderRequest.getNote());
         setOrderInfo(newOrder);
-        float totalOrderPrice = calculateTotalPriceOrderDetailOfOrder(newOrder.getOrderDetails());
-        applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderPrice, newOrder.getShippingMoney());
+        applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
+
         Order order = clientOrderRepository.save(newOrder);
         Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
@@ -207,48 +247,26 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             orderHistory.setActionDescription(order.getStatus().action_description);
             clientOrderHistoryRepository.save(orderHistory);
         }
-        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+        ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, orderRequest.getEmail());
+        return clientOrderResponse;
     }
 
     @Override
     public ClientOrderResponse findById(String id) {
         Optional<Order> orderOptional = clientOrderRepository.findById(id);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
+            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
     }
 
     @Override
     public Boolean delete(String id) {
-        Optional<Order> orderOptional = clientOrderRepository.findById(id);
-        if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
-        }
-        Order order = orderOptional.get();
-        if (order.getStatus() == OrderStatus.PENDING) {
-            clientOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
-            clientOrderRepository.delete(order);
-        } else {
-            order.setDeleted(true);
-            clientOrderRepository.save(order);
-            OrderHistory orderHistory = new OrderHistory();
-            orderHistory.setOrder(order);
-            orderHistory.setNote(order.getNote());
-            orderHistory.setActionDescription("Order is deleted");
-            clientOrderHistoryRepository.save(orderHistory);
-        }
-        return true;
+        return null;
     }
 
-    public float calculateTotalPriceOrderDetailOfOrder(List<OrderDetail> orderDetails) {
-        if (orderDetails != null) {
-            return orderDetails.stream()
-                    .map(OrderDetail::getTotalPrice)
-                    .reduce(0.0f, Float::sum);
-        }
-        return 0;
-    }
 
     public float totalCartItem(List<ClientCartItemRequest> clientCartItemRequests) {
         float total = 0.0f;
@@ -267,14 +285,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     private void setOrderInfo(Order order) {
-        ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
-        if (customerResponse == null) {
-            order.setCustomer(null);
-        } else {
-            Customer customer = clientCustomerRepository.findById(customerResponse.getId()).orElseThrow(() -> new ResourceNotFoundException("Customer Not Found!"));
-            order.setCustomer(customer);
+        if (order.getEmail() != null) {
+            Customer customer = clientCustomerRepository.findByEmail(order.getEmail()).orElse(null);
+            if (customer != null) {
+                order.setCustomer(customer);
+            } else {
+                order.setCustomer(null);
+            }
         }
-
         order.setEmployee(null);
     }
 
@@ -301,6 +319,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                     .orElse(null);
             float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalCartItem;
             float finalTotalPrice = Math.max(0, totalCartItem - discount);
+            if (totalCartItem >= EntityProperties.IS_FREE_SHIPPING) {
+                return finalTotalPrice;
+            }
             return finalTotalPrice + shippingFee;
         }
         return totalCartItem + shippingFee;
@@ -361,7 +382,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private List<ClientPaymentResponse> createPayment(Order order, ClientOrderRequest orderRequest) {
         List<ClientPaymentResponse> clientPaymentResponses = new ArrayList<>();
         PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
-                .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod NOT FOUND !"));
+                .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod" + EntityProperties.NOT_FOUND));
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentMethod(paymentMethod);
@@ -390,13 +411,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return null;
     }
 
-    private List<ClientOrderHistoryResponse> createOrderHistory(Order order) {
+    private List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus) {
         List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
         OrderHistory orderHistory = new OrderHistory();
         orderHistory.setOrder(order);
-        orderHistory.setActionStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
+        orderHistory.setActionStatus(orderStatus);
         orderHistory.setNote(order.getNote());
-        orderHistory.setActionDescription(OrderStatus.WAIT_FOR_CONFIRMATION.action_description);
+        orderHistory.setActionDescription(orderStatus.action_description);
         clientOrderHistoryResponses.add(ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(clientOrderHistoryRepository.save(orderHistory)));
         return clientOrderHistoryResponses;
     }
@@ -407,9 +428,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
-                if (productDetail.getQuantity() < clientCartItemRequest.getQuantity()) {
-                    throw new ApiException("The quantity of products you purchased exceeds the quantity in stock : "+productDetail.getProduct().getName());
-                }
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
                 orderDetail.setQuantity(clientCartItemRequest.getQuantity());
@@ -427,9 +445,16 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     @Override
     public ClientOrderResponse findByIdAndCustomerId(String orderId, String customerId) {
+        if (customerId == null) {
+            Optional<Order> orderOptional = clientOrderRepository.findById(orderId);
+            if (orderOptional.isEmpty()) {
+                throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+            }
+            return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
+        }
         Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer_Id(orderId, customerId);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Order Not Found!");
+            throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
     }
@@ -437,12 +462,28 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Override
     public ClientOrderResponse findByCode(String code) {
         Order order = clientOrderRepository.findByCode(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Order Not Found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND));
 
         if (order.getStatus() == OrderStatus.COMPLETED) {
             throw new ResourceNotFoundException("Order tracking is expired!");
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+    }
+
+    @Override
+    public Boolean cancelOrder(String code) {
+        Optional<Order> orderOptional = clientOrderRepository.findByCode(code);
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+        }
+        Order order = orderOptional.get();
+        if (order.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && order.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+            throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
+        }
+        order.setStatus(OrderStatus.CANCELED);
+        Order newOrder = clientOrderRepository.save(order);
+        createOrderHistory(newOrder, OrderStatus.CANCELED);
+        return true;
     }
 
 }

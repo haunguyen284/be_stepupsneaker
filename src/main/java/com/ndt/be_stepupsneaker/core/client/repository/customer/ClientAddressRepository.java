@@ -48,10 +48,12 @@ public interface ClientAddressRepository extends AddressRepository {
     Address findDefaultAddressByCustomer(@Param("customerId") String customerId);
 
 
-    List<Address> findByCustomer(Customer customer);
+    List<Address> findByCustomerAndDeleted(Customer customer,Boolean deleted);
 
     @Modifying
     @Transactional
     @Query("DELETE FROM Address x WHERE x.id IN (SELECT y.address.id FROM Order y WHERE y.id IN :orderIds)")
     void deleteAddressByOrder(List<String> orderIds);
+
+    Optional<Address> findByIdAndCustomer(String id, Customer customer);
 }

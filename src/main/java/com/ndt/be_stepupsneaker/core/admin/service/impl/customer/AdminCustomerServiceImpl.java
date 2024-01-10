@@ -6,10 +6,12 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrow
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
@@ -41,18 +43,22 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     private PasswordEncoder passwordEncoder;
 
+    private AdminEmployeeRepository adminEmployeeRepository;
+
     @Autowired
     public AdminCustomerServiceImpl(CloudinaryUpload cloudinaryUpload,
                                     AdminCustomerRepository adminCustomerRepository,
                                     PaginationUtil paginationUtil,
                                     EmailService emailService,
-                                    PasswordEncoder passwordEncoder
+                                    PasswordEncoder passwordEncoder,
+                                    AdminEmployeeRepository adminEmployeeRepository
     ) {
         this.cloudinaryUpload = cloudinaryUpload;
         this.adminCustomerRepository = adminCustomerRepository;
         this.paginationUtil = paginationUtil;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
+        this.adminEmployeeRepository = adminEmployeeRepository;
     }
 
 
@@ -85,7 +91,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     public Object create(AdminCustomerRequest customerDTO) {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
-        if (customerOptional.isPresent()) {
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
+        if (customerOptional.isPresent() || employeeOptional.isPresent()) {
             throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
@@ -101,7 +108,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public AdminCustomerResponse update(AdminCustomerRequest customerDTO) {
 
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getId(), customerDTO.getEmail());
-        if (customerOptional.isPresent()) {
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
+        if (customerOptional.isPresent() || employeeOptional.isPresent()) {
             throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
         customerOptional = adminCustomerRepository.findById(customerDTO.getId());

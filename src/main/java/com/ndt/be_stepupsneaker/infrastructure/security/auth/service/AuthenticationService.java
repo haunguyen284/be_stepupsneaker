@@ -62,7 +62,8 @@ public class AuthenticationService {
 
     public AuthenticationResponse registerCustomer(ClientCustomerRequest request) {
         Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(request.getEmail());
-        if (customerOptional.isPresent()) {
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
+        if (customerOptional.isPresent() || employeeOptional.isPresent()) {
             throw new ApiException("Email" + EntityProperties.IS_EXIST);
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
