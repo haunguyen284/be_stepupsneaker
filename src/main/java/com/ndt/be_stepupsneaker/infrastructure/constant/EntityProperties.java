@@ -23,6 +23,7 @@ public final class EntityProperties {
     public static final byte LENGTH_PENDING_ORDER = 5;
     public static final int EXPIRATION = 5;
     public static final float IS_FREE_SHIPPING = 5000000;
+    public static final Long DELIVERY_TIME_IN_MILLIS = 24L * 60 * 60 * 1000;
     public static final String VITE_GHN_USER_TOKEN = "2bddbda8-7165-11ee-af43-6ead57e9219a";
     public static final String VITE_GHN_SHOP_ID = "4649903";
     public static final String SECRET = "QHMBQfsViR66wU3Yx/MOdkKcHdmJeRy4JdbDbrjmZdfu35Q7yzH6b3vJCrQcNgoOEFfsGyhOeF5Pby7R+YzG0w==";
