@@ -38,6 +38,7 @@ import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
+import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
@@ -155,10 +156,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         } else {
             orderSave.setShippingMoney(shippingFee);
         }
+        orderSave.setOriginMoney(totalCart);
         setOrderInfo(orderSave);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
         Order newOrder = clientOrderRepository.save(orderSave);
-        newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + 86_400_000L);
+        newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
         createVoucherHistory(newOrder);
@@ -212,14 +214,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         clientAddressRepository.save(address);
         List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(newOrder);
-        List<ProductDetail> productDetails = new ArrayList<>();
-        for (OrderDetail orderDetail : orderDetails) {
-            ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail" + EntityProperties.NOT_FOUND));
-            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
-            productDetails.add(productDetail);
-        }
-        clientProductDetailRepository.saveAll(productDetails);
+        revertQuantityProductDetail(newOrder);
         clientOrderDetailRepository.deleteAll(orderDetails);
         float shippingFee = calculateShippingFee(orderRequest.getAddressShipping());
         float totalCart = totalCartItem(orderRequest.getCartItems());
@@ -229,6 +224,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             newOrder.setShippingMoney(shippingFee);
         }
         createOrderDetails(newOrder, orderRequest);
+        newOrder.setOriginMoney(totalCart);
         newOrder.setEmail(orderRequest.getEmail());
         newOrder.setType(OrderType.ONLINE);
         newOrder.setFullName(orderRequest.getFullName());
@@ -269,6 +265,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
 
     public float totalCartItem(List<ClientCartItemRequest> clientCartItemRequests) {
+        List<ProductDetail> productDetails = new ArrayList<>();
         float total = 0.0f;
         if (clientCartItemRequests != null) {
             for (ClientCartItemRequest request : clientCartItemRequests) {
@@ -277,8 +274,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 float price = productDetail.getPrice();
                 total += price * request.getQuantity();
                 productDetail.setQuantity(productDetail.getQuantity() - request.getQuantity());
-                clientProductDetailRepository.save(productDetail);
+                productDetails.add(productDetail);
             }
+            clientProductDetailRepository.saveAll(productDetails);
 
         }
         return total;
@@ -480,10 +478,20 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         if (order.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && order.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
             throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
         }
+        revertQuantityProductDetail(order);
         order.setStatus(OrderStatus.CANCELED);
         Order newOrder = clientOrderRepository.save(order);
         createOrderHistory(newOrder, OrderStatus.CANCELED);
         return true;
     }
 
+    public void revertQuantityProductDetail(Order order) {
+        List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(order);
+        List<ProductDetail> productDetails = orderDetails.stream().map(orderDetail -> {
+            ProductDetail productDetail = orderDetail.getProductDetail();
+            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+            return productDetail;
+        }).collect(Collectors.toList());
+        clientProductDetailRepository.saveAll(productDetails);
+    }
 }
