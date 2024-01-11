@@ -61,6 +61,12 @@ public class Order extends PrimaryEntity {
     @Column(name = "email", length = EntityProperties.LENGTH_EMAIL)
     private String email;
 
+    @Column(name = "origin_money")
+    private float originMoney;
+
+    @Column(name = "reducel_money")
+    private float reduceMoney;
+
     @Column(name = "total_money")
     private float totalMoney;
 

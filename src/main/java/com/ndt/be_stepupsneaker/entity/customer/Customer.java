@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.entity.customer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.cart.Cart;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
