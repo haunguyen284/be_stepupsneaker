@@ -301,11 +301,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             if (voucher != null) {
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
                 float finalTotalPrice = Math.max(0, totalOrderPrice - discount);
+                order.setReduceMoney(discount);
                 order.setTotalMoney(finalTotalPrice + shippingFee);
                 voucher.setQuantity(voucher.getQuantity() - 1);
                 clientVoucherRepository.save(voucher);
             }
         } else {
+            order.setReduceMoney(0);
             order.setVoucher(null);
             order.setTotalMoney(totalOrderPrice + shippingFee);
         }
