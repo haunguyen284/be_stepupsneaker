@@ -35,6 +35,8 @@ public class ClientOrderResponse {
 
     private float originMoney;
 
+    private float reduceMoney;
+
     private float totalMoney;
 
     private float shippingMoney;
