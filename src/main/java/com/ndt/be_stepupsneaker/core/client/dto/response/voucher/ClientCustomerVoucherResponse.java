@@ -14,7 +14,7 @@ import lombok.Setter;
 public class ClientCustomerVoucherResponse {
     private String id;
 
-//    private AdminVoucherResponse voucher;
+    private AdminVoucherResponse voucher;
 //
 //    private AdminCustomerResponse customer;
 }

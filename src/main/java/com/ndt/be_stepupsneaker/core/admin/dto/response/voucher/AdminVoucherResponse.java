@@ -38,6 +38,6 @@ public class AdminVoucherResponse {
 
     private String image;
 
-    List<AdminCustomerVoucherResponse> customerVoucherList;
+//    List<AdminCustomerVoucherResponse> customerVoucherList;
 
 }

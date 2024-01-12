@@ -26,6 +26,6 @@ public class ClientCustomerResponse {
     private String gender;
     private String image;
     private ClientCartResponse cart;
-//    List<ClientCustomerVoucherResponse> customerVoucherList;
+    List<ClientCustomerVoucherResponse> customerVoucherList;
     List<ClientAddressNoCustomerResponse> addressList;
 }
