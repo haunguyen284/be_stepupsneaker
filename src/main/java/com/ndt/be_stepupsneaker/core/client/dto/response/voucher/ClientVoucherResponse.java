@@ -36,6 +36,6 @@ public class ClientVoucherResponse {
 
     private String image;
 
-    List<ClientCustomerVoucherResponse> customerVoucherList;
+//    List<ClientCustomerVoucherResponse> customerVoucherList;
 
 }
