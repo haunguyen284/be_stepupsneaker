@@ -232,7 +232,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         newOrder.setNote(orderRequest.getNote());
         setOrderInfo(newOrder);
         applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
-
         Order order = clientOrderRepository.save(newOrder);
         Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
