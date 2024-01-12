@@ -8,6 +8,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDeta
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +39,10 @@ public class AdminOrderResponse {
     private String fullName;
 
     private float totalMoney;
+
+    private float reduceMoney;
+
+    private float originMoney;
 
     private float shippingMoney;
 

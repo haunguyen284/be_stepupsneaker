@@ -39,7 +39,11 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
                     (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
                     AND 
                     (:customer IS NULL OR :customer ILIKE '' OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customer)) 
-                    AND 
+                    AND
+                    (x.status != 2) 
+                    AND
+                    (x.status != 4)
+                    AND
                     (x.deleted = false)
             """)
     Page<Voucher> findAllVoucher(@Param("request") ClientVoucherRequest request, Pageable pageable,
