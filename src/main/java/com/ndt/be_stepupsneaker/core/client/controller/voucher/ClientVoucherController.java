@@ -46,4 +46,10 @@ public class ClientVoucherController {
         return ResponseHelper.getResponse(ClientVoucherResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/code/{code}")
+    public Object findByCode(@PathVariable("code") String code) {
+        ClientVoucherResponse ClientVoucherResponse = clientVoucherService.findByCode(code);
+        return ResponseHelper.getResponse(ClientVoucherResponse, HttpStatus.OK);
+    }
+
 }

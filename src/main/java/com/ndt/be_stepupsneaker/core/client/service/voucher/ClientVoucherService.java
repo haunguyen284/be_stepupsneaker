@@ -11,4 +11,6 @@ public interface ClientVoucherService extends BaseService<ClientVoucherResponse,
     PageableObject<ClientVoucherResponse> findAllVoucher(ClientVoucherRequest voucherReq, String customerId);
 
     PageableObject<ClientVoucherResponse> findLegitVouchers(String customerId, float totalMoney);
+
+    ClientVoucherResponse findByCode(String code);
 }

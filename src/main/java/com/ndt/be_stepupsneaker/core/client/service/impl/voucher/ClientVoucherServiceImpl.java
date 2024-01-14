@@ -101,4 +101,14 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
         return new PageableObject<>(clientVoucherResponses);
     }
 
+    @Override
+    public ClientVoucherResponse findByCode(String code) {
+        Optional<Voucher> optionalVoucher = ClientVoucherRepository.findByCode(code);
+        if (optionalVoucher.isEmpty()) {
+            throw new ResourceNotFoundException("VOUCHER CODE DOES NOT EXIST");
+        }
+
+        return ClientVoucherMapper.INSTANCE.voucherToClientVoucherResponse(optionalVoucher.get());
+    }
+
 }
