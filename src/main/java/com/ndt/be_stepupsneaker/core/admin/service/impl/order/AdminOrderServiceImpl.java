@@ -121,33 +121,33 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
 
         Order orderSave = orderOptional.get();
-        orderSave.setFullName(orderRequest.getFullName());
-        orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
-        orderSave.setNote(orderRequest.getNote());
-        orderSave.setExpectedDeliveryDate(orderRequest.getExpectedDeliveryDate());
-        orderSave.setConfirmationDate(orderRequest.getConfirmationDate());
-        orderSave.setReceivedDate(orderRequest.getReceivedDate());
-        orderSave.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
+//        orderSave.setFullName(orderRequest.getFullName());
+//        orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
+//        orderSave.setNote(orderRequest.getNote());
+//        orderSave.setExpectedDeliveryDate(orderRequest.getExpectedDeliveryDate());
+//        orderSave.setConfirmationDate(orderRequest.getConfirmationDate());
+//        orderSave.setReceivedDate(orderRequest.getReceivedDate());
+//        orderSave.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
         orderSave.setStatus(orderRequest.getStatus());
-        orderSave.setTotalMoney(orderRequest.getTotalMoney());
-        if (orderRequest.getVoucher() != null) {
-            orderSave.setVoucher(adminVoucherRepository.findById(orderRequest.getVoucher()).orElse(null));
-        } else {
-            orderSave.setVoucher(null);
-        }
-        if (orderRequest.getCustomer() != null) {
-            orderSave.setCustomer(adminCustomerRepository.findById(orderRequest.getCustomer()).orElse(null));
-        } else {
-            orderSave.setCustomer(null);
-        }
+//        orderSave.setTotalMoney(orderRequest.getTotalMoney());
+//        if (orderRequest.getVoucher() != null) {
+//            orderSave.setVoucher(adminVoucherRepository.findById(orderRequest.getVoucher()).orElse(null));
+//        } else {
+//            orderSave.setVoucher(null);
+//        }
+//        if (orderRequest.getCustomer() != null) {
+//            orderSave.setCustomer(adminCustomerRepository.findById(orderRequest.getCustomer()).orElse(null));
+//        } else {
+//            orderSave.setCustomer(null);
+//        }
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
-        if (orderRequest.getAddress() != null) {
-            orderSave.setAddress(adminAddressRepository.findById(orderRequest.getAddress()).orElse(null));
-        } else {
-            orderSave.setAddress(null);
-        }
+//        if (orderRequest.getAddress() != null) {
+//            orderSave.setAddress(adminAddressRepository.findById(orderRequest.getAddress()).orElse(null));
+//        } else {
+//            orderSave.setAddress(null);
+//        }
 
         Order order = adminOrderRepository.save(orderSave);
 

@@ -40,9 +40,7 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
                     AND 
                     (:customer IS NULL OR :customer ILIKE '' OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customer)) 
                     AND
-                    (x.status != 2) 
-                    AND
-                    (x.status != 4)
+                    (x.status <> 2) AND (x.status <> 4) AND (x.status <> 1) AND (x.quantity > 0)
                     AND
                     (x.deleted = false)
             """)
@@ -61,18 +59,18 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
 
 
     @Query("""
-    SELECT x FROM Voucher x WHERE 
-    (
-    :customerId IS NULL 
-    OR 
-    :customerId ILIKE '' 
-    OR 
-    x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customerId)
-    ) 
-    AND 
-    x.constraint <= :totalMoney 
-    ORDER BY x.value 
-    """)
+            SELECT x FROM Voucher x WHERE 
+            (
+            :customerId IS NULL 
+            OR 
+            :customerId ILIKE '' 
+            OR 
+            x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customerId)
+            ) 
+            AND 
+            x.constraint <= :totalMoney 
+            ORDER BY x.value 
+            """)
     Page<Voucher> findLegitVouchers(Pageable pageable, @Param("customerId") String customerId, @Param("totalMoney") float totalMoney);
 
 }
