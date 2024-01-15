@@ -72,4 +72,9 @@ public class AdminOrderController {
         return ResponseHelper.getResponse(adminOrderService.delete(id), HttpStatus.OK);
     }
 
+    @PutMapping("/cancel/{code}")
+    public Object cancelOrder(@PathVariable("code") String code) {
+        return ResponseHelper.getResponse(adminOrderService.cancelOrder(code), HttpStatus.OK);
+    }
+
 }

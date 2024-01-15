@@ -52,5 +52,4 @@ public interface ClientOrderDetailRepository extends OrderDetailRepository {
     @Query("DELETE FROM OrderDetail x WHERE x.order.id IN :orderIds")
     void deleteAllByOrder(List<String> orderIds);
 
-    List<OrderDetail> findAllByOrder(Order order);
 }

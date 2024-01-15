@@ -1,9 +1,13 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderHistoryResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderHistoryMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
@@ -17,7 +21,9 @@ import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
@@ -33,8 +39,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminOrderServiceImpl implements AdminOrderService {
@@ -48,6 +56,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
     private final PaginationUtil paginationUtil;
     private final MySessionInfo mySessionInfo;
+    private final AdminOrderDetailRepository adminOrderDetailRepository;
+    private final AdminProductDetailRepository adminProductDetailRepository;
 
     @Autowired
     public AdminOrderServiceImpl(
@@ -59,7 +69,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminVoucherRepository adminVoucherRepository,
             AdminVoucherHistoryRepository adminVoucherHistoryRepository,
             PaginationUtil paginationUtil,
-            MySessionInfo mySessionInfo) {
+            MySessionInfo mySessionInfo, AdminOrderDetailRepository adminOrderDetailRepository, AdminProductDetailRepository adminProductDetailRepository) {
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.adminCustomerRepository = adminCustomerRepository;
@@ -69,6 +79,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         this.adminVoucherHistoryRepository = adminVoucherHistoryRepository;
         this.paginationUtil = paginationUtil;
         this.mySessionInfo = mySessionInfo;
+        this.adminOrderDetailRepository = adminOrderDetailRepository;
+        this.adminProductDetailRepository = adminProductDetailRepository;
     }
 
     @Override
@@ -101,14 +113,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
         Order orderResult = adminOrderRepository.save(orderSave);
-
-        OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setOrder(orderResult);
-        orderHistory.setNote(orderResult.getNote());
-        orderHistory.setActionStatus(OrderStatus.PENDING);
-        orderHistory.setActionDescription(OrderStatus.PENDING.action_description);
-        adminOrderHistoryRepository.save(orderHistory);
-
+        createOrderHistory(orderResult,OrderStatus.PENDING);
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderResult);
     }
 
@@ -232,6 +237,44 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public List<AdminDailyGrowthResponse> getOrderGrowthBetween(Long start, Long end) {
         List<Statistic> statistics = adminOrderRepository.getDailyOrderBetween(start, end);
         return DailyStatisticUtil.getDailyGrowth(statistics);
+    }
+
+    @Override
+    public Boolean cancelOrder(String code) {
+        Optional<Order> orderOptional = adminOrderRepository.findByCode(code);
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+        }
+        Order order = orderOptional.get();
+        if (order.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && order.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+            throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
+        }
+        revertQuantityProductDetail(order);
+        order.setStatus(OrderStatus.CANCELED);
+        Order newOrder = adminOrderRepository.save(order);
+        createOrderHistory(newOrder, OrderStatus.CANCELED);
+        return true;
+    }
+
+    public void revertQuantityProductDetail(Order order) {
+        List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder(order);
+        List<ProductDetail> productDetails = orderDetails.stream().map(orderDetail -> {
+            ProductDetail productDetail = orderDetail.getProductDetail();
+            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+            return productDetail;
+        }).collect(Collectors.toList());
+        adminProductDetailRepository.saveAll(productDetails);
+    }
+
+    private List<AdminOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus) {
+        List<AdminOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setOrder(order);
+        orderHistory.setActionStatus(orderStatus);
+        orderHistory.setNote(order.getNote());
+        orderHistory.setActionDescription(orderStatus.action_description);
+        clientOrderHistoryResponses.add(AdminOrderHistoryMapper.INSTANCE.orderHistoryToAdminOrderHistoryResponse(adminOrderHistoryRepository.save(orderHistory)));
+        return clientOrderHistoryResponses;
     }
 
 }
