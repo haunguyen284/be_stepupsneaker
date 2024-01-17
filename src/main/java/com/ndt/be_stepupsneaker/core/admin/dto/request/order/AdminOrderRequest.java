@@ -19,7 +19,10 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String id;
 
+    private String code;
+
     private String customer;
+
 
 //    private String employee;
 

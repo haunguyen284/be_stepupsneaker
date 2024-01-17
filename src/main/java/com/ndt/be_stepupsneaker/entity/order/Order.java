@@ -24,6 +24,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Set;
 @Setter
 @Table(name = "shop_order")
 @Entity
+@DynamicUpdate
 public class Order extends PrimaryEntity {
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")

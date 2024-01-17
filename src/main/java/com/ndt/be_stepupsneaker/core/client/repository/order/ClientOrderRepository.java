@@ -89,7 +89,5 @@ public interface ClientOrderRepository extends OrderRepository {
 
     Optional<Order> findByIdAndCustomer_Id(String orderId, String customerId);
 
-    Optional<Order> findByCode(String code);
-
 
 }

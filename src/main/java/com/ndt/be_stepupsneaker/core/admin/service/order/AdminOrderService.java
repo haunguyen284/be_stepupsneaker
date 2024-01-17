@@ -19,5 +19,7 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     List<AdminDailyGrowthResponse> getOrderGrowthBetween(Long start, Long end);
 
+    AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest);
+
 
 }
