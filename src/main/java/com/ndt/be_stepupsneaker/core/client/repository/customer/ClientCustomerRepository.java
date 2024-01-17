@@ -48,7 +48,15 @@ public interface ClientCustomerRepository extends CustomerRepository {
                                    @Param("noVoucher") String noVoucher,
                                    @Param("status") CustomerStatus status, Pageable pageable);
 
+//    @Query("SELECT DISTINCT c FROM Customer c " +
+//            "LEFT JOIN FETCH c.customerVoucherList cv " +
+//            "LEFT JOIN FETCH cv.voucher v " +
+//            "WHERE c.email = :email AND (v.status <> 2) " +
+//            "AND (v.status <> 4) AND (v.status <> 1) AND (v.quantity > 0) AND (v.deleted = FALSE )")
+//    Optional<Customer> findCustomerWithActiveVouchers(@Param("email") String email);
+
     Optional<Customer> findByEmail(String email);
+
 
     @Query("""
             SELECT x FROM Customer x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id'))
