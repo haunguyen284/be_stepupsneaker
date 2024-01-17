@@ -35,21 +35,21 @@ public class AdminOrderController {
     }
 
     @GetMapping("")
-    public Object findAllOrder(AdminOrderRequest adminOrderRequest){
+    public Object findAllOrder(AdminOrderRequest adminOrderRequest) {
         PageableObject<AdminOrderResponse> listOrder = adminOrderService.findAllEntity(adminOrderRequest);
 
         return ResponseHelper.getResponse(listOrder, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public Object findById(@PathVariable("id")String id){
+    public Object findById(@PathVariable("id") String id) {
         AdminOrderResponse adminOrderResponse = adminOrderService.findById(id);
 
         return ResponseHelper.getResponse(adminOrderResponse, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult){
+    public Object create(@RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult) {
 
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
@@ -58,7 +58,7 @@ public class AdminOrderController {
     }
 
     @PutMapping("/{id}")
-    public Object update(@PathVariable("id")String id, @RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult){
+    public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult) {
         adminOrderRequest.setId(id);
 
         if (bindingResult.hasErrors())
@@ -68,13 +68,15 @@ public class AdminOrderController {
     }
 
     @DeleteMapping("/{id}")
-    public Object delete(@PathVariable("id")String id){
+    public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminOrderService.delete(id), HttpStatus.OK);
     }
 
-    @PutMapping("/cancel/{code}")
-    public Object cancelOrder(@PathVariable("code") String code) {
-        return ResponseHelper.getResponse(adminOrderService.cancelOrder(code), HttpStatus.OK);
+    @PutMapping("/confirmation-order/{code}")
+    public Object confirmationOrder(@PathVariable("code") String code, AdminOrderRequest adminOrderRequest) {
+        adminOrderRequest.setCode(code);
+        return ResponseHelper.getResponse(adminOrderService.confirmationOrder(adminOrderRequest), HttpStatus.OK);
     }
+
 
 }

@@ -113,58 +113,46 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
         Order orderResult = adminOrderRepository.save(orderSave);
-        createOrderHistory(orderResult,OrderStatus.PENDING);
+        createOrderHistory(orderResult, OrderStatus.PENDING);
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderResult);
     }
 
     @Override
     public AdminOrderResponse update(AdminOrderRequest orderRequest) {
-
-        Optional<Order> orderOptional = adminOrderRepository.findById(orderRequest.getId());
-        if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
-        }
-
-        Order orderSave = orderOptional.get();
-//        orderSave.setFullName(orderRequest.getFullName());
-//        orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
-//        orderSave.setNote(orderRequest.getNote());
-//        orderSave.setExpectedDeliveryDate(orderRequest.getExpectedDeliveryDate());
-//        orderSave.setConfirmationDate(orderRequest.getConfirmationDate());
-//        orderSave.setReceivedDate(orderRequest.getReceivedDate());
-//        orderSave.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
+        Order orderSave = getOrderById(orderRequest);
+        orderSave.setFullName(orderRequest.getFullName());
+        orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
+        orderSave.setNote(orderRequest.getNote());
+        orderSave.setExpectedDeliveryDate(orderRequest.getExpectedDeliveryDate());
+        orderSave.setConfirmationDate(orderRequest.getConfirmationDate());
+        orderSave.setReceivedDate(orderRequest.getReceivedDate());
+        orderSave.setDeliveryStartDate(orderRequest.getDeliveryStartDate());
         orderSave.setStatus(orderRequest.getStatus());
-//        orderSave.setTotalMoney(orderRequest.getTotalMoney());
-//        if (orderRequest.getVoucher() != null) {
-//            orderSave.setVoucher(adminVoucherRepository.findById(orderRequest.getVoucher()).orElse(null));
-//        } else {
-//            orderSave.setVoucher(null);
-//        }
-//        if (orderRequest.getCustomer() != null) {
-//            orderSave.setCustomer(adminCustomerRepository.findById(orderRequest.getCustomer()).orElse(null));
-//        } else {
-//            orderSave.setCustomer(null);
-//        }
+        orderSave.setTotalMoney(orderRequest.getTotalMoney());
+        if (orderRequest.getVoucher() != null) {
+            orderSave.setVoucher(adminVoucherRepository.findById(orderRequest.getVoucher()).orElse(null));
+        } else {
+            orderSave.setVoucher(null);
+        }
+        if (orderRequest.getCustomer() != null) {
+            orderSave.setCustomer(adminCustomerRepository.findById(orderRequest.getCustomer()).orElse(null));
+        } else {
+            orderSave.setCustomer(null);
+        }
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
-//        if (orderRequest.getAddress() != null) {
-//            orderSave.setAddress(adminAddressRepository.findById(orderRequest.getAddress()).orElse(null));
-//        } else {
-//            orderSave.setAddress(null);
-//        }
-
+        if (orderRequest.getAddress() != null) {
+            orderSave.setAddress(adminAddressRepository.findById(orderRequest.getAddress()).orElse(null));
+        } else {
+            orderSave.setAddress(null);
+        }
         Order order = adminOrderRepository.save(orderSave);
 
         Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
 
         if (existingOrderHistoryOptional.isEmpty()) {
-            OrderHistory orderHistory = new OrderHistory();
-            orderHistory.setOrder(order);
-            orderHistory.setActionStatus(order.getStatus());
-            orderHistory.setNote(orderRequest.getOrderHistoryNote());
-            orderHistory.setActionDescription(order.getStatus().action_description);
-            adminOrderHistoryRepository.save(orderHistory);
+            createOrderHistory(order,order.getStatus());
         }
 
         // Voucher history
@@ -240,20 +228,23 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     @Override
-    public Boolean cancelOrder(String code) {
-        Optional<Order> orderOptional = adminOrderRepository.findByCode(code);
-        if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+    public AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest) {
+        Order orderSave = getOrderByCode(adminOrderRequest);
+        if (adminOrderRequest.getStatus() == null) {
+            if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+                throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
+            }
+            revertQuantityProductDetail(orderSave);
+            orderSave.setStatus(OrderStatus.CANCELED);
+            Order newOrder = adminOrderRepository.save(orderSave);
+            createOrderHistory(newOrder, OrderStatus.CANCELED);
+            return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
         }
-        Order order = orderOptional.get();
-        if (order.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && order.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-            throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
-        }
-        revertQuantityProductDetail(order);
-        order.setStatus(OrderStatus.CANCELED);
-        Order newOrder = adminOrderRepository.save(order);
-        createOrderHistory(newOrder, OrderStatus.CANCELED);
-        return true;
+        orderSave.setStatus(adminOrderRequest.getStatus());
+        Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+        orderSave.setEmployee(employee);
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(orderSave));
     }
 
     public void revertQuantityProductDetail(Order order) {
@@ -275,6 +266,24 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderHistory.setActionDescription(orderStatus.action_description);
         clientOrderHistoryResponses.add(AdminOrderHistoryMapper.INSTANCE.orderHistoryToAdminOrderHistoryResponse(adminOrderHistoryRepository.save(orderHistory)));
         return clientOrderHistoryResponses;
+    }
+
+    private Order getOrderById(AdminOrderRequest orderRequest) {
+        Optional<Order> orderOptional = adminOrderRepository.findById(orderRequest.getId());
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
+        }
+
+        return orderOptional.get();
+    }
+
+    private Order getOrderByCode(AdminOrderRequest orderRequest) {
+        Optional<Order> orderOptional = adminOrderRepository.findByCode(orderRequest.getCode());
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
+        }
+
+        return orderOptional.get();
     }
 
 }

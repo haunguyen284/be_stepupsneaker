@@ -19,7 +19,7 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     List<AdminDailyGrowthResponse> getOrderGrowthBetween(Long start, Long end);
 
-    Boolean cancelOrder(String code);
+    AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest);
 
 
 }
