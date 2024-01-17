@@ -8,12 +8,19 @@ import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @Scope(scopeName = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -29,6 +36,18 @@ public class MySessionInfo {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
             customer = clientCustomerRepository.findByEmail(userName).orElse(null);
+            List<CustomerVoucher> validCustomerVouchers = customer.getCustomerVoucherList().stream()
+                    .filter(customerVoucher -> {
+                        Voucher voucher = customerVoucher.getVoucher();
+                        return !voucher.getStatus().equals(VoucherStatus.CANCELLED)
+                                && !voucher.getStatus().equals(VoucherStatus.EXPIRED)
+                                && !voucher.getStatus().equals(VoucherStatus.UP_COMING)
+                                && !voucher.getStatus().equals(VoucherStatus.IN_ACTIVE)
+                                && voucher.getQuantity() > 0
+                                && !voucher.getDeleted();
+                    })
+                    .collect(Collectors.toList());
+            customer.setCustomerVoucherList(validCustomerVouchers);
         }
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);
     }
