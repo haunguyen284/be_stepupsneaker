@@ -20,7 +20,8 @@ import java.util.UUID;
 @Transactional
 public interface AdminCustomerRepository extends CustomerRepository {
     @Query("""
-            SELECT x FROM Customer x
+            SELECT x FROM Customer x 
+            JOIN FETCH x.customerVoucherList cv
             WHERE
                 (:#{#request.q} IS NULL OR :#{#request.q} ILIKE ''  OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
                 OR
@@ -40,7 +41,11 @@ public interface AdminCustomerRepository extends CustomerRepository {
                 (:voucher IS NULL OR :voucher ILIKE '' OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :voucher))
                 AND
                 (:noVoucher IS NULL OR :noVoucher ILIKE '' OR x.id NOT IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :noVoucher))
-                AND
+                AND 
+                cv.voucher.status = 0 
+                AND 
+                cv.voucher.quantity > 0 
+                AND 
                 (x.deleted = FALSE)
             """)
     Page<Customer> findAllCustomer(@Param("request") AdminCustomerRequest request,
