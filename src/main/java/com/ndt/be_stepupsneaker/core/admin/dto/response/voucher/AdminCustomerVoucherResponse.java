@@ -16,8 +16,6 @@ import java.util.UUID;
 
 public class AdminCustomerVoucherResponse {
     private String id;
-//
-//    private AdminVoucherResponse voucher;
-//
-//    private AdminCustomerResponse customer;
+
+    private AdminVoucherResponse voucher;
 }
