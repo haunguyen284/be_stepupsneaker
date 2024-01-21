@@ -11,5 +11,6 @@ public interface AdminOrderDetailService extends BaseService<AdminOrderDetailRes
 
     List<AdminOrderDetailResponse> create(List<AdminOrderDetailRequest> orderDetailRequests);
     List<AdminOrderDetailResponse> update(List<AdminOrderDetailRequest> orderDetailRequests);
+    AdminOrderDetailResponse update(AdminOrderDetailRequest orderDetailRequest);
 
 }
