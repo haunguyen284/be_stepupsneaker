@@ -49,11 +49,11 @@ public class AuthenticationController {
 
     }
 
-    // test
     @PutMapping("/change-password")
     public Object changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         return ResponseHelper.getResponse(authenticationService.changePassword(request), HttpStatus.OK);
     }
+
 
     @PostMapping("/forgot-password")
     public Object forgotPassword(@RequestParam("email") String email) {

@@ -295,9 +295,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     private void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
         if (voucherId != null && !voucherId.isBlank()) {
-            Voucher voucher = clientVoucherRepository.findById(voucherId).orElse(null);
-            order.setVoucher(voucher);
+            Voucher voucher = clientVoucherRepository.findById(voucherId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND));
             if (voucher != null) {
+                if (voucher.getConstraint() > totalOrderPrice) {
+                    throw new ResourceNotFoundException("Your order is not eligible for the voucher!");
+                }
+                order.setVoucher(voucher);
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
                 float finalTotalPrice = Math.max(0, totalOrderPrice - discount);
                 order.setReduceMoney(discount);
