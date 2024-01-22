@@ -1,5 +1,9 @@
 package com.ndt.be_stepupsneaker.infrastructure.email.util;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderDetailResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
+import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderDetailResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.product.ClientProductDetailResponse;
@@ -137,6 +141,79 @@ public class SendMailAutoEntity {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = clientOrderResponse.getCustomer().getEmail();
+        }
+        email.setToEmail(toEmail);
+        emailService.sendEmail(email);
+    }
+
+    public void sendMailAutoUpdateOrderToClient(AdminOrderResponse adminOrderResponse, String emailReq) {
+        String[] toEmail = new String[1];
+        Email email = new Email();
+        email.setSubject("Your order has been confirmed!");
+        String emailTitle = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailTitle += "<tr><td colspan='4' style='text-align: center;'><strong>Your Order Information from STEP UP SNEAKER</strong></td></tr>";
+        emailTitle += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        email.setTitleEmail(emailTitle);
+        String emailBody = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'>";
+        emailBody += "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailBody += "<thead style='background-color: #f0f0f0;'>";
+        emailBody += "<tr>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Product</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Quantity</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Price</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Total</th>";
+        emailBody += "</tr>";
+        emailBody += "</thead>";
+        emailBody += "<tbody>";
+
+        List<AdminOrderDetailResponse> orderDetails = adminOrderResponse.getOrderDetails();
+        float totalOrderDetail = 0.0f;
+        if (orderDetails != null && !orderDetails.isEmpty()) {
+            for (AdminOrderDetailResponse orderDetail : orderDetails) {
+                AdminProductDetailResponse productDetail = orderDetail.getProductDetail();
+                if (productDetail != null) {
+                    float totalPrice = orderDetail.getQuantity() * productDetail.getPrice();
+                    totalOrderDetail += totalPrice;
+                    emailBody += "<tr>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + productDetail.getProduct().getName() + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + orderDetail.getQuantity() + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(productDetail.getPrice()) + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(totalPrice) + "</td>";
+                    emailBody += "</tr>";
+                }
+            }
+        }
+        float totalVoucher = 0.0f;
+        if (adminOrderResponse.getVoucher() != null) {
+            float discount = adminOrderResponse.getVoucher().getType() == VoucherType.CASH ? adminOrderResponse.getVoucher().getValue() : (adminOrderResponse.getVoucher().getValue() / 100) * totalOrderDetail;
+            float finalTotalPrice = Math.max(0, totalOrderDetail - discount);
+            totalVoucher = finalTotalPrice;
+        }
+        emailBody += "</tbody>";
+        emailBody += "</table>";
+        emailBody += "</td></tr>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Full name:</strong> " + adminOrderResponse.getFullName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Delivery address     :</strong> "
+                + adminOrderResponse.getAddress().getMore() + ", "
+                + adminOrderResponse.getAddress().getWardName() + ", "
+                + adminOrderResponse.getAddress().getDistrictName() + ", "
+                + adminOrderResponse.getAddress().getProvinceName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Phone number:</strong> " + adminOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Click here to track your order:</span><a href='" + EntityProperties.URL_FE_TRACKING + adminOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Track Your Order</a></td></tr>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td><strong>Shipping money :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(adminOrderResponse.getShippingMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Voucher       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(totalVoucher) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Order total   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(adminOrderResponse.getTotalMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Created at    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(adminOrderResponse.getCreatedAt()) + "</td></tr>";
+        emailBody += "</table>";
+        email.setBody(emailBody);
+        if (adminOrderResponse.getCustomer() == null) {
+            toEmail[0] = emailReq;
+        } else {
+            toEmail[0] = adminOrderResponse.getCustomer().getEmail();
         }
         email.setToEmail(toEmail);
         emailService.sendEmail(email);

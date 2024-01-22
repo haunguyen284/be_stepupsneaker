@@ -29,6 +29,8 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -58,6 +60,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final MySessionInfo mySessionInfo;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminProductDetailRepository adminProductDetailRepository;
+    private final EmailService emailService;
 
     @Autowired
     public AdminOrderServiceImpl(
@@ -69,7 +72,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminVoucherRepository adminVoucherRepository,
             AdminVoucherHistoryRepository adminVoucherHistoryRepository,
             PaginationUtil paginationUtil,
-            MySessionInfo mySessionInfo, AdminOrderDetailRepository adminOrderDetailRepository, AdminProductDetailRepository adminProductDetailRepository) {
+            MySessionInfo mySessionInfo, AdminOrderDetailRepository adminOrderDetailRepository,
+            AdminProductDetailRepository adminProductDetailRepository, EmailService emailService) {
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.adminCustomerRepository = adminCustomerRepository;
@@ -81,6 +85,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         this.mySessionInfo = mySessionInfo;
         this.adminOrderDetailRepository = adminOrderDetailRepository;
         this.adminProductDetailRepository = adminProductDetailRepository;
+        this.emailService = emailService;
     }
 
     @Override
@@ -234,6 +239,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ResourceNotFoundException("Order not found");
         }
         Order orderSave = orderOptional.get();
+        if(orderSave.getStatus()== OrderStatus.COMPLETED){
+            throw new ApiException("Your order is in completed status!");
+        }
         if (adminOrderRequest.getStatus() == null) {
             if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
                 throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
@@ -250,7 +258,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setEmployee(employee);
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus());
-        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
+        AdminOrderResponse adminOrderResponse =  AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
+        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, adminOrderResponse.getEmail());
+        return null;
     }
 
     public void revertQuantityProductDetail(Order order) {

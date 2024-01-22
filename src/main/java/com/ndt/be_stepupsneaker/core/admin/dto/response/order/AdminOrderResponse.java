@@ -36,6 +36,8 @@ public class AdminOrderResponse {
 
     private AdminAddressResponse address;
 
+    private String email;
+
     private String fullName;
 
     private float totalMoney;
