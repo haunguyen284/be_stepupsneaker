@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req -> req
                                 .requestMatchers("/error/**", "/auth/**", "/client/products/**",
-                                        "/client/product-details/**", "/admin/notifications/sse")
+                                        "/client/product-details/**", "/admin/notifications/sse","/client/transaction/**")
                                 .permitAll()
                                 .requestMatchers("/client/orders/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyRole(EntityProperties.ADMIN, EntityProperties.STAFF)

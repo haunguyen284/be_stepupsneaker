@@ -299,7 +299,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND));
             if (voucher != null) {
                 if (voucher.getQuantity() < 1) {
-                    throw new ResourceNotFoundException("The previous voucher has expired!")
+                    throw new ResourceNotFoundException("The previous voucher has expired!");
                 }
                 if (voucher.getConstraint() > totalOrderPrice) {
                     throw new ResourceNotFoundException("Your order is not eligible for the voucher!");

@@ -10,6 +10,8 @@ import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.EmployeeStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
@@ -52,6 +54,7 @@ public class AuthenticationService {
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(request));
+        employee.setStatus(EmployeeStatus.ACTIVE);
         adminEmployeeRepository.save(employee);
         var jwtToken = jwtService.generateToken(employee);
         return AuthenticationResponse.builder()
@@ -68,6 +71,7 @@ public class AuthenticationService {
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(request));
+        customer.setStatus(CustomerStatus.ACTIVE);
         clientCustomerRepository.save(customer);
         var jwtToken = jwtService.generateToken(customer);
         return AuthenticationResponse.builder()

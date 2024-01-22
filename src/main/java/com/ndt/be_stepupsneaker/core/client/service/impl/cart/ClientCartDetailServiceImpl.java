@@ -53,6 +53,9 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     public Object create(ClientCartDetailRequest request) {
         Cart thisSessionCart = cart();
 
+        if (request.getQuantity() > 5) {
+            throw new ApiException("You can only add a maximum of 5 products to your cart!");
+        }
         ProductDetail productDetail = adminProductDetailRepository.findById(request.getProductDetail())
                 .orElseThrow(() -> new ResourceNotFoundException("Product Detail not found"));
 
@@ -144,7 +147,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     public Object updateQuantity(ClientCartDetailRequest request) {
         Cart thisSessionCart = cart();
 
-        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(),thisSessionCart);
+        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(), thisSessionCart);
 
         if (cartDetail == null) {
             throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
@@ -155,6 +158,9 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
 
         int requestedQuantity = request.getQuantity();
         int availableQuantity = productDetail.getQuantity();
+        if (requestedQuantity > 5) {
+            throw new ApiException("You can only add a maximum of 5 products to your cart!");
+        }
 
         validateRequestedQuantity(requestedQuantity, availableQuantity);
 
@@ -168,15 +174,15 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     public Object decreaseQuantity(ClientCartDetailRequest request) {
         Cart thisSessionCart = cart();
 
-        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(),thisSessionCart);
+        CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(), thisSessionCart);
 
         if (cartDetail == null) {
             throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
         }
 
-        if(request.getQuantity() == 1){
+        if (request.getQuantity() == 1) {
             clientCartDetailRepository.delete(cartDetail);
-        }else {
+        } else {
             cartDetail.setQuantity(cartDetail.getQuantity() - 1);
             clientCartDetailRepository.save(cartDetail);
         }
@@ -238,6 +244,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
             throw new ApiException("The requested quantity exceeds the available stock for the product!");
         }
     }
+
     private Cart cart() {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         return clientCartRepository.findById(customerResponse.getCart().getId())

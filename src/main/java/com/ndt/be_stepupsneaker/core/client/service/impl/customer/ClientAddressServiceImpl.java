@@ -84,12 +84,19 @@ public class ClientAddressServiceImpl implements ClientAddressService {
             throw new ResourceNotFoundException("Address is not exit");
         }
         Address addressSave = addressOptional.get();
+        if(addressDTO.getProvinceName()!=null){
+            addressSave.setProvinceName(addressDTO.getProvinceName());
+        }
+        if(addressDTO.getDistrictName()!=null){
+            addressSave.setDistrictName(addressDTO.getDistrictName());
+        }
+        if(addressDTO.getWardName()!=null){
+            addressSave.setWardName(addressDTO.getWardName());
+        }
+
         addressSave.setDistrictId(addressDTO.getDistrictId());
         addressSave.setWardCode(addressDTO.getWardCode());
         addressSave.setProvinceId(addressDTO.getProvinceId());
-        addressSave.setDistrictName(addressDTO.getDistrictName());
-        addressSave.setWardName(addressDTO.getWardName());
-        addressSave.setProvinceName(addressDTO.getProvinceName());
         addressSave.setMore(addressDTO.getMore());
         addressSave.setPhoneNumber(addressDTO.getPhoneNumber());
         return ClientAddressMapper.INSTANCE.addressToClientAddressResponse(clientAddressRepository.save(addressSave));
