@@ -72,9 +72,9 @@ public class AdminOrderController {
         return ResponseHelper.getResponse(adminOrderService.delete(id), HttpStatus.OK);
     }
 
-    @PutMapping("/confirmation-order/{code}")
-    public Object confirmationOrder(@PathVariable("code") String code, AdminOrderRequest adminOrderRequest) {
-        adminOrderRequest.setCode(code);
+    @PutMapping("/confirmation-order/{id}")
+    public Object confirmationOrder(@PathVariable("id") String id, @RequestBody AdminOrderRequest adminOrderRequest) {
+        adminOrderRequest.setId(id);
         return ResponseHelper.getResponse(adminOrderService.confirmationOrder(adminOrderRequest), HttpStatus.OK);
     }
 

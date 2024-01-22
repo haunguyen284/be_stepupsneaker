@@ -229,7 +229,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest) {
-        Order orderSave = getOrderByCode(adminOrderRequest);
+        Optional<Order> orderOptional = adminOrderRepository.findById(adminOrderRequest.getId());
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Order not found");
+        }
+        Order orderSave = orderOptional.get();
         if (adminOrderRequest.getStatus() == null) {
             if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
                 throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
@@ -244,7 +248,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
-        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(orderSave));
+        Order newOrder = adminOrderRepository.save(orderSave);
+        createOrderHistory(newOrder, adminOrderRequest.getStatus());
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
     }
 
     public void revertQuantityProductDetail(Order order) {
