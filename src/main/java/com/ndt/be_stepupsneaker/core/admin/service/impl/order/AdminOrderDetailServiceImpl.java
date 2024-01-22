@@ -63,13 +63,17 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     @Override
     public AdminOrderDetailResponse update(AdminOrderDetailRequest orderDetailRequest) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(orderDetailRequest.getId());
+        Optional<Order> orderOptional = adminOrderRepository.findById(orderDetailRequest.getOrder());
         if (orderDetailOptional.isEmpty()) {
             throw new ResourceNotFoundException("ORDER DETAIL NOT FOUND");
+        }
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException("ORDER NOT FOUND");
         }
 
         OrderDetail orderDetail = orderDetailOptional.get();
         int totalQuantity = 0;
-        orderDetail.setOrder(adminOrderRepository.findById(orderDetailRequest.getOrder()).orElse(null));
+        orderDetail.setOrder(orderOptional.get());
         orderDetail.setProductDetail(adminProductDetailRepository.findById(orderDetailRequest.getProductDetail()).orElse(null));
         ProductDetail productDetail = orderDetail.getProductDetail();
         if (productDetail.getQuantity() < orderDetail.getQuantity()) {

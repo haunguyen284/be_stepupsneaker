@@ -83,6 +83,7 @@ public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
 
     @Override
     public List<ClientOrderDetailResponse> update(List<ClientOrderDetailRequest> orderDetailRequests) {
+
         List<OrderDetail> orderDetails = orderDetailRequests.stream().map(ClientOrderDetailMapper.INSTANCE::clientOrderDetailRequestToOrderDetail).collect(Collectors.toList());
         return clientOrderDetailRepository.saveAll(orderDetails).stream().map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse).collect(Collectors.toList());
     }

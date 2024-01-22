@@ -24,10 +24,6 @@ public class NotificationEmployeeResponse {
 
     private String content;
 
-    private AdminEmployeeResponse employee;
-
-    private AdminCustomerResponse customer;
-
     private String href;
 
     private NotificationEmployeeType notificationType;
