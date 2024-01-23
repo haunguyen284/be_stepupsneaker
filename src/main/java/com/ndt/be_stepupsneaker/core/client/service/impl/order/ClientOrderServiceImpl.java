@@ -149,7 +149,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         Address newAddress = clientAddressRepository.save(address);
         orderSave.setAddress(newAddress);
-        float shippingFee = calculateShippingFee(clientOrderRequest.getAddressShipping());
+        float shippingFee = calculateShippingFee(newAddress);
         float totalCart = totalCartItem(clientOrderRequest.getCartItems());
         if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
             orderSave.setShippingMoney(0);
@@ -200,23 +200,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         if (newOrder.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && newOrder.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
             throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
         }
-        Address address = clientAddressRepository.findById(newOrder.getAddress().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
-        address.setMore(orderRequest.getAddressShipping().getMore());
-        address.setDistrictId(orderRequest.getAddressShipping().getDistrictId());
-        address.setDistrictName(orderRequest.getAddressShipping().getDistrictName());
-        address.setProvinceId(orderRequest.getAddressShipping().getProvinceId());
-        address.setProvinceName(orderRequest.getAddressShipping().getProvinceName());
-        address.setWardCode(orderRequest.getAddressShipping().getWardCode());
-        address.setWardName(orderRequest.getAddressShipping().getWardName());
-        if (address.getCustomer() == null) {
-            address.setCustomer(null);
-        }
-        clientAddressRepository.save(address);
+        Address address = saveAddress(newOrder, orderRequest);
         List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(newOrder);
         revertQuantityProductDetail(newOrder);
         clientOrderDetailRepository.deleteAll(orderDetails);
-        float shippingFee = calculateShippingFee(orderRequest.getAddressShipping());
+        float shippingFee = calculateShippingFee(address);
         float totalCart = totalCartItem(orderRequest.getCartItems());
         if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
             newOrder.setShippingMoney(0);
@@ -293,7 +281,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         order.setEmployee(null);
     }
 
-    private void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
+    public void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
         if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = clientVoucherRepository.findById(voucherId)
                     .orElseThrow(() -> new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND));
@@ -333,12 +321,29 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return totalCartItem + shippingFee;
     }
 
-    public float calculateShippingFee(ClientAddressRequest addressRequest) {
+    public Address saveAddress(Order order, ClientOrderRequest clientOrderRequest) {
+        Address address = clientAddressRepository.findById(order.getAddress().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
+        address.setMore(clientOrderRequest.getAddressShipping().getMore());
+        address.setDistrictId(clientOrderRequest.getAddressShipping().getDistrictId());
+        address.setDistrictName(clientOrderRequest.getAddressShipping().getDistrictName());
+        address.setProvinceId(clientOrderRequest.getAddressShipping().getProvinceId());
+        address.setProvinceName(clientOrderRequest.getAddressShipping().getProvinceName());
+        address.setWardCode(clientOrderRequest.getAddressShipping().getWardCode());
+        address.setWardName(clientOrderRequest.getAddressShipping().getWardName());
+        if (address.getCustomer() == null) {
+            address.setCustomer(null);
+        }
+        return clientAddressRepository.save(address);
+    }
+
+
+    public float calculateShippingFee(Address address) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("token", EntityProperties.VITE_GHN_USER_TOKEN);
         headers.set("shop_id", EntityProperties.VITE_GHN_SHOP_ID);
         headers.setContentType(MediaType.APPLICATION_JSON);
-        ClientShippingRequest shippingRequest = createShippingRequest(addressRequest);
+        ClientShippingRequest shippingRequest = createShippingRequest(address);
         String apiUrl = EntityProperties.GHN_API_FEE_URL;
         HttpEntity<ClientShippingRequest> requestEntity = new HttpEntity<>(shippingRequest, headers);
         ResponseEntity<ClientShippingResponse> responseEntity;
@@ -372,11 +377,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return 0.0f;
     }
 
-    private ClientShippingRequest createShippingRequest(ClientAddressRequest addressRequest) {
+    private ClientShippingRequest createShippingRequest(Address address) {
         ClientShippingRequest shippingRequest = new ClientShippingRequest();
         shippingRequest.setFromDistrictId(1542);
-        shippingRequest.setToDistrictId(Integer.parseInt(addressRequest.getDistrictId()));
-        shippingRequest.setToWardCode(addressRequest.getWardCode());
+        shippingRequest.setToDistrictId(Integer.parseInt(address.getDistrictId()));
+        shippingRequest.setToWardCode(address.getWardCode());
         shippingRequest.setServiceId(53321);
         shippingRequest.setHeight(15);
         shippingRequest.setLength(15);

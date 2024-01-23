@@ -1,5 +1,8 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
@@ -10,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -25,6 +29,13 @@ public class AdminOrderRequest extends PageableRequest {
 
 
 //    private String employee;
+
+
+    private String email;
+
+    private AdminAddressRequest addressShipping;
+
+    private List<AdminCartItemRequest> cartItems;
 
     private String voucher;
 
