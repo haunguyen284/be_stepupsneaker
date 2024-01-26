@@ -14,6 +14,9 @@ import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import java.util.List;
 import java.util.Set;
@@ -23,6 +26,7 @@ import java.util.Set;
 @DynamicUpdate
 @Table(name = "shop_voucher")
 @Entity
+@Audited
 public class Voucher extends PrimaryEntity {
     @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false, unique = true)
     private String code;
@@ -56,6 +60,7 @@ public class Voucher extends PrimaryEntity {
     private String image;
 
     @OneToMany(mappedBy = "voucher")
+    @NotAudited
     List<CustomerVoucher> customerVoucherList;
 }
 

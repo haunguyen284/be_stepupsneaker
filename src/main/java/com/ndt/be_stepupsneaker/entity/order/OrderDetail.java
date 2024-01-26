@@ -11,15 +11,19 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 @Getter
 @Setter
 @Table(name = "order_detail")
 @Entity
+@Audited
 public class OrderDetail extends PrimaryEntity {
 
     @JoinColumn(name = "product_detail_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private ProductDetail productDetail;
 
     @JoinColumn(name = "shop_order_id", referencedColumnName = "id")

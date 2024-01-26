@@ -13,8 +13,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.NotAudited;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -72,4 +76,26 @@ public class AdminOrderResponse {
 
     private List<AdminPaymentResponse> payments;
 
+    public List<String> findChanges(AdminOrderResponse newResponse) {
+        List<String> changes = new ArrayList<>();
+
+        Field[] fields = AdminOrderResponse.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (!field.isAnnotationPresent(NotAudited.class)) {
+                field.setAccessible(true);
+                try {
+                    Object oldValue = field.get(this);
+                    Object newValue = field.get(newResponse);
+
+                    if (!Objects.equals(oldValue, newValue)) {
+                        changes.add(field.getName() + " changed from " + oldValue + " to " + newValue);
+                    }
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return changes;
+    }
 }
