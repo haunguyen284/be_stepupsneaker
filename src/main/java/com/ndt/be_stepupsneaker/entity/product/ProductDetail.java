@@ -13,6 +13,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import java.util.List;
 

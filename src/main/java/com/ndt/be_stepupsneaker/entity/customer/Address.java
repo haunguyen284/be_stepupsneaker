@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.List;
 
@@ -16,6 +18,7 @@ import java.util.List;
 @Setter
 @Table(name = "address")
 @Entity
+@Audited
 public class Address extends PrimaryEntity {
     @Column(name = "phone_number", length = EntityProperties.LENGTH_PHONE)
     private String phoneNumber;
@@ -54,6 +57,7 @@ public class Address extends PrimaryEntity {
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotAudited
     private Customer customer;
 
 }

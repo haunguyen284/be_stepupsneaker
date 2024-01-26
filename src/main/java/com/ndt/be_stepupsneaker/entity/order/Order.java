@@ -5,7 +5,6 @@ import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
@@ -23,26 +22,31 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.DynamicUpdate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.Nationalized;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 
 @Getter
 @Setter
 @Table(name = "shop_order")
 @Entity
-@DynamicUpdate
+@Audited
 public class Order extends PrimaryEntity {
 
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotAudited
     private Customer customer;
 
     @JoinColumn(name = "employee_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotAudited
     private Employee employee;
 
     @JoinColumn(name = "shop_voucher_id", referencedColumnName = "id")
@@ -88,6 +92,7 @@ public class Order extends PrimaryEntity {
     private Long receivedDate;
 
     @Column(name = "type")
+    @NotAudited
     private OrderType type;
 
     @Column(name = "note", length = EntityProperties.LENGTH_DESCRIPTION)
@@ -101,15 +106,19 @@ public class Order extends PrimaryEntity {
     private List<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @NotAudited
     private List<OrderHistory> orderHistories;
 
     @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @NotAudited
     private List<Payment> payments;
 
     @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @NotAudited
     private List<VoucherHistory> voucherHistories;
 
     @Column(name = "code", updatable = false, length = EntityProperties.LENGTH_CODE, unique = true)
+    @NotAudited
     private String code;
 
     @PrePersist
