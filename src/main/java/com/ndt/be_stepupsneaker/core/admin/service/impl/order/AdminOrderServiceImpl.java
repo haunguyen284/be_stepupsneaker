@@ -239,16 +239,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (orderSave.getStatus() == OrderStatus.COMPLETED) {
             throw new ApiException("Your order is in completed status!");
         }
-        if (adminOrderRequest.getStatus() == null) {
-            if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-                throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
-            }
-            revertQuantityProductDetail(orderSave);
-            orderSave.setStatus(OrderStatus.CANCELED);
-            Order newOrder = adminOrderRepository.save(orderSave);
-            createOrderHistory(newOrder, OrderStatus.CANCELED);
-            return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
+
+        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+            throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
         }
+
         orderSave.setStatus(adminOrderRequest.getStatus());
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
@@ -360,7 +355,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             Employee employee = adminEmployeeRepository.findById(employeeResponse.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
             order.setEmployee(employee);
-        }else{
+        } else {
             throw new ResourceNotFoundException("Please! Login!");
         }
     }

@@ -2,6 +2,8 @@ package com.ndt.be_stepupsneaker.core.client.dto.request.customer;
 
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,11 +15,23 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ClientCustomerRequest extends PageableRequest {
     private String id;
+
+    @NotBlank(message = "FullName must be not null")
     private String fullName;
+
+    @NotBlank(message = "Email must be not null")
     private String email;
+
+    @NotNull(message = "DateOfBirt must be not null")
     private Long dateOfBirth;
+
+    @NotBlank(message = "Password must be not null")
     private String password;
+
+    @NotNull(message = "Status must be not null")
     private CustomerStatus status;
+
+    @NotBlank(message = "Gender must be not null")
     private String gender;
     private String image;
 }

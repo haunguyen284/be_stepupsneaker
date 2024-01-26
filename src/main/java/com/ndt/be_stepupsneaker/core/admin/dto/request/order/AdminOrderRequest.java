@@ -30,9 +30,10 @@ public class AdminOrderRequest extends PageableRequest {
 
 //    private String employee;
 
-
+    @NotBlank(message = "Email must be not null")
     private String email;
 
+    @NotNull(message = "AddressShipping must be not null")
     private AdminAddressRequest addressShipping;
 
     private List<AdminCartItemRequest> cartItems;
@@ -41,10 +42,13 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String address;
 
+    @NotBlank(message = "PhoneNumber must be not null")
     private String phoneNumber;
 
+    @NotBlank(message = "FullName must be not null")
     private String fullName;
 
+    @NotNull(message = "TotalMoney must be not null")
     private float totalMoney;
 
     private float priceMin;
@@ -70,7 +74,7 @@ public class AdminOrderRequest extends PageableRequest {
     private String note;
 
     private String orderHistoryNote;
-
+    
     private OrderStatus status;
 
     private TransactionInfo transactionInfo;

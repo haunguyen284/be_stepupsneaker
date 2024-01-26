@@ -8,6 +8,7 @@ import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
@@ -57,6 +58,11 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         if (optionalVoucher.isPresent()) {
             throw new ApiException("Code" + EntityProperties.IS_EXIST);
         }
+        if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
+            if (voucherRequest.getValue() > 70){
+                throw new ApiException("Value exceeds the allowable percentage!");
+            }
+        }
         voucherRequest.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         Voucher voucher = adminVoucherRepository.save(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
         adminVoucherRepository.updateStatusBasedOnTime(voucher.getId(), voucher.getStartDate(), voucher.getEndDate());
@@ -84,6 +90,11 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         newVoucher.setEndDate(voucherRequest.getEndDate());
         newVoucher.setStartDate(voucherRequest.getStartDate());
         newVoucher.setType(voucherRequest.getType());
+        if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
+            if (voucherRequest.getValue() > 50){
+                throw new ApiException("Value exceeds the allowable percentage!");
+            }
+        }
         newVoucher.setValue(voucherRequest.getValue());
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(adminVoucherRepository.save(newVoucher));
     }
