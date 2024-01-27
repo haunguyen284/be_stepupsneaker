@@ -3,12 +3,12 @@ package com.ndt.be_stepupsneaker.core.admin.dto.response.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminAddressResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.ChangeDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
+import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,11 +16,7 @@ import lombok.Setter;
 import org.hibernate.envers.NotAudited;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -76,26 +72,4 @@ public class AdminOrderResponse {
 
     private List<AdminPaymentResponse> payments;
 
-    public List<String> findChanges(AdminOrderResponse newResponse) {
-        List<String> changes = new ArrayList<>();
-
-        Field[] fields = AdminOrderResponse.class.getDeclaredFields();
-        for (Field field : fields) {
-            if (!field.isAnnotationPresent(NotAudited.class)) {
-                field.setAccessible(true);
-                try {
-                    Object oldValue = field.get(this);
-                    Object newValue = field.get(newResponse);
-
-                    if (!Objects.equals(oldValue, newValue)) {
-                        changes.add(field.getName() + " changed from " + oldValue + " to " + newValue);
-                    }
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return changes;
-    }
 }

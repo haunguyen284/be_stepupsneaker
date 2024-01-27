@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.admin.controller.order;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderHistoryRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderHistoryResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.AdminOrderAuditResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderAuditService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.Order;
@@ -28,13 +29,13 @@ public class AdminOrderAuditController {
 
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
-        List<AdminOrderResponse> adminOrderResponseList = adminOrderAuditService.getOrderRevisions(id);
+        List<AdminOrderAuditResponse> adminOrderResponseList = adminOrderAuditService.getOrderRevisions(id);
 
 
-        AdminOrderResponse entity1 = adminOrderResponseList.get(0);
-        AdminOrderResponse entity2 = adminOrderResponseList.get(1);
+//        AdminOrderResponse entity1 = adminOrderResponseList.get(0);
+//        AdminOrderResponse entity2 = adminOrderResponseList.get(1);
 
-        System.out.println(entity1.findChanges(entity2));
+//        System.out.println(entity1.findChanges(entity2));
 
         return ResponseHelper.getResponse(adminOrderResponseList, HttpStatus.OK);
     }

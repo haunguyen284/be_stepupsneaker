@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository(OrderRepository.NAME)
-public interface OrderRepository extends JpaRepository<Order, String>, RevisionRepository<Order,String, Long> {
+public interface OrderRepository extends JpaRepository<Order, String>, RevisionRepository<Order,String, Integer> {
     public static final String NAME = "BaseOrderRepository";
     Optional<Order> findByCode(String code);
 }
