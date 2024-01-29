@@ -33,11 +33,9 @@ public class AdminCustomerRequest extends PageableRequest {
 
     @NotNull(message = "DateOfBirth must be not null")
     private Long dateOfBirth;
-
-    @NotBlank(message = "Password must be not null")
+    
     private String password;
 
-    @NotBlank(message = "Status must be not null")
     private CustomerStatus status;
 
     @NotBlank(message = "Gender must be not null")
