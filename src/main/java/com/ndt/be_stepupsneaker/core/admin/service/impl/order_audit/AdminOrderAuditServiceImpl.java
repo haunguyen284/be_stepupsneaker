@@ -1,11 +1,12 @@
-package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
+package com.ndt.be_stepupsneaker.core.admin.service.impl.order_audit;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.AdminOrderAuditResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.ChangeDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
-import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderAuditService;
+import com.ndt.be_stepupsneaker.core.admin.service.order_audit.AdminOrderAuditService;
+import com.ndt.be_stepupsneaker.entity.envers.AuditEnversInfo;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.envers.NotAudited;
@@ -24,33 +25,42 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
 
     @Override
     public List<AdminOrderAuditResponse> getOrderRevisions(String id) {
-        List<Revision<Integer, Order>> revisions = adminOrderRepository.findRevisions(id).stream().toList();
+        List<Revision<Integer, Order>> revisions = adminOrderRepository.findRevisions(id).getContent();
         List<AdminOrderAuditResponse> auditResponses = new ArrayList<>();
 
-        for (int i = 1; i < revisions.size(); i++) {
+        if (revisions.isEmpty()) {
+            return auditResponses;
+        }
+
+        for (int i = 0; i < revisions.size(); i++) {
             Revision<Integer, Order> currentRevision = revisions.get(i);
-            Order currentOrder = currentRevision.getEntity();
-            AdminOrderResponse currentAdminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(currentOrder);
+            RevisionMetadata<Integer> metadata = currentRevision.getMetadata();
+            AuditEnversInfo auditEnversInfo = metadata.getDelegate();
 
-            AdminOrderAuditResponse currentAuditResponse = new AdminOrderAuditResponse();
-            RevisionMetadata<Integer> currentMetadata = currentRevision.getMetadata();
-            currentAuditResponse.setRevisionNumber(currentMetadata.getRevisionNumber().orElseThrow());
-            currentAuditResponse.setRevisionType(currentMetadata.getRevisionType());
-            currentAuditResponse.setEntity(currentAdminOrderResponse);
+            AdminOrderResponse currentOrder = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(currentRevision.getEntity());
 
-            AdminOrderResponse previousAdminOrderResponse = null;
+            AdminOrderAuditResponse auditResponse = new AdminOrderAuditResponse();
+            auditResponse.setRevisionNumber(i + 1);
+            auditResponse.setRevisionType(metadata.getRevisionType());
+            auditResponse.setEntity(currentOrder);
+            auditResponse.setCreator(auditEnversInfo.getUsername());
+            auditResponse.setAt(auditEnversInfo.getTimestamp());
+
             if (i > 0) {
                 Revision<Integer, Order> previousRevision = revisions.get(i - 1);
-                Order previousOrder = previousRevision.getEntity();
-                previousAdminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(previousOrder);
+                AdminOrderResponse previousOrder = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(previousRevision.getEntity());
+
+                if (metadata.getRevisionType() == RevisionMetadata.RevisionType.UPDATE) {
+                    auditResponse.setChanges(findChanges(currentOrder, previousOrder));
+                }
             }
 
-            currentAuditResponse.setChanges(findChanges(currentAdminOrderResponse,previousAdminOrderResponse));
-            auditResponses.add(currentAuditResponse);
+            auditResponses.add(auditResponse);
         }
 
         return auditResponses;
     }
+
 
     public Map<String, ChangeDetailResponse<?>> findChanges(AdminOrderResponse newResponse,AdminOrderResponse oldResponse) {
         Map<String, ChangeDetailResponse<?>> changes = new HashMap<>();
