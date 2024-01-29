@@ -16,7 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AdminAddressRequest extends PageableRequest {
     private String id;
-    @NotBlank(message = "PhoneNumber must be not null")
     private String phoneNumber;
 
     private Boolean isDefault;
@@ -26,8 +25,6 @@ public class AdminAddressRequest extends PageableRequest {
     private String districtName;
     private String provinceName;
     private String wardName;
-
-    @NotBlank(message = "More must be not null")
     private String more;
     private String customer;
 }

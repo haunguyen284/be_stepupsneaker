@@ -17,22 +17,17 @@ public class AdminOrderDetailRequest extends PageableRequest {
 
     private String id;
 
-    @NotBlank(message = "Product detail must be not null")
     private String productDetail;
 
-    @NotBlank(message = "Order must be not null")
     private String order;
 
-    @NotNull(message = "Quantity must be not null")
     private int quantity;
 
-    @NotNull(message = "Price must be not null")
     private float price;
 
-    @NotNull(message = "Total price must be not null")
+
     private float totalPrice;
 
-    @NotNull(message = "Status must be not null")
     private OrderStatus status;
 
 //    Filters

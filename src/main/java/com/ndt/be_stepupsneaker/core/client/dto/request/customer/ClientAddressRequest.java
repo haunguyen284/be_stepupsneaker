@@ -14,24 +14,24 @@ import lombok.Setter;
 public class ClientAddressRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "PhoneNumber must be not null")
     private String phoneNumber;
+
     private Boolean isDefault;
 
-    @NotBlank(message = "DistrictId must be not null")
     private String districtId;
 
-    @NotBlank(message = "ProvinceId must be not null")
     private String provinceId;
 
-    @NotBlank(message = "WardCode must be not null")
     private String wardCode;
+
     private String districtName;
+
     private String provinceName;
+
     private String wardName;
 
-    @NotBlank(message = "More must be not null")
     private String more;
+
     private String customer;
 
     private String height;

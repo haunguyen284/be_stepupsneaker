@@ -15,13 +15,10 @@ public class AdminOrderHistoryRequest extends PageableRequest {
 
     private String id;
 
-    @NotBlank(message = "Order must be not null")
     private String order;
 
-    @NotBlank(message = "Action description must be not null")
     private String actionDescription;
 
-    @NotBlank(message = "Note must be not null")
     private String note;
 
 }

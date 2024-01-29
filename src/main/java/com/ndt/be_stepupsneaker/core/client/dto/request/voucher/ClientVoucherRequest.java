@@ -24,7 +24,6 @@ public class ClientVoucherRequest extends PageableRequest {
     @NotBlank(message = "Name must be not null")
     private String name;
 
-    @NotNull(message = "Status must be not null")
     private VoucherStatus status;
 
     @NotNull(message = "Type must be not null")

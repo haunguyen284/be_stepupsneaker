@@ -24,7 +24,6 @@ public class ClientPromotionRequest extends PageableRequest {
     @NotBlank(message = "NamePromotion must be not null")
     private String name;
 
-    @NotNull(message = "Status must be not null")
     private VoucherStatus status;
 
     @NotNull(message = "Value must be not null")
