@@ -36,18 +36,20 @@ public class MySessionInfo {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
             customer = clientCustomerRepository.findByEmail(userName).orElse(null);
-            List<CustomerVoucher> validCustomerVouchers = customer.getCustomerVoucherList().stream()
-                    .filter(customerVoucher -> {
-                        Voucher voucher = customerVoucher.getVoucher();
-                        return !voucher.getStatus().equals(VoucherStatus.CANCELLED)
-                                && !voucher.getStatus().equals(VoucherStatus.EXPIRED)
-                                && !voucher.getStatus().equals(VoucherStatus.UP_COMING)
-                                && !voucher.getStatus().equals(VoucherStatus.IN_ACTIVE)
-                                && voucher.getQuantity() > 0
-                                && !voucher.getDeleted();
-                    })
-                    .collect(Collectors.toList());
-            customer.setCustomerVoucherList(validCustomerVouchers);
+            if (customer != null) {
+                List<CustomerVoucher> validCustomerVouchers = customer.getCustomerVoucherList().stream()
+                        .filter(customerVoucher -> {
+                            Voucher voucher = customerVoucher.getVoucher();
+                            return !voucher.getStatus().equals(VoucherStatus.CANCELLED)
+                                    && !voucher.getStatus().equals(VoucherStatus.EXPIRED)
+                                    && !voucher.getStatus().equals(VoucherStatus.UP_COMING)
+                                    && !voucher.getStatus().equals(VoucherStatus.IN_ACTIVE)
+                                    && voucher.getQuantity() > 0
+                                    && !voucher.getDeleted();
+                        })
+                        .collect(Collectors.toList());
+                customer.setCustomerVoucherList(validCustomerVouchers);
+            }
         }
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);
     }

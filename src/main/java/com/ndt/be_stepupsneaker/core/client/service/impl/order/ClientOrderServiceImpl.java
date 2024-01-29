@@ -159,8 +159,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setOriginMoney(totalCart);
         setOrderInfo(orderSave);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
+        orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
-        newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
         createVoucherHistory(newOrder);
@@ -324,16 +324,19 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public Address saveAddress(Order order, ClientOrderRequest clientOrderRequest) {
         Address address = clientAddressRepository.findById(order.getAddress().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
+        if (clientOrderRequest.getAddressShipping().getProvinceName() != null) {
+            address.setProvinceName(clientOrderRequest.getAddressShipping().getProvinceName());
+        }
+        if (clientOrderRequest.getAddressShipping().getDistrictName() != null) {
+            address.setDistrictName(clientOrderRequest.getAddressShipping().getDistrictName());
+        }
+        if (clientOrderRequest.getAddressShipping().getWardName() != null) {
+            address.setWardName(clientOrderRequest.getAddressShipping().getWardName());
+        }
         address.setMore(clientOrderRequest.getAddressShipping().getMore());
         address.setDistrictId(clientOrderRequest.getAddressShipping().getDistrictId());
-        address.setDistrictName(clientOrderRequest.getAddressShipping().getDistrictName());
         address.setProvinceId(clientOrderRequest.getAddressShipping().getProvinceId());
-        address.setProvinceName(clientOrderRequest.getAddressShipping().getProvinceName());
         address.setWardCode(clientOrderRequest.getAddressShipping().getWardCode());
-        address.setWardName(clientOrderRequest.getAddressShipping().getWardName());
-        if (address.getCustomer() == null) {
-            address.setCustomer(null);
-        }
         return clientAddressRepository.save(address);
     }
 
