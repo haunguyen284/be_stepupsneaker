@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.admin.controller.notification;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.notification.NotificationEmployeeRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.notification.NotificationEmployeeResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.notification.NotificationOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.notification.NotificationEmployeeService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -38,6 +39,11 @@ public class NotificationEmployeeController {
     @GetMapping("/sse")
     public Flux<ServerSentEvent<List<NotificationEmployeeResponse>>> steamNotification() {
         return notificationEmployeeService.findAllNotificationFlux();
+    }
+
+    @GetMapping("/orders/sse")
+    public Flux<ServerSentEvent<List<NotificationOrderResponse>>> steamNotificationOrder() {
+        return notificationEmployeeService.getOrderCountByStatusFlux();
     }
 
     @PutMapping("/read/{id}")

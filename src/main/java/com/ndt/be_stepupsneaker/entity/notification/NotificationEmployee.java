@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.entity.notification;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.NotificationEmployeeType;
 import jakarta.persistence.Column;
@@ -35,6 +36,10 @@ public class NotificationEmployee extends PrimaryEntity {
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.EAGER)
     private Customer customer;
+
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Order order;
 
     @Column(name = "href", length = EntityProperties.LENGTH_HREF)
     private String href;
