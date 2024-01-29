@@ -159,15 +159,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setOriginMoney(totalCart);
         setOrderInfo(orderSave);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
+        orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
-        newOrder.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
-            String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
-            return vnpayUrl;
+            return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
         if (newOrder.getPayments() == null) {

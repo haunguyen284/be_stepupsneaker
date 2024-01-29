@@ -102,18 +102,18 @@ public class Order extends PrimaryEntity {
     @Column(name = "status")
     private OrderStatus status;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
     @NotAudited
     private List<OrderHistory> orderHistories;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
     @NotAudited
     private List<Payment> payments;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
     @NotAudited
     private List<VoucherHistory> voucherHistories;
 

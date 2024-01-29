@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
 @Getter
@@ -28,6 +29,7 @@ public class OrderDetail extends PrimaryEntity {
 
     @JoinColumn(name = "shop_order_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Order order;
 
     @Column(name = "quantity")
