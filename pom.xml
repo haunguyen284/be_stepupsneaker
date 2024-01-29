@@ -129,6 +129,12 @@
             <version>3.7</version>
         </dependency>
         <dependency>
+            <groupId>org.javers</groupId>
+            <artifactId>javers-core</artifactId>
+            <version>7.3.7</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-envers</artifactId>
         </dependency>

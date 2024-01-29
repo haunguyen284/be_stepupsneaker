@@ -8,14 +8,21 @@ import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository
 import com.ndt.be_stepupsneaker.core.admin.service.order_audit.AdminOrderAuditService;
 import com.ndt.be_stepupsneaker.entity.envers.AuditEnversInfo;
 import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.util.EntityComparator;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.envers.NotAudited;
+import org.javers.core.Javers;
+import org.javers.core.JaversBuilder;
+import org.javers.core.diff.Diff;
 import org.springframework.data.history.Revision;
 import org.springframework.data.history.RevisionMetadata;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +69,7 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
     }
 
 
-    public Map<String, ChangeDetailResponse<?>> findChanges(AdminOrderResponse newResponse,AdminOrderResponse oldResponse) {
+    public Map<String, ChangeDetailResponse<?>> findChanges(AdminOrderResponse newResponse, AdminOrderResponse oldResponse) {
         Map<String, ChangeDetailResponse<?>> changes = new HashMap<>();
 
         Field[] fields = AdminOrderResponse.class.getDeclaredFields();
@@ -73,13 +80,29 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
                     Object oldValue = field.get(oldResponse);
                     Object newValue = field.get(newResponse);
 
-                    if (!Objects.equals(oldValue, newValue)) {
-                        if (oldValue != null && newValue != null) {
-                            ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
-                            changeDetail.setOldValue(oldValue);
-                            changeDetail.setNewValue(newValue);
-                            changes.put(field.getName(), changeDetail);
+                    if (oldValue != null && newValue != null) {
+                        if (EntityComparator.isBaseType(oldValue.getClass()) && EntityComparator.isBaseType(newValue.getClass())) {
+                            if (!oldValue.equals(newValue)) {
+                                ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
+                                changeDetail.setOldValue(oldValue);
+                                changeDetail.setNewValue(newValue);
+                                changes.put(field.getName(), changeDetail);
+                            }
+                        } else {
+                            Javers javers = JaversBuilder.javers().build();
+                            Diff diff = javers.compare(oldValue, newValue);
+                            if (diff.hasChanges()) {
+                                ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
+                                changeDetail.setOldValue(oldValue);
+                                changeDetail.setNewValue(newValue);
+                                changes.put(field.getName(), changeDetail);
+                            }
                         }
+                    } else if ( oldValue == null && newValue != null) {
+                        ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
+                        changeDetail.setOldValue(null);
+                        changeDetail.setNewValue(newValue);
+                        changes.put(field.getName(), changeDetail);
                     }
 
                 } catch (IllegalAccessException e) {

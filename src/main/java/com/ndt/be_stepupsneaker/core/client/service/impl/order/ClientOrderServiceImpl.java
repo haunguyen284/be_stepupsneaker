@@ -166,8 +166,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
-            String vnpayUrl = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
-            return vnpayUrl;
+            return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
         if (newOrder.getPayments() == null) {
@@ -180,12 +179,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
 
         // Notification new order
-        NotificationEmployee notificationEmployee = new NotificationEmployee();
-        notificationEmployee.setContent(clientOrderResponse.getFullName() + " " + orderSave.getCode());
-        notificationEmployee.setCustomer(orderSave.getCustomer());
-        notificationEmployee.setNotificationType(NotificationEmployeeType.ORDER_PLACED);
-        notificationEmployee.setHref("orders/show/" + orderSave.getId());
-        notificationEmployeeRepository.save(notificationEmployee);
+        notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
+
         return clientOrderResponse;
     }
 
@@ -233,6 +228,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, orderRequest.getEmail());
+
+        // Notification update order
+        notificationOrder(order, NotificationEmployeeType.ORDER_CHANGED);
+
         return clientOrderResponse;
     }
 
@@ -498,6 +497,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         order.setStatus(OrderStatus.CANCELED);
         Order newOrder = clientOrderRepository.save(order);
         createOrderHistory(newOrder, OrderStatus.CANCELED);
+
+        // Notification update order
+        notificationOrder(newOrder, NotificationEmployeeType.ORDER_CHANGED);
         return true;
     }
 
@@ -509,5 +511,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             return productDetail;
         }).collect(Collectors.toList());
         clientProductDetailRepository.saveAll(productDetails);
+    }
+
+    private void notificationOrder(Order order, NotificationEmployeeType type) {
+        NotificationEmployee notificationEmployee = new NotificationEmployee();
+        notificationEmployee.setContent(order.getFullName() + " " + order.getCode());
+        notificationEmployee.setCustomer(order.getCustomer());
+        notificationEmployee.setNotificationType(type);
+        notificationEmployee.setHref("orders/show/" + order.getId());
+        notificationEmployee.setOrder(order);
+        notificationEmployeeRepository.save(notificationEmployee);
     }
 }

@@ -21,7 +21,6 @@ public class DBGenerationConfig {
         em.setJpaVendorAdapter(vendorAdapter);
 
         Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2ddl.auto", "create");
         properties.setProperty("hibernate.physical_naming_strategy",
                 "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
         properties.setProperty("hibernate.show_sql", "true");

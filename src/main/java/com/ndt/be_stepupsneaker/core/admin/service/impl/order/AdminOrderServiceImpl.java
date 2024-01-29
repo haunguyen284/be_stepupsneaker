@@ -344,11 +344,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private void setOrderInfo(Order order) {
         if (order.getEmail() != null) {
             Customer customer = adminCustomerRepository.findByEmail(order.getEmail()).orElse(null);
-            if (customer != null) {
-                order.setCustomer(customer);
-            } else {
-                order.setCustomer(null);
-            }
+            order.setCustomer(customer);
         }
         AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
         if (employeeResponse != null) {
