@@ -177,8 +177,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
-
-        // Notification new order
         notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
 
         return clientOrderResponse;
@@ -197,8 +195,50 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         Address address = saveAddress(newOrder, orderRequest);
         List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(newOrder);
-        revertQuantityProductDetail(newOrder);
-        clientOrderDetailRepository.deleteAll(orderDetails);
+        List<OrderDetail> newOrderDetails = new ArrayList<>();
+        List<OrderDetail> removeOrderDetails = new ArrayList<>();
+        List<ProductDetail> productDetails = new ArrayList<>();
+        int quantityInStock = 0;
+        for (OrderDetail orderDetail : orderDetails) {
+            boolean found = false;
+            for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
+                        && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
+                    if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
+                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                    }
+                    //
+                    ProductDetail productDetail = orderDetail.getProductDetail();
+                    if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
+                        quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
+                        productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
+                    } else {
+                        quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
+                        productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
+                    }
+                    productDetails.add(productDetail);
+                    //
+                    orderDetail.setQuantity(cartItemRequest.getQuantity());
+                    orderDetail.setPrice(orderDetail.getProductDetail().getPrice());
+                    orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                    newOrderDetails.add(orderDetail);
+                }
+                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                removeOrderDetails.add(orderDetail);
+            }
+        }
+        if (newOrderDetails != null) {
+            clientProductDetailRepository.saveAll(productDetails);
+            clientOrderDetailRepository.saveAll(newOrderDetails);
+        }
+        if (removeOrderDetails != null) {
+            revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
+            clientOrderDetailRepository.deleteAll(removeOrderDetails);
+        }
         float shippingFee = calculateShippingFee(address);
         float totalCart = totalCartItem(orderRequest.getCartItems());
         if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
@@ -206,7 +246,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         } else {
             newOrder.setShippingMoney(shippingFee);
         }
-        createOrderDetails(newOrder, orderRequest);
         newOrder.setOriginMoney(totalCart);
         newOrder.setEmail(orderRequest.getEmail());
         newOrder.setType(OrderType.ONLINE);
@@ -233,6 +272,16 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         notificationOrder(order, NotificationEmployeeType.ORDER_CHANGED);
 
         return clientOrderResponse;
+    }
+
+    public void revertQuantityProductDetailWhenRemoveOrderDetail(List<OrderDetail> orderDetails) {
+        List<ProductDetail> productDetails = new ArrayList<>();
+        for (OrderDetail orderDetail : orderDetails) {
+            ProductDetail productDetail = orderDetail.getProductDetail();
+            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+            productDetails.add(productDetail);
+        }
+        clientProductDetailRepository.saveAll(productDetails);
     }
 
     @Override
