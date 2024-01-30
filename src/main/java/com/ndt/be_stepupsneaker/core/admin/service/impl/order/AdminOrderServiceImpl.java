@@ -12,6 +12,7 @@ import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderDetailMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
+import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
@@ -140,8 +141,50 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Address address = saveAddress(orderSave, orderRequest);
         List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder(orderSave);
-        revertQuantityProductDetail(orderSave);
-        adminOrderDetailRepository.deleteAll(orderDetails);
+        List<OrderDetail> newOrderDetails = new ArrayList<>();
+        List<OrderDetail> removeOrderDetails = new ArrayList<>();
+        List<ProductDetail> productDetails = new ArrayList<>();
+        int quantityInStock = 0;
+        for (OrderDetail orderDetail : orderDetails) {
+            boolean found = false;
+            for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
+                        && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
+                    if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
+                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                    }
+                    //
+                    ProductDetail productDetail = orderDetail.getProductDetail();
+                    if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
+                        quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
+                        productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
+                    } else {
+                        quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
+                        productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
+                    }
+                    productDetails.add(productDetail);
+                    //
+                    orderDetail.setQuantity(cartItemRequest.getQuantity());
+                    orderDetail.setPrice(orderDetail.getProductDetail().getPrice());
+                    orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                    newOrderDetails.add(orderDetail);
+                }
+                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                removeOrderDetails.add(orderDetail);
+            }
+        }
+        if (newOrderDetails != null) {
+            adminProductDetailRepository.saveAll(productDetails);
+            adminOrderDetailRepository.saveAll(newOrderDetails);
+        }
+        if (removeOrderDetails != null) {
+            clientOrderServiceImpl.revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
+            adminOrderDetailRepository.deleteAll(removeOrderDetails);
+        }
         float shippingFee = clientOrderServiceImpl.calculateShippingFee(address);
         float totalCart = totalCartItem(orderRequest.getCartItems());
         if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
@@ -149,7 +192,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         } else {
             orderSave.setShippingMoney(shippingFee);
         }
-        createOrderDetails(orderSave, orderRequest);
+//        createOrderDetails(orderSave, orderRequest);
         orderSave.setOriginMoney(totalCart);
         orderSave.setEmail(orderRequest.getEmail());
         orderSave.setType(OrderType.ONLINE);
