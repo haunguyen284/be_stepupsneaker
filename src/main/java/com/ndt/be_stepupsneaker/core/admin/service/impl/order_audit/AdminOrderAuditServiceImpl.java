@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.order_audit;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.AdminOrderAuditResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.ChangeDetailResponse;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +84,7 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
 
                     if (oldValue != null && newValue != null) {
                         if (EntityComparator.isBaseType(oldValue.getClass()) && EntityComparator.isBaseType(newValue.getClass())) {
-                            if (!oldValue.equals(newValue)) {
+                            if (!Objects.equals(oldValue, newValue)) {
                                 ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
                                 changeDetail.setOldValue(oldValue);
                                 changeDetail.setNewValue(newValue);
@@ -90,7 +92,19 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
                             }
                         } else {
                             Javers javers = JaversBuilder.javers().build();
-                            Diff diff = javers.compare(oldValue, newValue);
+                            Diff diff = null;
+
+                            if (oldValue instanceof List && newValue instanceof List) {
+                                @SuppressWarnings("unchecked")
+                                List<AdminOrderDetailResponse> oldList = (List<AdminOrderDetailResponse>) oldValue;
+                                @SuppressWarnings("unchecked")
+                                List<AdminOrderDetailResponse> newList = (List<AdminOrderDetailResponse>) newValue;
+
+                                diff = javers.compareCollections(oldList, newList, AdminOrderDetailResponse.class);
+                            } else {
+                                diff = javers.compare(oldValue, newValue);
+                            }
+
                             if (diff.hasChanges()) {
                                 ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
                                 changeDetail.setOldValue(oldValue);
@@ -98,13 +112,7 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
                                 changes.put(field.getName(), changeDetail);
                             }
                         }
-                    } else if ( oldValue == null && newValue != null) {
-                        ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
-                        changeDetail.setOldValue(null);
-                        changeDetail.setNewValue(newValue);
-                        changes.put(field.getName(), changeDetail);
                     }
-
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
@@ -113,6 +121,7 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
 
         return changes;
     }
+
 
 
 

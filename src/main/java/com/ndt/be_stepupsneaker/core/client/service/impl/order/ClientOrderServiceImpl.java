@@ -373,7 +373,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         Address address = clientAddressRepository.findById(order.getAddress().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
         if (clientOrderRequest.getAddressShipping().getProvinceName() != null || clientOrderRequest.getAddressShipping().getProvinceName().equals("")) {
-            System.out.println("DIT BA TH RUYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
             address.setProvinceName(clientOrderRequest.getAddressShipping().getProvinceName());
         }
         if (clientOrderRequest.getAddressShipping().getDistrictName() != null || clientOrderRequest.getAddressShipping().getDistrictName().equals("")) {
