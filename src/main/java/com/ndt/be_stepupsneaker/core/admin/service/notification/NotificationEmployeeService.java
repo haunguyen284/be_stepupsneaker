@@ -18,4 +18,7 @@ public interface NotificationEmployeeService {
 
     Flux<ServerSentEvent<List<NotificationOrderResponse>>> getOrderCountByStatusFlux();
 
+    List<NotificationEmployeeResponse> readAll();
+
+    PageableObject<NotificationEmployeeResponse> unRead(NotificationEmployeeRequest request);
 }
