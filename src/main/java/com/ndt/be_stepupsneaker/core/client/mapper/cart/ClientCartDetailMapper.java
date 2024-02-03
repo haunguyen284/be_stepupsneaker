@@ -11,6 +11,7 @@ import org.mapstruct.factory.Mappers;
 public interface ClientCartDetailMapper {
     ClientCartDetailMapper INSTANCE = Mappers.getMapper(ClientCartDetailMapper.class);
 
+    @Mapping(target = "cart",source = "cart.id")
     ClientCartDetailResponse cartDetailToClientCartDetailResponse(CartDetail cartDetail);
 
     @Mapping(target = "productDetail.id",source = "productDetail")
