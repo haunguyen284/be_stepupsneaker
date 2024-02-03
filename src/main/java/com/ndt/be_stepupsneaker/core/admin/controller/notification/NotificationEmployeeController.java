@@ -50,4 +50,14 @@ public class NotificationEmployeeController {
     public Object changeNotificationToRead(@PathVariable String id) {
         return ResponseHelper.getResponse(notificationEmployeeService.changeNotificationToRead(id), HttpStatus.OK);
     }
+
+    @GetMapping("/read-all")
+    public Object readAll() {
+        return ResponseHelper.getResponse(notificationEmployeeService.readAll(), HttpStatus.OK);
+    }
+
+    @GetMapping("/unread")
+    public Object unRead(NotificationEmployeeRequest request) {
+        return ResponseHelper.getResponse(notificationEmployeeService.unRead(request), HttpStatus.OK);
+    }
 }

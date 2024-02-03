@@ -91,4 +91,20 @@ public class NotificationEmployeeServiceImpl implements NotificationEmployeeServ
                         .build());
     }
 
+    @Override
+    public List<NotificationEmployeeResponse> readAll() {
+        List<NotificationEmployee> notificationEmployees = notificationEmployeeRepository.findByRead(false);
+        notificationEmployees.forEach(x -> x.setRead(true));
+        notificationEmployeeRepository.saveAll(notificationEmployees);
+        return notificationEmployees.stream().map(NotificationEmployeeMapper.INSTANCE::notificationEmployeeToNotificationEmployeeResponse).toList();
+    }
+
+    @Override
+    public PageableObject<NotificationEmployeeResponse> unRead(NotificationEmployeeRequest request) {
+        Pageable pageable = paginationUtil.pageable(request);
+        Page<NotificationEmployee> resp = notificationEmployeeRepository.findByRead(false, pageable);
+        Page<NotificationEmployeeResponse> notificationEmployeeResponses = resp.map(NotificationEmployeeMapper.INSTANCE::notificationEmployeeToNotificationEmployeeResponse);
+        return new PageableObject<>(notificationEmployeeResponses);
+    }
+
 }
