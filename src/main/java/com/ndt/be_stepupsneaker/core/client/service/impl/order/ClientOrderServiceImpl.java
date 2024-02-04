@@ -305,6 +305,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return clientOrderResponse;
     }
 
+    // Revert lại số lượng ProductDetail khi xóa OrderDetail
     public void revertQuantityProductDetailWhenRemoveOrderDetail(List<OrderDetail> orderDetails) {
         List<ProductDetail> productDetails = new ArrayList<>();
         for (OrderDetail orderDetail : orderDetails) {
@@ -329,6 +330,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return null;
     }
 
+    // Tính tổng tiền trong OrderDetail
     public float totalMoneyOrderDetails(List<OrderDetail> orderDetails) {
         float total = 0.0f;
         if (orderDetails != null) {
@@ -340,6 +342,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
 
+    // Tính tổng tiền CartItem gửi lên
     public float totalCartItem(List<ClientCartItemRequest> clientCartItemRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         float total = 0.0f;
@@ -360,7 +363,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return total;
     }
 
-    // Kiểm tra đợt giảm giá còn hạn không
+    // Kiểm tra đợt giảm giá còn hạn hoặc bắt đầu hay chưa
     public boolean isValid(PromotionProductDetail ppd) {
         Promotion promotion = ppd.getPromotion();
         if (promotion != null && promotion.getEndDate() != null && promotion.getStartDate() != null) {
@@ -644,7 +647,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return true;
     }
 
-    // revert lại số lượng khi xóa, hủy, ....
+    // revert lại số lượng khi xóa, hủy Order
     public void revertQuantityProductDetail(Order order) {
         List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(order);
         List<ProductDetail> productDetails = orderDetails.stream().map(orderDetail -> {
