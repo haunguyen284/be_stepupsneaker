@@ -14,12 +14,15 @@ import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminStyleReposito
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminTradeMarkRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductDetailService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -110,8 +113,12 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     }
 
     @Override
-    public List<AdminProductDetailResponse> findByTrending(Long fromDate, Long toDate) {
-        return adminProductDetailRepository.findProductDetailTrending(fromDate, toDate).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).toList();
+    public PageableObject<AdminProductDetailResponse> findByTrending(Long fromDate, Long toDate) {
+        List<ProductDetail> productDetails = adminProductDetailRepository.findProductDetailTrending(fromDate, toDate);
+        PageRequest pageRequest = PageRequest.of(0, 5);
+        Page<ProductDetail> resp = new PageImpl<>(productDetails, pageRequest, productDetails.size());
+        Page<AdminProductDetailResponse> adminProductDetailResponses = resp.map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse);
+        return new PageableObject<>(adminProductDetailResponses);
     }
 
 
