@@ -1,5 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.repository.voucher;
 
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.repository.voucher.PromotionProductDetailRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.context.annotation.Primary;
@@ -19,4 +21,7 @@ public interface AdminPromotionProductDetailRepository extends PromotionProductD
     @Transactional
     @Query("DELETE FROM PromotionProductDetail x WHERE x.promotion.id = :promotion AND x.productDetail.id IN :productDetails")
     void deleteProductDetailsByPromotionId(@Param("promotion") String promotion, @Param("productDetails") List<String> productDetails);
+
+
+    List<PromotionProductDetail> getPromotionProductDetailsByPromotionId(String promotionId);;
 }
