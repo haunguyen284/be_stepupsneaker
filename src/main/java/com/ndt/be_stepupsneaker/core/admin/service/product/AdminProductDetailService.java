@@ -11,4 +11,5 @@ public interface AdminProductDetailService extends BaseService<AdminProductDetai
     List<AdminProductDetailResponse> create(List<AdminProductDetailRequest> productDetailRequests);
     List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests);
 
+    List<AdminProductDetailResponse> findByTrending(Long fromDate, Long toDate);
 }

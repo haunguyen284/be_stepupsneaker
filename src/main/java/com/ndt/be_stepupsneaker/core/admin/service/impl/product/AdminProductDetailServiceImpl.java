@@ -109,6 +109,11 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
         return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());
     }
 
+    @Override
+    public List<AdminProductDetailResponse> findByTrending(Long fromDate, Long toDate) {
+        return adminProductDetailRepository.findProductDetailTrending(fromDate, toDate).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).toList();
+    }
+
 
     @Override
     public AdminProductDetailResponse update(AdminProductDetailRequest productDetailRequest) {
