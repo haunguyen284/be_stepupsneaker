@@ -234,7 +234,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             orderDetailsUpdate.add(orderDetailUpdate);
 
             // trừ / cộng số lượng của SP sau khi mua
-            productDetailUpdate.setQuantity(productDetailUpdate.getQuantity() + quantityChange);
+            productDetailUpdate.setQuantity(productDetailUpdate.getQuantity() - quantityChange);
             productDetailsUpdate.add(productDetailUpdate);
 
         }
