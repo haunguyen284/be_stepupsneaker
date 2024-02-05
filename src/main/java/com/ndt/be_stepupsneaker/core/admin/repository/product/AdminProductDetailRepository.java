@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -88,4 +89,16 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     )
     """)
     Optional<ProductDetail> findByProductProperties(@Param("request") AdminProductDetailRequest request);
+
+    @Query("""
+    SELECT pd FROM OrderDetail od 
+    JOIN od.productDetail pd 
+    JOIN od.order o 
+    WHERE o.status = 4 
+    AND o.createdAt BETWEEN :fromDate AND :toDate 
+    GROUP BY pd.id 
+    ORDER BY SUM(od.quantity) DESC 
+    LIMIT 5
+    """)
+    List<ProductDetail> findProductDetailTrending(@Param("fromDate") Long fromDate, @Param("toDate") Long toDate);
 }

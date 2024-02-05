@@ -38,6 +38,8 @@ public class ClientProductDetailResponse {
 
     private int quantity;
 
+    private float moneyPromotion;
+
     private ProductStatus status;
 
     List<AdminPromotionNoProductDetailResponse> promotionProductDetails;

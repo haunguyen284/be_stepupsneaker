@@ -16,6 +16,7 @@ import lombok.Setter;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -68,7 +69,11 @@ public class ProductDetail extends PrimaryEntity {
     @Column(name = "status")
     private ProductStatus status;
 
+    @Column(name = "money_promotion")
+    private Float moneyPromotion;
+
     @OneToMany(mappedBy = "productDetail")
     List<PromotionProductDetail> promotionProductDetails;
+
 }
 

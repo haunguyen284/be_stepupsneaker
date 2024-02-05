@@ -16,15 +16,15 @@ import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.ConvertUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,17 +131,57 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         }
         if (productDetailIds != null) {
             List<ProductDetail> productDetails = adminProductDetailRepository.findAllById(productDetailIds);
+            Set<ProductDetail> productDetailsToUpdate = new HashSet<>();
+            List<PromotionProductDetail> promotionProductDetailsAdd = new ArrayList<>();
+
             List<PromotionProductDetail> promotionProductDetails = productDetails
                     .stream()
                     .map(productDetail -> {
                         PromotionProductDetail promotionProductDetail = new PromotionProductDetail();
                         promotionProductDetail.setPromotion(promotion);
                         promotionProductDetail.setProductDetail(productDetail);
+
+                        promotionProductDetailsAdd.add(promotionProductDetail);
+                        if (!productDetailsToUpdate.contains(productDetail)) {
+                            Float currentMoneyPromotion = productDetail.getMoneyPromotion();
+
+                            Optional<Float> maxMoneyPromotion = promotionProductDetail.getProductDetail().getPromotionProductDetails().stream()
+                                    .filter(ppd -> isValid(ppd))
+                                    .map(ppd -> calculateMoneyPromotion(ppd))
+                                    .max(Float::compare);
+                            System.out.println("ProductDetail ID: " + productDetail.getId());
+
+                            if (maxMoneyPromotion.isPresent() && (currentMoneyPromotion == null || maxMoneyPromotion.get() > currentMoneyPromotion)) {
+                                productDetail.setMoneyPromotion(maxMoneyPromotion.get());
+                                System.out.println("Max Money Promotion: " + maxMoneyPromotion.orElse(null));
+                            }
+
+                            productDetailsToUpdate.add(productDetail);
+                        }
                         return promotionProductDetail;
                     })
                     .collect(Collectors.toList());
-            adminPromotionProductDetailRepository.saveAll(promotionProductDetails);
+            adminPromotionProductDetailRepository.saveAll(promotionProductDetailsAdd);
             promotion.getPromotionProductDetailList().addAll(promotionProductDetails);
+            adminProductDetailRepository.saveAll(productDetailsToUpdate);
+
         }
+
+    }
+
+    public boolean isValid(PromotionProductDetail ppd) {
+        Promotion promotion = ppd.getPromotion();
+        if (promotion != null && promotion.getEndDate() != null) {
+            LocalDateTime currentDate = LocalDateTime.now();
+            LocalDateTime endDate = ConvertUtil.convertLongToLocalDateTime(promotion.getEndDate());
+            return !currentDate.isAfter(endDate);
+        }
+        return false;
+    }
+
+    // Phương thức tính toán giá trị moneyPromotion
+    public Float calculateMoneyPromotion(PromotionProductDetail ppd) {
+        Float promotionMoney = (ppd.getProductDetail().getPrice() * ppd.getPromotion().getValue()) / 100;
+        return promotionMoney;
     }
 }

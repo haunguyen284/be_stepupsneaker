@@ -35,6 +35,7 @@ import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
@@ -45,6 +46,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -136,45 +138,53 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public AdminOrderResponse update(AdminOrderRequest orderRequest) {
         Order orderSave = getOrderById(orderRequest);
-        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION && orderSave.getStatus() != OrderStatus.PENDING) {
             throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
         }
-        Address address = saveAddress(orderSave, orderRequest);
+        Address address = null;
+        if (orderRequest.getAddressShipping() == null) {
+            orderSave.setAddress(null);
+        } else {
+            address = saveAddress(orderSave, orderRequest);
+
+        }
         List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder(orderSave);
         List<OrderDetail> newOrderDetails = new ArrayList<>();
         List<OrderDetail> removeOrderDetails = new ArrayList<>();
         List<ProductDetail> productDetails = new ArrayList<>();
         int quantityInStock = 0;
-        for (OrderDetail orderDetail : orderDetails) {
-            boolean found = false;
-            for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
-                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
-                        && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
-                    if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
-                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+        if (orderRequest.getCartItems() != null) {
+            for (OrderDetail orderDetail : orderDetails) {
+                boolean found = false;
+                for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+                    if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
+                            && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
+                        if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
+                            throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                        }
+                        //
+                        ProductDetail productDetail = orderDetail.getProductDetail();
+                        if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
+                            quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
+                            productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
+                        } else {
+                            quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
+                            productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
+                        }
+                        productDetails.add(productDetail);
+                        //
+                        orderDetail.setQuantity(cartItemRequest.getQuantity());
+                        orderDetail.setPrice(orderDetail.getProductDetail().getPrice());
+                        orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                        newOrderDetails.add(orderDetail);
                     }
-                    //
-                    ProductDetail productDetail = orderDetail.getProductDetail();
-                    if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
-                        quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
-                        productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
-                    } else {
-                        quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
-                        productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
+                    if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
+                        found = true;
                     }
-                    productDetails.add(productDetail);
-                    //
-                    orderDetail.setQuantity(cartItemRequest.getQuantity());
-                    orderDetail.setPrice(orderDetail.getProductDetail().getPrice());
-                    orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                    newOrderDetails.add(orderDetail);
                 }
-                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
-                    found = true;
+                if (!found) {
+                    removeOrderDetails.add(orderDetail);
                 }
-            }
-            if (!found) {
-                removeOrderDetails.add(orderDetail);
             }
         }
         if (newOrderDetails != null) {
@@ -185,22 +195,22 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             clientOrderServiceImpl.revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
             adminOrderDetailRepository.deleteAll(removeOrderDetails);
         }
-        float shippingFee = clientOrderServiceImpl.calculateShippingFee(address);
-        float totalCart = totalCartItem(orderRequest.getCartItems());
-        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
-            orderSave.setShippingMoney(0);
-        } else {
-            orderSave.setShippingMoney(shippingFee);
+        float shippingFee = 0;
+        float totalMoney = totalCartItem(orderRequest.getCartItems());
+        if (address != null) {
+            shippingFee = clientOrderServiceImpl.calculateShippingFee(totalMoney, address);
         }
+        orderSave.setShippingMoney(shippingFee);
+
 //        createOrderDetails(orderSave, orderRequest);
-        orderSave.setOriginMoney(totalCart);
+        orderSave.setOriginMoney(totalMoney);
         orderSave.setEmail(orderRequest.getEmail());
         orderSave.setType(OrderType.ONLINE);
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
         setOrderInfo(orderSave);
-        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
+        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
         Order order = adminOrderRepository.save(orderSave);
 //        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
 //        if (existingOrderHistoryOptional.isEmpty()) {
@@ -213,7 +223,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 //        }
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, orderRequest.getEmail());
+        if (adminOrderResponse.getAddress() != null) {
+            sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, orderRequest.getEmail());
+        }
         return adminOrderResponse;
     }
 
@@ -284,7 +296,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ApiException("Your order is in completed status!");
         }
 
-        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY &&
+                orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION &&
+                orderSave.getStatus() != OrderStatus.DELIVERING) {
             throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
         }
 
@@ -292,12 +306,17 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
+        if (orderSave.getStatus() == OrderStatus.CANCELED) {
+            Voucher voucher = orderSave.getVoucher();
+            voucher.setQuantity(voucher.getQuantity() + 1);
+            adminVoucherRepository.save(voucher);
+        }
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus());
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, adminOrderResponse.getEmail());
-        return null;
+        return adminOrderResponse;
     }
 
     public void revertQuantityProductDetail(Order order) {
@@ -331,23 +350,33 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     public Address saveAddress(Order order, AdminOrderRequest orderRequest) {
-        Address address = adminAddressRepository.findById(order.getAddress().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
-        if (orderRequest.getAddressShipping().getProvinceName() != null) {
-            address.setProvinceName(orderRequest.getAddressShipping().getProvinceName());
+        if (orderRequest.getAddress() == null) {
+            order.setAddress(null);
+            return null;
+        } else {
+            Address address = adminAddressRepository.findById(order.getAddress().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
+
+            if (orderRequest.getAddressShipping() != null) {
+                if (orderRequest.getAddressShipping().getProvinceName() != null) {
+                    address.setProvinceName(orderRequest.getAddressShipping().getProvinceName());
+                }
+                if (orderRequest.getAddressShipping().getDistrictName() != null) {
+                    address.setDistrictName(orderRequest.getAddressShipping().getDistrictName());
+                }
+                if (orderRequest.getAddressShipping().getWardName() != null) {
+                    address.setWardName(orderRequest.getAddressShipping().getWardName());
+                }
+                address.setMore(orderRequest.getAddressShipping().getMore());
+                address.setDistrictId(orderRequest.getAddressShipping().getDistrictId());
+                address.setProvinceId(orderRequest.getAddressShipping().getProvinceId());
+                address.setWardCode(orderRequest.getAddressShipping().getWardCode());
+            }
+
+            return adminAddressRepository.save(address);
         }
-        if (orderRequest.getAddressShipping().getDistrictName() != null) {
-            address.setDistrictName(orderRequest.getAddressShipping().getDistrictName());
-        }
-        if (orderRequest.getAddressShipping().getWardName() != null) {
-            address.setWardName(orderRequest.getAddressShipping().getWardName());
-        }
-        address.setMore(orderRequest.getAddressShipping().getMore());
-        address.setDistrictId(orderRequest.getAddressShipping().getDistrictId());
-        address.setProvinceId(orderRequest.getAddressShipping().getProvinceId());
-        address.setWardCode(orderRequest.getAddressShipping().getWardCode());
-        return adminAddressRepository.save(address);
     }
+
 
     public float totalCartItem(List<AdminCartItemRequest> adminCartItemRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
@@ -389,17 +418,20 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     }
 
     private void setOrderInfo(Order order) {
-        if (order.getEmail() != null) {
+        if (order.getCustomer() == null && order.getEmail() != null) {
             Customer customer = adminCustomerRepository.findByEmail(order.getEmail()).orElse(null);
             order.setCustomer(customer);
         }
-        AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
-        if (employeeResponse != null) {
-            Employee employee = adminEmployeeRepository.findById(employeeResponse.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
-            order.setEmployee(employee);
-        } else {
-            throw new ResourceNotFoundException("Please! Login!");
+
+        if (order.getEmployee() == null) {
+            AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
+            if (employeeResponse != null) {
+                Employee employee = adminEmployeeRepository.findById(employeeResponse.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+                order.setEmployee(employee);
+            } else {
+                throw new ResourceNotFoundException("Please! Login!");
+            }
         }
     }
 

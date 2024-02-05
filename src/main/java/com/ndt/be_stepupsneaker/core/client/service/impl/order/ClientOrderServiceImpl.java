@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.order;
 
 import com.amazonaws.services.apigateway.model.Op;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
@@ -32,6 +33,7 @@ import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.notification.NotificationEmployee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
@@ -40,6 +42,8 @@ import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
+import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
@@ -53,7 +57,9 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
+import com.ndt.be_stepupsneaker.util.ConvertUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -64,9 +70,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -149,23 +157,19 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         Address newAddress = clientAddressRepository.save(address);
         orderSave.setAddress(newAddress);
-        float shippingFee = calculateShippingFee(newAddress);
-        float totalCart = totalCartItem(clientOrderRequest.getCartItems());
-        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
-            orderSave.setShippingMoney(0);
-        } else {
-            orderSave.setShippingMoney(shippingFee);
-        }
-        orderSave.setOriginMoney(totalCart);
+        float totalMoney = totalCartItem(clientOrderRequest.getCartItems());
+        float shippingFee = calculateShippingFee(totalMoney, newAddress);
+        orderSave.setShippingMoney(shippingFee);
+        orderSave.setOriginMoney(totalMoney);
         setOrderInfo(orderSave);
-        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
+        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
         orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
-            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
+            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
@@ -182,79 +186,77 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return clientOrderResponse;
     }
 
+    @Transactional
     @Override
     public ClientOrderResponse update(ClientOrderRequest orderRequest) {
-
         Optional<Order> orderOptional = clientOrderRepository.findById(orderRequest.getId());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
+            throw new ResourceNotFoundException("ORDER DOES NOT EXIST");
         }
-        Order newOrder = orderOptional.get();
-        if (newOrder.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && newOrder.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-            throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
+
+        Order orderUpdate = orderOptional.get();
+        Address address = saveAddress(orderUpdate, orderRequest);
+
+        if (orderUpdate.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderUpdate.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+            throw new ApiException("Order cannot be updated while the status is being shipped or completed !");
         }
-        Address address = saveAddress(newOrder, orderRequest);
-        List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(newOrder);
-        List<OrderDetail> newOrderDetails = new ArrayList<>();
-        List<OrderDetail> removeOrderDetails = new ArrayList<>();
-        List<ProductDetail> productDetails = new ArrayList<>();
-        int quantityInStock = 0;
-        for (OrderDetail orderDetail : orderDetails) {
-            boolean found = false;
-            for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
-                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
-                        && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
-                    if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
-                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
-                    }
-                    //
-                    ProductDetail productDetail = orderDetail.getProductDetail();
-                    if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
-                        quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
-                        productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
-                    } else {
-                        quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
-                        productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
-                    }
-                    productDetails.add(productDetail);
-                    //
-                    orderDetail.setQuantity(cartItemRequest.getQuantity());
-                    orderDetail.setPrice(orderDetail.getProductDetail().getPrice());
-                    orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                    newOrderDetails.add(orderDetail);
-                }
-                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
-                    found = true;
-                }
+
+        List<OrderDetail> orderDetailsUpdate = new ArrayList<>();
+        List<ProductDetail> productDetailsUpdate = new ArrayList<>();
+
+        for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+            Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(cartItemRequest.getId());
+            if (orderDetailOptional.isEmpty()) {
+                throw new ResourceNotFoundException(String.format("ORDER DETAIL %s DOES NOT EXIST", cartItemRequest.getId()));
             }
-            if (!found) {
-                removeOrderDetails.add(orderDetail);
+
+            OrderDetail orderDetailUpdate = orderDetailOptional.get();
+            ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
+            int quantityChange = cartItemRequest.getQuantity() - orderDetailUpdate.getQuantity();
+            float promotionValue = getPromotionValueOfProductDetail(productDetailUpdate);
+            float newProductPrice = productDetailUpdate.getPrice() - promotionValue;
+
+            // Nếu số lượng giỏ tăng và giá SP đã bị thay đổi -> tạo orderdetail mới
+            if (orderDetailUpdate.getPrice() != (newProductPrice) && quantityChange > 0) {
+                OrderDetail newOrderDetail = new OrderDetail();
+                newOrderDetail.setProductDetail(productDetailUpdate);
+                newOrderDetail.setQuantity(quantityChange);
+                newOrderDetail.setPrice(newProductPrice);
+                newOrderDetail.setTotalPrice(newProductPrice * quantityChange);
+                newOrderDetail.setOrder(orderUpdate);
+                orderDetailsUpdate.add(newOrderDetail);
+            } else {
+                // TH còn lại -> chỉ cập nhật số lượng giỏ
+                orderDetailUpdate.setQuantity(cartItemRequest.getQuantity());
+                orderDetailUpdate.setTotalPrice(cartItemRequest.getQuantity() * orderDetailUpdate.getPrice());
             }
+
+            orderDetailsUpdate.add(orderDetailUpdate);
+
+            // trừ / cộng số lượng của SP sau khi mua
+            productDetailUpdate.setQuantity(productDetailUpdate.getQuantity() + quantityChange);
+            productDetailsUpdate.add(productDetailUpdate);
+
         }
-        if (newOrderDetails != null) {
-            clientProductDetailRepository.saveAll(productDetails);
-            clientOrderDetailRepository.saveAll(newOrderDetails);
-        }
-        if (removeOrderDetails != null) {
-            revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
-            clientOrderDetailRepository.deleteAll(removeOrderDetails);
-        }
-        float shippingFee = calculateShippingFee(address);
-        float totalCart = totalCartItem(orderRequest.getCartItems());
-        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
-            newOrder.setShippingMoney(0);
-        } else {
-            newOrder.setShippingMoney(shippingFee);
-        }
-        newOrder.setOriginMoney(totalCart);
-        newOrder.setEmail(orderRequest.getEmail());
-        newOrder.setType(OrderType.ONLINE);
-        newOrder.setFullName(orderRequest.getFullName());
-        newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
-        newOrder.setNote(orderRequest.getNote());
-        setOrderInfo(newOrder);
-        applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
-        Order order = clientOrderRepository.save(newOrder);
+
+        // đoạn code của duy
+
+        clientProductDetailRepository.saveAll(productDetailsUpdate);
+        clientOrderDetailRepository.saveAll(orderDetailsUpdate);
+
+        float totalMoney = totalMoneyOrderDetails(orderDetailsUpdate);
+        float shippingFee = calculateShippingFee(totalMoney, address);
+
+        orderUpdate.setShippingMoney(shippingFee);
+        orderUpdate.setOriginMoney(totalMoney);
+        orderUpdate.setEmail(orderRequest.getEmail());
+        orderUpdate.setType(OrderType.ONLINE);
+        orderUpdate.setFullName(orderRequest.getFullName());
+        orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
+        orderUpdate.setNote(orderRequest.getNote());
+        setOrderInfo(orderUpdate);
+        applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney());
+        Order order = clientOrderRepository.save(orderUpdate);
         Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
             OrderHistory orderHistory = new OrderHistory();
@@ -274,6 +276,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return clientOrderResponse;
     }
 
+
+    // Revert lại số lượng ProductDetail khi xóa OrderDetail
     public void revertQuantityProductDetailWhenRemoveOrderDetail(List<OrderDetail> orderDetails) {
         List<ProductDetail> productDetails = new ArrayList<>();
         for (OrderDetail orderDetail : orderDetails) {
@@ -298,37 +302,71 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return null;
     }
 
+    // Tính tổng tiền trong OrderDetail
+    public float totalMoneyOrderDetails(List<OrderDetail> orderDetails) {
+        float total = 0.0f;
+        if (orderDetails != null) {
+            for (OrderDetail orderDetail : orderDetails) {
+                total += orderDetail.getPrice() * orderDetail.getQuantity();
+            }
+        }
+        return total;
+    }
 
+
+    // Tính tổng tiền CartItem gửi lên
     public float totalCartItem(List<ClientCartItemRequest> clientCartItemRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         float total = 0.0f;
+
         if (clientCartItemRequests != null) {
             for (ClientCartItemRequest request : clientCartItemRequests) {
                 ProductDetail productDetail = clientProductDetailRepository.findById(request.getId())
                         .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found"));
-                float price = productDetail.getPrice();
+
+                float promotionValue = getPromotionValueOfProductDetail(productDetail);
+                float price = productDetail.getPrice() - promotionValue;
                 total += price * request.getQuantity();
                 productDetail.setQuantity(productDetail.getQuantity() - request.getQuantity());
                 productDetails.add(productDetail);
             }
             clientProductDetailRepository.saveAll(productDetails);
-
         }
+
         return total;
     }
 
+    // Kiểm tra đợt giảm giá còn hạn hoặc bắt đầu hay chưa
+    public boolean isValid(PromotionProductDetail ppd) {
+        Promotion promotion = ppd.getPromotion();
+        if (promotion != null && promotion.getEndDate() != null && promotion.getStartDate() != null) {
+            LocalDateTime currentDate = LocalDateTime.now();
+            LocalDateTime startDate = ConvertUtil.convertLongToLocalDateTime(promotion.getStartDate());
+            LocalDateTime endDate = ConvertUtil.convertLongToLocalDateTime(promotion.getEndDate());
+
+            return !currentDate.isBefore(startDate) && !currentDate.isAfter(endDate);
+        }
+        return false;
+    }
+
+
+    // Tính tiền sản phẩm trong đợt giảm giá
+    public Float calculateMoneyPromotion(PromotionProductDetail ppd) {
+        Float promotionMoney = (ppd.getProductDetail().getPrice() * ppd.getPromotion().getValue()) / 100;
+        return promotionMoney;
+    }
+
+
+    // Thông tin người dùng và nhân viên set vào order
     private void setOrderInfo(Order order) {
-        if (order.getEmail() != null) {
+        if (order.getCustomer() == null && order.getEmail() != null) {
             Customer customer = clientCustomerRepository.findByEmail(order.getEmail()).orElse(null);
-            if (customer != null) {
-                order.setCustomer(customer);
-            } else {
-                order.setCustomer(null);
-            }
+            order.setCustomer(customer);
         }
         order.setEmployee(null);
     }
 
+    // Thêm khuyến mãi vào order
     public void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
         if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = clientVoucherRepository.findById(voucherId)
@@ -355,6 +393,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
     }
 
+    // Tổng tiền khi thanh toán VnPay
     private float totalVnPay(String voucherId, float totalCartItem, float shippingFee) {
         if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = clientVoucherRepository.findById(voucherId)
@@ -369,6 +408,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return totalCartItem + shippingFee;
     }
 
+    // Lưu địa chỉ
     public Address saveAddress(Order order, ClientOrderRequest clientOrderRequest) {
         Address address = clientAddressRepository.findById(order.getAddress().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
@@ -389,7 +429,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
 
-    public float calculateShippingFee(Address address) {
+    // Tính phí ship
+    public float calculateShippingFee(float totalMoney, Address address) {
+        if (totalMoney >= EntityProperties.IS_FREE_SHIPPING) { // kiểm tra free ship
+            return 0.0f;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.set("token", EntityProperties.VITE_GHN_USER_TOKEN);
         headers.set("shop_id", EntityProperties.VITE_GHN_SHOP_ID);
@@ -428,6 +472,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return 0.0f;
     }
 
+    // Set giá trị cho shippingRequest để tính ship
     private ClientShippingRequest createShippingRequest(Address address) {
         ClientShippingRequest shippingRequest = new ClientShippingRequest();
         shippingRequest.setFromDistrictId(1542);
@@ -441,6 +486,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return shippingRequest;
     }
 
+    // Tạo payment
     private List<ClientPaymentResponse> createPayment(Order order, ClientOrderRequest orderRequest) {
         List<ClientPaymentResponse> clientPaymentResponses = new ArrayList<>();
         PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
@@ -455,6 +501,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return clientPaymentResponses;
     }
 
+    // Tạo VoucherHistory
     private ClientVoucherHistoryResponse createVoucherHistory(Order order) {
         if (order.getVoucher() != null) {
             VoucherHistory voucherHistory = new VoucherHistory();
@@ -473,6 +520,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return null;
     }
 
+    // Tạo orderHistory
     private List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus) {
         List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
         OrderHistory orderHistory = new OrderHistory();
@@ -484,18 +532,21 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return clientOrderHistoryResponses;
     }
 
+    // Tạo orderDetail
     private List<ClientOrderDetailResponse> createOrderDetails(Order order, ClientOrderRequest clientOrderRequest) {
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
+                float promotionValue = getPromotionValueOfProductDetail(productDetail);
+                float price = productDetail.getPrice() - promotionValue;
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
                 orderDetail.setQuantity(clientCartItemRequest.getQuantity());
                 orderDetail.setOrder(order);
-                orderDetail.setPrice(productDetail.getPrice());
-                orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
+                orderDetail.setPrice(price);
+                orderDetail.setTotalPrice(price * orderDetail.getQuantity());
                 orderDetails.add(orderDetail);
             }
         }
@@ -503,6 +554,22 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 .stream()
                 .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
                 .collect(Collectors.toList());
+    }
+    
+    
+
+    // Tính giá sản phẩm thấp nhất trong promotionProductDetail theo value của Promotion
+    private float getPromotionValueOfProductDetail(ProductDetail productDetail) {
+        float promotionValue = 0;
+        List<PromotionProductDetail> promotionProductDetailsSet = productDetail.getPromotionProductDetails();
+        if (promotionProductDetailsSet != null && !promotionProductDetailsSet.isEmpty()) {
+            Optional<Float> maxMoneyPromotion = promotionProductDetailsSet.stream()
+                    .filter(this::isValid)
+                    .map(this::calculateMoneyPromotion)
+                    .max(Float::compare);
+            promotionValue = maxMoneyPromotion.orElse(productDetail.getPrice());
+        }
+        return promotionValue;
     }
 
     @Override
@@ -542,6 +609,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         if (order.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && order.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
             throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
         }
+        if (order.getVoucher() != null) {
+            Voucher voucher = order.getVoucher();
+            voucher.setQuantity(voucher.getQuantity() + 1);
+            clientVoucherRepository.save(voucher);
+        }
         revertQuantityProductDetail(order);
         order.setStatus(OrderStatus.CANCELED);
         Order newOrder = clientOrderRepository.save(order);
@@ -552,6 +624,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         return true;
     }
 
+    // revert lại số lượng khi xóa, hủy Order
     public void revertQuantityProductDetail(Order order) {
         List<OrderDetail> orderDetails = clientOrderDetailRepository.findAllByOrder(order);
         List<ProductDetail> productDetails = orderDetails.stream().map(orderDetail -> {
