@@ -157,23 +157,19 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         Address newAddress = clientAddressRepository.save(address);
         orderSave.setAddress(newAddress);
-        float shippingFee = calculateShippingFee(newAddress);
-        float totalCart = totalCartItem(clientOrderRequest.getCartItems());
-        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
-            orderSave.setShippingMoney(0);
-        } else {
-            orderSave.setShippingMoney(shippingFee);
-        }
-        orderSave.setOriginMoney(totalCart);
+        float totalMoney = totalCartItem(clientOrderRequest.getCartItems());
+        float shippingFee = calculateShippingFee(totalMoney, newAddress);
+        orderSave.setShippingMoney(shippingFee);
+        orderSave.setOriginMoney(totalMoney);
         setOrderInfo(orderSave);
-        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
+        applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
         orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
-            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalCart, newOrder.getShippingMoney());
+            float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
@@ -193,99 +189,74 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Transactional
     @Override
     public ClientOrderResponse update(ClientOrderRequest orderRequest) {
-
         Optional<Order> orderOptional = clientOrderRepository.findById(orderRequest.getId());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
+            throw new ResourceNotFoundException("ORDER DOES NOT EXIST");
         }
-        Order newOrder = orderOptional.get();
-        if (newOrder.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && newOrder.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-            throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
+
+        Order orderUpdate = orderOptional.get();
+        Address address = saveAddress(orderUpdate, orderRequest);
+
+        if (orderUpdate.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderUpdate.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
+            throw new ApiException("Order cannot be updated while the status is being shipped or completed !");
         }
-        Address address = saveAddress(newOrder, orderRequest);
-        List<OrderDetail> orderDetails = clientOrderDetailRepository.findDistinctByOrder(newOrder);
-        List<OrderDetail> newOrderDetails = new ArrayList<>();
-        List<OrderDetail> removeOrderDetails = new ArrayList<>();
-        List<ProductDetail> productDetails = new ArrayList<>();
-        int quantityInStock = 0;
-        for (OrderDetail orderDetail : orderDetails) {
-            boolean found = false;
-            float maxMoneyPromotionInProductDetail = maxMoneyPromotionInProductDetail(orderDetail.getProductDetail());
-            for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
-                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
-                        && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
-                    if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
-                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
-                    }
-                    //
-                    ProductDetail productDetail = orderDetail.getProductDetail();
-                    if (maxMoneyPromotionInProductDetail == orderDetail.getPrice()) {
-                        System.out.println("========ĐỢT GIẢM GIÁ GIỐNG NHAU=====");
-                        if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
-                            quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
-                            productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
-                        } else {
-                            quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
-                            productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
-                        }
-                        productDetails.add(productDetail);
-                        //
-                        orderDetail.setQuantity(cartItemRequest.getQuantity());
-                        orderDetail.setPrice(maxMoneyPromotionInProductDetail);
-                        orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                        newOrderDetails.add(orderDetail);
-                    } else {
-                        int quantity = 0;
-                        quantity = cartItemRequest.getQuantity() - orderDetail.getQuantity();
-                        System.out.println("========IN VÀO ĐÂY LÀ KHÁC ĐỢT GIẢM GIÁ=====");
-                        OrderDetail newOrderDetail = new OrderDetail();
-                        newOrderDetail.setProductDetail(productDetail);
-                        newOrderDetail.setQuantity(quantity);
-                        newOrderDetail.setPrice(maxMoneyPromotionInProductDetail);
-                        newOrderDetail.setTotalPrice(maxMoneyPromotionInProductDetail * newOrderDetail.getQuantity());
-                        newOrderDetail.setOrder(newOrder);
-                        newOrderDetails.add(newOrderDetail);
-                        //
-                        orderDetail.setQuantity(orderDetail.getQuantity());
-                        newOrderDetails.add(orderDetail);
 
-                    }
+        List<OrderDetail> orderDetailsUpdate = new ArrayList<>();
+        List<ProductDetail> productDetailsUpdate = new ArrayList<>();
 
-                }
-                if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
-                    found = true;
-                }
+        for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+            Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(cartItemRequest.getId());
+            if (orderDetailOptional.isEmpty()) {
+                throw new ResourceNotFoundException(String.format("ORDER DETAIL %s DOES NOT EXIST", cartItemRequest.getId()));
             }
-            if (!found) {
-                removeOrderDetails.add(orderDetail);
-            }
-        }
-//        if (removeOrderDetails != null) {
-//            revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
-//            clientOrderDetailRepository.deleteAll(removeOrderDetails);
-//        }
-        if (newOrderDetails != null) {
-            clientProductDetailRepository.saveAll(productDetails);
-            clientOrderDetailRepository.saveAll(newOrderDetails);
-        }
-        float shippingFee = calculateShippingFee(address);
-        List<OrderDetail> orderDetailList = clientOrderDetailRepository.getAllByOrder(newOrder);
-        float totalOrderDetails = totalMoneyOrderDetails(orderDetailList);
 
-        if (totalOrderDetails >= EntityProperties.IS_FREE_SHIPPING) {
-            newOrder.setShippingMoney(0);
-        } else {
-            newOrder.setShippingMoney(shippingFee);
+            OrderDetail orderDetailUpdate = orderDetailOptional.get();
+            ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
+            int quantityChange = cartItemRequest.getQuantity() - orderDetailUpdate.getQuantity();
+            float promotionValue = getPromotionValueOfProductDetail(productDetailUpdate);
+            float newProductPrice = productDetailUpdate.getPrice() - promotionValue;
+
+            // Nếu số lượng giỏ tăng và giá SP đã bị thay đổi -> tạo orderdetail mới
+            if (orderDetailUpdate.getPrice() != (newProductPrice) && quantityChange > 0) {
+                OrderDetail newOrderDetail = new OrderDetail();
+                newOrderDetail.setProductDetail(productDetailUpdate);
+                newOrderDetail.setQuantity(quantityChange);
+                newOrderDetail.setPrice(newProductPrice);
+                newOrderDetail.setTotalPrice(newProductPrice * quantityChange);
+                newOrderDetail.setOrder(orderUpdate);
+                orderDetailsUpdate.add(newOrderDetail);
+            } else {
+                // TH còn lại -> chỉ cập nhật số lượng giỏ
+                orderDetailUpdate.setQuantity(cartItemRequest.getQuantity());
+                orderDetailUpdate.setTotalPrice(cartItemRequest.getQuantity() * orderDetailUpdate.getPrice());
+            }
+
+            orderDetailsUpdate.add(orderDetailUpdate);
+
+            // trừ / cộng số lượng của SP sau khi mua
+            productDetailUpdate.setQuantity(productDetailUpdate.getQuantity() + quantityChange);
+            productDetailsUpdate.add(productDetailUpdate);
+
         }
-        newOrder.setOriginMoney(totalOrderDetails);
-        newOrder.setEmail(orderRequest.getEmail());
-        newOrder.setType(OrderType.ONLINE);
-        newOrder.setFullName(orderRequest.getFullName());
-        newOrder.setPhoneNumber(orderRequest.getPhoneNumber());
-        newOrder.setNote(orderRequest.getNote());
-        setOrderInfo(newOrder);
-        applyVoucherToOrder(newOrder, orderRequest.getVoucher(), totalOrderDetails, newOrder.getShippingMoney());
-        Order order = clientOrderRepository.save(newOrder);
+
+        // đoạn code của duy
+
+        clientProductDetailRepository.saveAll(productDetailsUpdate);
+        clientOrderDetailRepository.saveAll(orderDetailsUpdate);
+
+        float totalMoney = totalMoneyOrderDetails(orderDetailsUpdate);
+        float shippingFee = calculateShippingFee(totalMoney, address);
+
+        orderUpdate.setShippingMoney(shippingFee);
+        orderUpdate.setOriginMoney(totalMoney);
+        orderUpdate.setEmail(orderRequest.getEmail());
+        orderUpdate.setType(OrderType.ONLINE);
+        orderUpdate.setFullName(orderRequest.getFullName());
+        orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
+        orderUpdate.setNote(orderRequest.getNote());
+        setOrderInfo(orderUpdate);
+        applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney());
+        Order order = clientOrderRepository.save(orderUpdate);
         Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
             OrderHistory orderHistory = new OrderHistory();
@@ -304,6 +275,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
         return clientOrderResponse;
     }
+
 
     // Revert lại số lượng ProductDetail khi xóa OrderDetail
     public void revertQuantityProductDetailWhenRemoveOrderDetail(List<OrderDetail> orderDetails) {
@@ -352,7 +324,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 ProductDetail productDetail = clientProductDetailRepository.findById(request.getId())
                         .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found"));
 
-                float price = maxMoneyPromotionInProductDetail(productDetail);
+                float promotionValue = getPromotionValueOfProductDetail(productDetail);
+                float price = productDetail.getPrice() - promotionValue;
                 total += price * request.getQuantity();
                 productDetail.setQuantity(productDetail.getQuantity() - request.getQuantity());
                 productDetails.add(productDetail);
@@ -457,7 +430,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
 
     // Tính phí ship
-    public float calculateShippingFee(Address address) {
+    public float calculateShippingFee(float totalMoney, Address address) {
+        if (totalMoney >= EntityProperties.IS_FREE_SHIPPING) { // kiểm tra free ship
+            return 0.0f;
+        }
         HttpHeaders headers = new HttpHeaders();
         headers.set("token", EntityProperties.VITE_GHN_USER_TOKEN);
         headers.set("shop_id", EntityProperties.VITE_GHN_SHOP_ID);
@@ -563,12 +539,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
                     .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
             if (productDetail != null) {
+                float promotionValue = getPromotionValueOfProductDetail(productDetail);
+                float price = productDetail.getPrice() - promotionValue;
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
                 orderDetail.setQuantity(clientCartItemRequest.getQuantity());
                 orderDetail.setOrder(order);
-                orderDetail.setPrice(maxMoneyPromotionInProductDetail(productDetail));
-                orderDetail.setTotalPrice(maxMoneyPromotionInProductDetail(productDetail) * orderDetail.getQuantity());
+                orderDetail.setPrice(price);
+                orderDetail.setTotalPrice(price * orderDetail.getQuantity());
                 orderDetails.add(orderDetail);
             }
         }
@@ -577,22 +555,21 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
                 .collect(Collectors.toList());
     }
+    
+    
 
     // Tính giá sản phẩm thấp nhất trong promotionProductDetail theo value của Promotion
-    private float maxMoneyPromotionInProductDetail(ProductDetail productDetail) {
-        float maxPrice = 0.0f;
+    private float getPromotionValueOfProductDetail(ProductDetail productDetail) {
+        float promotionValue = 0;
         List<PromotionProductDetail> promotionProductDetailsSet = productDetail.getPromotionProductDetails();
         if (promotionProductDetailsSet != null && !promotionProductDetailsSet.isEmpty()) {
             Optional<Float> maxMoneyPromotion = promotionProductDetailsSet.stream()
-                    .filter(ppd -> isValid(ppd))
-                    .map(ppd -> calculateMoneyPromotion(ppd))
+                    .filter(this::isValid)
+                    .map(this::calculateMoneyPromotion)
                     .max(Float::compare);
-
-            maxPrice = productDetail.getPrice() - maxMoneyPromotion.orElse(productDetail.getPrice());
-        } else {
-            maxPrice = productDetail.getPrice();
+            promotionValue = maxMoneyPromotion.orElse(productDetail.getPrice());
         }
-        return maxPrice;
+        return promotionValue;
     }
 
     @Override

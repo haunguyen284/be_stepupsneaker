@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.core.client.repository.order;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderDetailRequest;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.repository.order.OrderDetailRepository;
 import jakarta.transaction.Transactional;

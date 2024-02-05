@@ -195,27 +195,22 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             clientOrderServiceImpl.revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
             adminOrderDetailRepository.deleteAll(removeOrderDetails);
         }
-        float shippingFee;
+        float shippingFee = 0;
+        float totalMoney = totalCartItem(orderRequest.getCartItems());
         if (address != null) {
-            shippingFee = clientOrderServiceImpl.calculateShippingFee(address);
-        } else {
-            shippingFee = 0;
+            shippingFee = clientOrderServiceImpl.calculateShippingFee(totalMoney, address);
         }
-        float totalCart = totalCartItem(orderRequest.getCartItems());
-        if (totalCart >= EntityProperties.IS_FREE_SHIPPING) {
-            orderSave.setShippingMoney(0);
-        } else {
-            orderSave.setShippingMoney(shippingFee);
-        }
+        orderSave.setShippingMoney(shippingFee);
+
 //        createOrderDetails(orderSave, orderRequest);
-        orderSave.setOriginMoney(totalCart);
+        orderSave.setOriginMoney(totalMoney);
         orderSave.setEmail(orderRequest.getEmail());
         orderSave.setType(OrderType.ONLINE);
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
         setOrderInfo(orderSave);
-        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalCart, orderSave.getShippingMoney());
+        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
         Order order = adminOrderRepository.save(orderSave);
 //        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
 //        if (existingOrderHistoryOptional.isEmpty()) {
