@@ -35,7 +35,6 @@ public class ClientCartDetailController {
     @GetMapping("")
     public Object findAllCartDetail() {
         return ResponseHelper.getResponse(clientCartDetailService.findAll(), HttpStatus.OK);
-
     }
 
     @GetMapping("/{id}")
