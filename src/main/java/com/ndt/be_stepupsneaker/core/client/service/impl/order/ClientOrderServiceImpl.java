@@ -166,7 +166,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION);
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
         createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
@@ -257,15 +257,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         setOrderInfo(orderUpdate);
         applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney());
         Order order = clientOrderRepository.save(orderUpdate);
-        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
-        if (existingOrderHistoryOptional.isEmpty()) {
-            OrderHistory orderHistory = new OrderHistory();
-            orderHistory.setOrder(order);
-            orderHistory.setActionStatus(order.getStatus());
-            orderHistory.setNote(orderRequest.getOrderHistoryNote());
-            orderHistory.setActionDescription(order.getStatus().action_description);
-            clientOrderHistoryRepository.save(orderHistory);
-        }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, orderRequest.getEmail());
@@ -521,13 +512,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     // Tạo orderHistory
-    private List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus) {
+    private List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
         List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
         OrderHistory orderHistory = new OrderHistory();
         orderHistory.setOrder(order);
         orderHistory.setActionStatus(orderStatus);
-        orderHistory.setNote(order.getNote());
-        orderHistory.setActionDescription(orderStatus.action_description);
+        orderHistory.setNote(orderHistoryNote);
         clientOrderHistoryResponses.add(ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(clientOrderHistoryRepository.save(orderHistory)));
         return clientOrderHistoryResponses;
     }
@@ -600,7 +590,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
     @Override
-    public Boolean cancelOrder(String code) {
+    public Boolean cancelOrder(String code, String orderHistoryNote) {
         Optional<Order> orderOptional = clientOrderRepository.findByCode(code);
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
@@ -617,7 +607,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         revertQuantityProductDetail(order);
         order.setStatus(OrderStatus.CANCELED);
         Order newOrder = clientOrderRepository.save(order);
-        createOrderHistory(newOrder, OrderStatus.CANCELED);
+        createOrderHistory(newOrder, OrderStatus.CANCELED, orderHistoryNote);
 
         // Notification update order
         notificationOrder(newOrder, NotificationEmployeeType.ORDER_CHANGED);

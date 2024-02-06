@@ -16,10 +16,6 @@ public class AdminOrderHistoryResponse {
 
     private String id;
 
-    private AdminOrderNoOrderDetailResponse order;
-
-    private String actionDescription;
-
     private OrderStatus actionStatus;
 
     private String note;

@@ -69,8 +69,8 @@ public class ClientOrderController {
     }
 
     @PutMapping("/cancel/{code}")
-    public Object cancelOrder(@PathVariable("code") String code) {
-        return ResponseHelper.getResponse(clientOrderService.cancelOrder(code), HttpStatus.OK);
+    public Object cancelOrder(@PathVariable("code") String code, @RequestParam String orderHistoryNote) {
+        return ResponseHelper.getResponse(clientOrderService.cancelOrder(code, orderHistoryNote), HttpStatus.OK);
     }
 
 

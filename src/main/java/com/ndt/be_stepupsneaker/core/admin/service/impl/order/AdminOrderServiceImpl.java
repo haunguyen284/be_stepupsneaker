@@ -131,7 +131,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
         Order orderResult = adminOrderRepository.save(orderSave);
-        createOrderHistory(orderResult, OrderStatus.PENDING);
+        createOrderHistory(orderResult, OrderStatus.PENDING, orderRequest.getOrderHistoryNote());
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderResult);
     }
 
@@ -251,12 +251,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         } else {
             order.setDeleted(true);
             adminOrderRepository.save(order);
-
-            OrderHistory orderHistory = new OrderHistory();
-            orderHistory.setOrder(order);
-            orderHistory.setNote(order.getNote());
-            orderHistory.setActionDescription("Order is deleted");
-            adminOrderHistoryRepository.save(orderHistory);
         }
         return true;
     }
@@ -306,13 +300,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
         orderSave.setEmployee(employee);
-        if (orderSave.getStatus() == OrderStatus.CANCELED) {
-            Voucher voucher = orderSave.getVoucher();
+        Voucher voucher = orderSave.getVoucher();
+        if (orderSave.getStatus() == OrderStatus.CANCELED && voucher != null) {
             voucher.setQuantity(voucher.getQuantity() + 1);
             adminVoucherRepository.save(voucher);
         }
         Order newOrder = adminOrderRepository.save(orderSave);
-        createOrderHistory(newOrder, adminOrderRequest.getStatus());
+        createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, adminOrderResponse.getEmail());
@@ -329,13 +323,12 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         adminProductDetailRepository.saveAll(productDetails);
     }
 
-    private List<AdminOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus) {
+    private List<AdminOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
         List<AdminOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
         OrderHistory orderHistory = new OrderHistory();
         orderHistory.setOrder(order);
         orderHistory.setActionStatus(orderStatus);
-        orderHistory.setNote(order.getNote());
-        orderHistory.setActionDescription(orderStatus.action_description);
+        orderHistory.setNote(orderHistoryNote);
         clientOrderHistoryResponses.add(AdminOrderHistoryMapper.INSTANCE.orderHistoryToAdminOrderHistoryResponse(adminOrderHistoryRepository.save(orderHistory)));
         return clientOrderHistoryResponses;
     }
