@@ -11,11 +11,8 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStat
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderDetailMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentMethodRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
-import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
-import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
-import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.service.impl.order.ClientOrderServiceImpl;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
@@ -46,7 +43,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import org.aspectj.weaver.ast.Or;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +70,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final EmailService emailService;
     private final ClientOrderServiceImpl clientOrderServiceImpl;
+    private final AdminPaymentMethodRepository adminPaymentMethodRepository;
 
     @Autowired
     public AdminOrderServiceImpl(
@@ -85,7 +83,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminVoucherHistoryRepository adminVoucherHistoryRepository,
             PaginationUtil paginationUtil,
             MySessionInfo mySessionInfo, AdminOrderDetailRepository adminOrderDetailRepository,
-            AdminProductDetailRepository adminProductDetailRepository, EmailService emailService, ClientOrderServiceImpl clientOrderService, ClientOrderServiceImpl clientOrderServiceImpl) {
+            AdminProductDetailRepository adminProductDetailRepository, EmailService emailService, ClientOrderServiceImpl clientOrderService, ClientOrderServiceImpl clientOrderServiceImpl, AdminPaymentMethodRepository adminPaymentMethodRepository) {
         this.adminOrderRepository = adminOrderRepository;
         this.adminOrderHistoryRepository = adminOrderHistoryRepository;
         this.adminCustomerRepository = adminCustomerRepository;
@@ -99,6 +97,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         this.adminProductDetailRepository = adminProductDetailRepository;
         this.emailService = emailService;
         this.clientOrderServiceImpl = clientOrderServiceImpl;
+        this.adminPaymentMethodRepository = adminPaymentMethodRepository;
     }
 
     @Override
@@ -135,6 +134,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderResult);
     }
 
+    @Transactional
     @Override
     public AdminOrderResponse update(AdminOrderRequest orderRequest) {
         Order orderSave = getOrderById(orderRequest);
@@ -148,61 +148,60 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             address = saveAddress(orderSave, orderRequest);
 
         }
-        List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder(orderSave);
-        List<OrderDetail> newOrderDetails = new ArrayList<>();
-        List<OrderDetail> removeOrderDetails = new ArrayList<>();
-        List<ProductDetail> productDetails = new ArrayList<>();
-        int quantityInStock = 0;
-        if (orderRequest.getCartItems() != null) {
-            for (OrderDetail orderDetail : orderDetails) {
-                boolean found = false;
-                for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
-                    if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())
-                            && orderDetail.getQuantity() != cartItemRequest.getQuantity()) {
-                        if (cartItemRequest.getQuantity() > orderDetail.getProductDetail().getQuantity()) {
-                            throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
-                        }
-                        //
-                        ProductDetail productDetail = orderDetail.getProductDetail();
-                        if (cartItemRequest.getQuantity() > orderDetail.getQuantity()) {
-                            quantityInStock = cartItemRequest.getQuantity() - orderDetail.getQuantity();
-                            productDetail.setQuantity(productDetail.getQuantity() - quantityInStock);
-                        } else {
-                            quantityInStock = orderDetail.getQuantity() - cartItemRequest.getQuantity();
-                            productDetail.setQuantity(productDetail.getQuantity() + quantityInStock);
-                        }
-                        productDetails.add(productDetail);
-                        //
-                        orderDetail.setQuantity(cartItemRequest.getQuantity());
-                        orderDetail.setPrice(orderDetail.getProductDetail().getPrice());
-                        orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                        newOrderDetails.add(orderDetail);
-                    }
-                    if (orderDetail.getProductDetail().getId().equals(cartItemRequest.getId())) {
-                        found = true;
-                    }
-                }
-                if (!found) {
-                    removeOrderDetails.add(orderDetail);
-                }
+        List<OrderDetail> orderDetailsUpdate = new ArrayList<>();
+        List<ProductDetail> productDetailsUpdate = new ArrayList<>();
+        List<OrderDetail> orderDetailsRemove = new ArrayList<>();
+        for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+            Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(cartItemRequest.getId());
+            if (orderDetailOptional.isEmpty()) {
+                throw new ResourceNotFoundException("OrderDetail Not Found!");
+            }
+            OrderDetail orderDetailUpdate = orderDetailOptional.get();
+            ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
+            if (cartItemRequest.getQuantity() > productDetailUpdate.getQuantity()) {
+                throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+            }
+            int quantityChange = cartItemRequest.getQuantity() - orderDetailUpdate.getQuantity();
+            float promotionValue = clientOrderServiceImpl.getPromotionValueOfProductDetail(productDetailUpdate);
+            float newProductPrice = productDetailUpdate.getPrice() - promotionValue;
+            if (orderDetailUpdate.getPrice() != newProductPrice && quantityChange > 0) {
+                OrderDetail newOrderDetail = new OrderDetail();
+                newOrderDetail.setProductDetail(productDetailUpdate);
+                newOrderDetail.setQuantity(quantityChange);
+                newOrderDetail.setPrice(newProductPrice);
+                newOrderDetail.setTotalPrice(newProductPrice * quantityChange);
+                newOrderDetail.setOrder(orderSave);
+                orderDetailsUpdate.add(newOrderDetail);
+            } else {
+                orderDetailUpdate.setQuantity(cartItemRequest.getQuantity());
+                orderDetailUpdate.setTotalPrice(cartItemRequest.getQuantity() * orderDetailUpdate.getPrice());
+            }
+
+            orderDetailsUpdate.add(orderDetailUpdate);
+            productDetailUpdate.setQuantity(productDetailUpdate.getQuantity() - quantityChange);
+            productDetailsUpdate.add(productDetailUpdate);
+        }
+        List<String> cartItemIds = orderRequest.getCartItems().stream()
+                .map(AdminCartItemRequest::getId)
+                .collect(Collectors.toList());
+
+        for (OrderDetail orderDetail : orderSave.getOrderDetails()) {
+            if (!cartItemIds.contains(orderDetail.getId())) {
+                orderDetailsRemove.add(orderDetail);
+                orderDetailsUpdate.remove(orderDetail);
             }
         }
-        if (newOrderDetails != null) {
-            adminProductDetailRepository.saveAll(productDetails);
-            adminOrderDetailRepository.saveAll(newOrderDetails);
+        if (orderDetailsRemove.size() > 0) {
+            clientOrderServiceImpl.revertQuantityProductDetailWhenRemoveOrderDetail(orderDetailsRemove);
+            adminOrderDetailRepository.deleteAll(orderDetailsRemove);
         }
-        if (removeOrderDetails != null) {
-            clientOrderServiceImpl.revertQuantityProductDetailWhenRemoveOrderDetail(removeOrderDetails);
-            adminOrderDetailRepository.deleteAll(removeOrderDetails);
-        }
-        float shippingFee = 0;
-        float totalMoney = totalCartItem(orderRequest.getCartItems());
-        if (address != null) {
-            shippingFee = clientOrderServiceImpl.calculateShippingFee(totalMoney, address);
-        }
-        orderSave.setShippingMoney(shippingFee);
 
-//        createOrderDetails(orderSave, orderRequest);
+        adminProductDetailRepository.saveAll(productDetailsUpdate);
+        adminOrderDetailRepository.saveAll(orderDetailsUpdate);
+
+        float totalMoney = clientOrderServiceImpl.totalMoneyOrderDetails(orderDetailsUpdate);
+        float shippingFee = clientOrderServiceImpl.calculateShippingFee(totalMoney, address);
+        orderSave.setShippingMoney(shippingFee);
         orderSave.setOriginMoney(totalMoney);
         orderSave.setEmail(orderRequest.getEmail());
         orderSave.setType(OrderType.ONLINE);
@@ -246,6 +245,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Order order = orderOptional.get();
         if (order.getStatus() == OrderStatus.PENDING) {
+            if (order.getOrderDetails() != null) {
+                adminOrderDetailRepository.deleteAll(order.getOrderDetails());
+            }
             adminOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
             adminOrderRepository.delete(order);
         } else {
@@ -313,15 +315,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         return adminOrderResponse;
     }
 
-    public void revertQuantityProductDetail(Order order) {
-        List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder(order);
-        List<ProductDetail> productDetails = orderDetails.stream().map(orderDetail -> {
-            ProductDetail productDetail = orderDetail.getProductDetail();
-            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
-            return productDetail;
-        }).collect(Collectors.toList());
-        adminProductDetailRepository.saveAll(productDetails);
-    }
 
     private List<AdminOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
         List<AdminOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
@@ -351,13 +344,19 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
 
             if (orderRequest.getAddressShipping() != null) {
-                if (orderRequest.getAddressShipping().getProvinceName() != null) {
+                if (orderRequest.getAddressShipping().getProvinceName().equals("")) {
+                    address.setProvinceName(address.getProvinceName());
+                } else {
                     address.setProvinceName(orderRequest.getAddressShipping().getProvinceName());
                 }
-                if (orderRequest.getAddressShipping().getDistrictName() != null) {
+                if (orderRequest.getAddressShipping().getDistrictName().equals("")) {
+                    address.setDistrictName(address.getDistrictName());
+                } else {
                     address.setDistrictName(orderRequest.getAddressShipping().getDistrictName());
                 }
-                if (orderRequest.getAddressShipping().getWardName() != null) {
+                if (orderRequest.getAddressShipping().getWardName().equals("")) {
+                    address.setWardName(address.getWardName());
+                } else {
                     address.setWardName(orderRequest.getAddressShipping().getWardName());
                 }
                 address.setMore(orderRequest.getAddressShipping().getMore());

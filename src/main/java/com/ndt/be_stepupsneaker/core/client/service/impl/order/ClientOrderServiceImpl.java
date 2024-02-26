@@ -202,6 +202,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
         List<OrderDetail> orderDetailsUpdate = new ArrayList<>();
         List<ProductDetail> productDetailsUpdate = new ArrayList<>();
+        List<OrderDetail> orderDetailsRemove = new ArrayList<>();
 
         for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
             Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(cartItemRequest.getId());
@@ -236,9 +237,23 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             productDetailUpdate.setQuantity(productDetailUpdate.getQuantity() - quantityChange);
             productDetailsUpdate.add(productDetailUpdate);
 
+
         }
 
-        // đoạn code của duy
+        List<String> cartItemIds = orderRequest.getCartItems().stream()
+                .map(ClientCartItemRequest::getId)
+                .collect(Collectors.toList());
+
+        for (OrderDetail orderDetail : orderUpdate.getOrderDetails()) {
+            if (!cartItemIds.contains(orderDetail.getId())) {
+                orderDetailsRemove.add(orderDetail);
+                orderDetailsUpdate.remove(orderDetail);
+            }
+        }
+        if (orderDetailsRemove.size() > 0) {
+            revertQuantityProductDetailWhenRemoveOrderDetail(orderDetailsRemove);
+            clientOrderDetailRepository.deleteAll(orderDetailsRemove);
+        }
 
         clientProductDetailRepository.saveAll(productDetailsUpdate);
         clientOrderDetailRepository.saveAll(orderDetailsUpdate);
@@ -402,13 +417,19 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public Address saveAddress(Order order, ClientOrderRequest clientOrderRequest) {
         Address address = clientAddressRepository.findById(order.getAddress().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
-        if (clientOrderRequest.getAddressShipping().getProvinceName() != null || clientOrderRequest.getAddressShipping().getProvinceName().equals("")) {
+        if (clientOrderRequest.getAddressShipping().getProvinceName().equals("")) {
+            address.setProvinceName(address.getProvinceName());
+        } else {
             address.setProvinceName(clientOrderRequest.getAddressShipping().getProvinceName());
         }
-        if (clientOrderRequest.getAddressShipping().getDistrictName() != null || clientOrderRequest.getAddressShipping().getDistrictName().equals("")) {
+        if (clientOrderRequest.getAddressShipping().getDistrictName().equals("")) {
+            address.setDistrictName(address.getDistrictName());
+        } else {
             address.setDistrictName(clientOrderRequest.getAddressShipping().getDistrictName());
         }
-        if (clientOrderRequest.getAddressShipping().getWardName() != null || clientOrderRequest.getAddressShipping().getWardName().equals("")) {
+        if (clientOrderRequest.getAddressShipping().getWardName().equals("")) {
+            address.setWardName(address.getWardName());
+        } else {
             address.setWardName(clientOrderRequest.getAddressShipping().getWardName());
         }
         address.setMore(clientOrderRequest.getAddressShipping().getMore());
@@ -544,11 +565,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                 .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
                 .collect(Collectors.toList());
     }
-    
-    
+
 
     // Tính giá sản phẩm thấp nhất trong promotionProductDetail theo value của Promotion
-    private float getPromotionValueOfProductDetail(ProductDetail productDetail) {
+    public float getPromotionValueOfProductDetail(ProductDetail productDetail) {
         float promotionValue = 0;
         List<PromotionProductDetail> promotionProductDetailsSet = productDetail.getPromotionProductDetails();
         if (promotionProductDetailsSet != null && !promotionProductDetailsSet.isEmpty()) {
