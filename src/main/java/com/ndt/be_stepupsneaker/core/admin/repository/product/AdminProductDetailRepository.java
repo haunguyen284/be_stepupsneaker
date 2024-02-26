@@ -69,6 +69,7 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     Page<ProductDetail> findAllProductDetail(@Param("request") AdminProductDetailRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
 
+
     @Query("""
     SELECT x FROM ProductDetail x WHERE (
     x.product.id = :#{#request.product} 
