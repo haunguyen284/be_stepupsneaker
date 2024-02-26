@@ -19,6 +19,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,9 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     private PasswordEncoder passwordEncoder;
 
     private AdminEmployeeRepository adminEmployeeRepository;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public AdminCustomerServiceImpl(CloudinaryUpload cloudinaryUpload,
@@ -93,7 +97,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
-            throw new ApiException("Email" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
         customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
@@ -110,11 +114,11 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getId(), customerDTO.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
-            throw new ApiException("Email" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         customerOptional = adminCustomerRepository.findById(customerDTO.getId());
         if (customerOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
         Customer customer = customerOptional.get();
         customer.setFullName(customerDTO.getFullName());
@@ -131,7 +135,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public AdminCustomerResponse findById(String id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customerOptional.get());
     }
@@ -140,7 +144,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public Boolean delete(String id) {
         Optional<Customer> customerOptional = adminCustomerRepository.findById(id);
         if (customerOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
         Customer customer = customerOptional.get();
         customer.setDeleted(true);

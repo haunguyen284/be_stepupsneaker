@@ -36,7 +36,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         req -> req
-                                .requestMatchers("/error/**", "/auth/**", "/client/products/**",
+                                .requestMatchers("/", "/error/**", "/auth/**", "/client/products/**",
                                         "/client/product-details/**", "/admin/notifications/sse",
                                         "/client/transaction/**",
                                         "/admin/notifications/orders/sse")

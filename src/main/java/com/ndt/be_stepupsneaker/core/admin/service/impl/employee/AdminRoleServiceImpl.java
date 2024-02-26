@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class AdminRoleServiceImpl implements AdminRoleService {
 
     @Autowired
     private PaginationUtil paginationUtil;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Override
     public PageableObject<AdminRoleRsponse> findAllEntity(AdminRoleRequest roleRequest) {

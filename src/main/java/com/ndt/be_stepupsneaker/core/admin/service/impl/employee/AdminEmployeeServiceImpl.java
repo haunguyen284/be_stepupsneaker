@@ -16,6 +16,7 @@ import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,9 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     private final AdminCustomerRepository adminCustomerRepository;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminEmployeeResponse> findAllEntity(AdminEmployeeRequest employeeRequest) {
         Pageable pageable = paginationUtil.pageable(employeeRequest);
@@ -59,11 +63,11 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
         if (employeeOptional.isPresent() || customerOptional.isPresent()) {
-            throw new ApiException("Email is exist");
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         employeeOptional = adminEmployeeRepository.findByPhoneNumber(employeeDTO.getPhoneNumber());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("PhoneNumber is exist");
+            throw new ApiException(messageUtil.getMessage("address.phone.exist"));
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
         employeeDTO.setPassword(passwordEncoder.encode(passWordRandom));
@@ -79,16 +83,16 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getId(), employeeDTO.getEmail());
         if (employeeOptional.isPresent() || customerOptional.isPresent()) {
-            throw new ApiException("Email is exist");
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         employeeOptional = adminEmployeeRepository.findById(employeeDTO.getId());
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee not exist");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
 
         Optional<Role> roleOptional = adminRoleRepository.findById(employeeDTO.getRole());
         if (roleOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Role not exist");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.role.notfound"));
         }
         Employee employee = employeeOptional.get();
         employee.setPassword(employeeDTO.getPassword());
@@ -108,7 +112,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     public AdminEmployeeResponse findById(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee is not found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employeeOptional.get());
     }
@@ -117,7 +121,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     public Boolean delete(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee is not found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
         Employee employee = employeeOptional.get();
         employee.setDeleted(true);
