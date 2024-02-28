@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Size;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminSizeResponse> findAllEntity(AdminSizeRequest adminSizeRequest) {
 
@@ -38,7 +42,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     public Object create(AdminSizeRequest adminSizeRequest) {
         Optional<Size> optionalSize = adminSizeRepository.findByName(adminSizeRequest.getName());
         if (optionalSize.isPresent()) {
-            throw new ApiException("NAME IS EXIST !");
+            throw new ApiException(messageUtil.getMessage("product.size.name.exist"));
         }
 
         Size size = adminSizeRepository.save(AdminSizeMapper.INSTANCE.adminSizeRequestToSize(adminSizeRequest));
@@ -50,12 +54,12 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     public AdminSizeResponse update(AdminSizeRequest adminSizeRequest) {
         Optional<Size> optionalSize = adminSizeRepository.findByName(adminSizeRequest.getId(), adminSizeRequest.getName());
         if (optionalSize.isPresent()) {
-            throw new ApiException("NAME IS EXIST !");
+            throw new ApiException(messageUtil.getMessage("product.size.name.exist"));
         }
 
         optionalSize = adminSizeRepository.findById(adminSizeRequest.getId());
         if (optionalSize.isEmpty()) {
-            throw new ResourceNotFoundException("SIZE IS NOT EXIST !");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.size.notfound"));
         }
         Size newSize = optionalSize.get();
         newSize.setName(adminSizeRequest.getName());
@@ -67,7 +71,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     public AdminSizeResponse findById(String id) {
         Optional<Size> optionalSize = adminSizeRepository.findById(id);
         if (optionalSize.isEmpty()) {
-            throw new ResourceNotFoundException("SIZE IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.size.notfound"));
         }
         return AdminSizeMapper.INSTANCE.INSTANCE.sizeToAdminSizeResponse(optionalSize.get());
     }
@@ -76,7 +80,7 @@ public class AdminSizeServiceImpl implements AdminSizeService {
     public Boolean delete(String id) {
         Optional<Size> optionalSize = adminSizeRepository.findById(id);
         if (optionalSize.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER NOT FOUND :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.size.notfound"));
         }
         Size newSize = optionalSize.get();
         newSize.setDeleted(true);

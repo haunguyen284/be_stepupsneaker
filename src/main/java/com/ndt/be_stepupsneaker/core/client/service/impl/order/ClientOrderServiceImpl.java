@@ -57,6 +57,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.notification.NotificationEmployeeRepository;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -95,6 +96,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final MySessionInfo mySessionInfo;
     private final NotificationEmployeeRepository notificationEmployeeRepository;
     private final EmailService emailService;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public ClientOrderServiceImpl(ClientOrderRepository clientOrderRepository,
@@ -141,10 +145,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         Order orderSave = ClientOrderMapper.INSTANCE.clientOrderRequestToOrder(clientOrderRequest);
         for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
             if (productDetail != null) {
                 if (productDetail.getQuantity() < clientCartItemRequest.getQuantity()) {
-                    throw new ApiException("The quantity of products you purchased exceeds the quantity in stock : " + productDetail.getProduct().getName());
+                    throw new ApiException(messageUtil.getMessage("order.product.exceed"));
                 }
             }
         }
@@ -190,14 +194,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public ClientOrderResponse update(ClientOrderRequest orderRequest) {
         Optional<Order> orderOptional = clientOrderRepository.findById(orderRequest.getId());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DOES NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
 
         Order orderUpdate = orderOptional.get();
         Address address = saveAddress(orderUpdate, orderRequest);
 
         if (orderUpdate.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderUpdate.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-            throw new ApiException("Order cannot be updated while the status is being shipped or completed !");
+            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
         List<OrderDetail> orderDetailsUpdate = new ArrayList<>();
@@ -207,7 +211,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
             Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(cartItemRequest.getId());
             if (orderDetailOptional.isEmpty()) {
-                throw new ResourceNotFoundException(String.format("ORDER DETAIL %s DOES NOT EXIST", cartItemRequest.getId()));
+                throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
             }
 
             OrderDetail orderDetailUpdate = orderDetailOptional.get();
@@ -297,7 +301,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public ClientOrderResponse findById(String id) {
         Optional<Order> orderOptional = clientOrderRepository.findById(id);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
     }
@@ -327,7 +331,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         if (clientCartItemRequests != null) {
             for (ClientCartItemRequest request : clientCartItemRequests) {
                 ProductDetail productDetail = clientProductDetailRepository.findById(request.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found"));
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
 
                 float promotionValue = getPromotionValueOfProductDetail(productDetail);
                 float price = productDetail.getPrice() - promotionValue;
@@ -375,13 +379,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee) {
         if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = clientVoucherRepository.findById(voucherId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound")));
             if (voucher != null) {
                 if (voucher.getQuantity() < 1) {
-                    throw new ResourceNotFoundException("The previous voucher has expired!");
+                    throw new ResourceNotFoundException(messageUtil.getMessage("voucher.expired"));
                 }
                 if (voucher.getConstraint() > totalOrderPrice) {
-                    throw new ResourceNotFoundException("Your order is not eligible for the voucher!");
+                    throw new ResourceNotFoundException(messageUtil.getMessage("order.eligible_voucher"));
                 }
                 order.setVoucher(voucher);
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
@@ -416,7 +420,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     // Lưu địa chỉ
     public Address saveAddress(Order order, ClientOrderRequest clientOrderRequest) {
         Address address = clientAddressRepository.findById(order.getAddress().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("address.notfound")));
         if (clientOrderRequest.getAddressShipping().getProvinceName().equals("")) {
             address.setProvinceName(address.getProvinceName());
         } else {
@@ -501,7 +505,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private List<ClientPaymentResponse> createPayment(Order order, ClientOrderRequest orderRequest) {
         List<ClientPaymentResponse> clientPaymentResponses = new ArrayList<>();
         PaymentMethod paymentMethod = clientPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
-                .orElseThrow(() -> new ResourceNotFoundException("PaymentMethod" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setPaymentMethod(paymentMethod);
@@ -547,7 +551,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (ClientCartItemRequest clientCartItemRequest : clientOrderRequest.getCartItems()) {
             ProductDetail productDetail = clientProductDetailRepository.findById(clientCartItemRequest.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
             if (productDetail != null) {
                 float promotionValue = getPromotionValueOfProductDetail(productDetail);
                 float price = productDetail.getPrice() - promotionValue;
@@ -586,13 +590,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         if (customerId == null) {
             Optional<Order> orderOptional = clientOrderRepository.findById(orderId);
             if (orderOptional.isEmpty()) {
-                throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+                throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
             }
             return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
         }
         Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer_Id(orderId, customerId);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
     }
@@ -600,10 +604,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     @Override
     public ClientOrderResponse findByCode(String code) {
         Order order = clientOrderRepository.findByCode(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
 
         if (order.getStatus() == OrderStatus.COMPLETED) {
-            throw new ResourceNotFoundException("Order tracking is expired!");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.tracking.expired"));
         }
         return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
     }
@@ -612,11 +616,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     public Boolean cancelOrder(String code, String orderHistoryNote) {
         Optional<Order> orderOptional = clientOrderRepository.findByCode(code);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Order" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         Order order = orderOptional.get();
         if (order.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && order.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION) {
-            throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
+            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
         if (order.getVoucher() != null) {
             Voucher voucher = order.getVoucher();

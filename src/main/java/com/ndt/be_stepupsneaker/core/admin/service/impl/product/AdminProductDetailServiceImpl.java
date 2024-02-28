@@ -18,6 +18,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -67,6 +68,9 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
 
     @Autowired
     private PaginationUtil paginationUtil;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Override
     public PageableObject<AdminProductDetailResponse> findAllEntity(AdminProductDetailRequest brandRequest) {
@@ -126,7 +130,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public AdminProductDetailResponse update(AdminProductDetailRequest productDetailRequest) {
         Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findById(productDetailRequest.getId());
         if (productDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("PRODUCT DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
         }
 
         ProductDetail productDetailSave = productDetailOptional.get();
@@ -150,7 +154,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public AdminProductDetailResponse findById(String id) {
         Optional<ProductDetail> ProductDetailOptional = adminProductDetailRepository.findById(id);
         if (ProductDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("PRODUCT DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
         }
 
         return AdminProductDetailMapper.INSTANCE.productDetailToAdminProductDetailResponse(ProductDetailOptional.get());
@@ -160,7 +164,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public Boolean delete(String id) {
         Optional<ProductDetail> brandOptional = adminProductDetailRepository.findById(id);
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("PRODUCT DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
         }
         ProductDetail brand = brandOptional.get();
         brand.setDeleted(true);

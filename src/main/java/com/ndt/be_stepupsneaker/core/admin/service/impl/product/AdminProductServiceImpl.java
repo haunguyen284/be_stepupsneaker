@@ -12,6 +12,7 @@ import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ public class AdminProductServiceImpl implements AdminProductService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminProductResponse> findAllEntity(AdminProductRequest request) {
 
@@ -61,12 +65,12 @@ public class AdminProductServiceImpl implements AdminProductService {
     public Object create(AdminProductRequest productDTO) {
         Optional<Product> productOptional = adminProductRepository.findByName(productDTO.getName());
         if (productOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.name.exist"));
         }
 
         productOptional = adminProductRepository.findByCode(productDTO.getCode());
         if (productOptional.isPresent()){
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.code.exist"));
         }
         productDTO.setImage(cloudinaryUpload.upload(productDTO.getImage()));
 
@@ -80,16 +84,16 @@ public class AdminProductServiceImpl implements AdminProductService {
 
         Optional<Product> productOptional = adminProductRepository.findByName(productDTO.getId(), productDTO.getName());
         if (productOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.name.exist"));
         }
         productOptional = adminProductRepository.findByCode(productDTO.getId(), productDTO.getCode());
         if (productOptional.isPresent()){
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.code.exist"));
         }
 
         productOptional = adminProductRepository.findById(productDTO.getId());
         if (productOptional.isEmpty()){
-            throw new ResourceNotFoundException("Product IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.notfound"));
         }
 
         Product productSave = productOptional.get();
@@ -107,7 +111,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     public AdminProductResponse findById(String id) {
         Optional<Product> productOptional = adminProductRepository.findById(id);
         if (productOptional.isEmpty()){
-            throw new RuntimeException("LOOI");
+            throw new RuntimeException(messageUtil.getMessage("product.notfound"));
         }
 
         return AdminProductMapper.INSTANCE.productToAdminProductResponse(productOptional.get());
@@ -117,7 +121,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     public Boolean delete(String id) {
         Optional<Product> productOptional = adminProductRepository.findById(id);
         if (productOptional.isEmpty()){
-            throw new ResourceNotFoundException("Product NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.notfound"));
         }
         Product product = productOptional.get();
         product.setDeleted(true);

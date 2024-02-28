@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,6 +32,9 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     private CustomerVoucherRepository customerVoucherRepository;
     private ScheduledService scheduledService;
     private CloudinaryUpload cloudinaryUpload;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public ClientVoucherServiceImpl(ClientVoucherRepository ClientVoucherRepository,
@@ -64,7 +68,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     public ClientVoucherResponse findById(String id) {
         Optional<Voucher> optionalVoucher = ClientVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
 
         return ClientVoucherMapper.INSTANCE.voucherToClientVoucherResponse(optionalVoucher.get());
@@ -74,7 +78,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     public Boolean delete(String id) {
         Optional<Voucher> optionalVoucher = ClientVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER NOT FOUND :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setDeleted(true);
@@ -105,7 +109,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     public ClientVoucherResponse findByCode(String code) {
         Optional<Voucher> optionalVoucher = ClientVoucherRepository.findByCode(code);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER CODE DOES NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.code.exist"));
         }
 
         return ClientVoucherMapper.INSTANCE.voucherToClientVoucherResponse(optionalVoucher.get());

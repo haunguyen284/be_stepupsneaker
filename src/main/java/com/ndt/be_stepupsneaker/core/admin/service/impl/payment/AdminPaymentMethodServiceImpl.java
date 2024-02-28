@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,9 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
 
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final PaginationUtil paginationUtil;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public AdminPaymentMethodServiceImpl(AdminPaymentMethodRepository adminPaymentMethodRepository, PaginationUtil paginationUtil) {
@@ -41,7 +45,7 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     public Object create(AdminPaymentMethodRequest paymentMethodRequest) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findByName(paymentMethodRequest.getName());
         if(paymentMethodOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("payment.name.exist"));
         }
 
         PaymentMethod paymentMethod = adminPaymentMethodRepository.save(AdminPaymentMethodMapper.INSTANCE.adminPaymentMethodRequestToPaymentMethod(paymentMethodRequest));
@@ -52,12 +56,12 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     public AdminPaymentMethodResponse update(AdminPaymentMethodRequest paymentMethodRequest) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findByName(paymentMethodRequest.getId(), paymentMethodRequest.getName());
         if(paymentMethodOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("payment.name.exist"));
         }
 
         paymentMethodOptional = adminPaymentMethodRepository.findById(paymentMethodRequest.getId());
         if(paymentMethodOptional.isEmpty()){
-            throw new ResourceNotFoundException("PAYMENT METHOD IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
         }
         PaymentMethod paymentMethodSave = paymentMethodOptional.get();
         paymentMethodSave.setName(paymentMethodRequest.getName());
@@ -68,7 +72,7 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     public AdminPaymentMethodResponse findById(String id) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(id);
         if(paymentMethodOptional.isEmpty()){
-            throw new ApiException("PAYMENT METHOD IS NOT EXIST");
+            throw new ApiException(messageUtil.getMessage("payment.method.notfound"));
         }
 
         return AdminPaymentMethodMapper.INSTANCE.paymentToAdminPaymentMethodResponse(paymentMethodOptional.get());
@@ -78,7 +82,7 @@ public class AdminPaymentMethodServiceImpl implements AdminPaymentMethodService 
     public Boolean delete(String id) {
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(id);
         if(paymentMethodOptional.isEmpty()){
-            throw new ApiException("PAYMENT METHOD IS NOT EXIST");
+            throw new ApiException(messageUtil.getMessage("payment.method.notfound"));
         }
 //        PaymentMethod paymentMethod = paymentMethodOptional.get();
 //        paymentMethod.setDeleted(true);

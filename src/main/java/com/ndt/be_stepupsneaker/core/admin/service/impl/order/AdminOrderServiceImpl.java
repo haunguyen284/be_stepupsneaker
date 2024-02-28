@@ -42,6 +42,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final EmailService emailService;
     private final ClientOrderServiceImpl clientOrderServiceImpl;
+
+    @Autowired
+    private MessageUtil messageUtil;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
 
     @Autowired
@@ -112,7 +116,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public Object create(AdminOrderRequest orderRequest) {
         Integer pendingOrder = adminOrderRepository.countAllByStatus(OrderStatus.PENDING);
         if (pendingOrder > EntityProperties.LENGTH_PENDING_ORDER) {
-            throw new ApiException("YOU CAN ONLY CREATE 5 PENDING ORDERS AT MAX");
+            throw new ApiException(messageUtil.getMessage("order.create_max"));
         }
 
         orderRequest.setType(OrderType.OFFLINE);
@@ -127,7 +131,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderSave.setAddress(null);
         }
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
         orderSave.setEmployee(employee);
         Order orderResult = adminOrderRepository.save(orderSave);
         createOrderHistory(orderResult, OrderStatus.PENDING, orderRequest.getOrderHistoryNote());
@@ -139,7 +143,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public AdminOrderResponse update(AdminOrderRequest orderRequest) {
         Order orderSave = getOrderById(orderRequest);
         if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION && orderSave.getStatus() != OrderStatus.PENDING) {
-            throw new ApiException("Orders cannot be updated while the status is being shipped or completed !");
+            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
         Address address = null;
         if (orderRequest.getAddressShipping() == null) {
@@ -154,12 +158,12 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
             Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(cartItemRequest.getId());
             if (orderDetailOptional.isEmpty()) {
-                throw new ResourceNotFoundException("OrderDetail Not Found!");
+                throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
             }
             OrderDetail orderDetailUpdate = orderDetailOptional.get();
             ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
             if (cartItemRequest.getQuantity() > productDetailUpdate.getQuantity()) {
-                throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
             }
             int quantityChange = cartItemRequest.getQuantity() - orderDetailUpdate.getQuantity();
             float promotionValue = clientOrderServiceImpl.getPromotionValueOfProductDetail(productDetailUpdate);
@@ -232,7 +236,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public AdminOrderResponse findById(String id) {
         Optional<Order> orderOptional = adminOrderRepository.findById(id);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderOptional.get());
     }
@@ -241,7 +245,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public Boolean delete(String id) {
         Optional<Order> orderOptional = adminOrderRepository.findById(id);
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         Order order = orderOptional.get();
         if (order.getStatus() == OrderStatus.PENDING) {
@@ -285,22 +289,22 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest) {
         Optional<Order> orderOptional = adminOrderRepository.findById(adminOrderRequest.getId());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Order not found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         Order orderSave = orderOptional.get();
         if (orderSave.getStatus() == OrderStatus.COMPLETED) {
-            throw new ApiException("Your order is in completed status!");
+            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
         if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY &&
                 orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION &&
                 orderSave.getStatus() != OrderStatus.DELIVERING) {
-            throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
+            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
         orderSave.setStatus(adminOrderRequest.getStatus());
         Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
         orderSave.setEmployee(employee);
         Voucher voucher = orderSave.getVoucher();
         if (orderSave.getStatus() == OrderStatus.CANCELED && voucher != null) {
@@ -329,7 +333,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private Order getOrderById(AdminOrderRequest orderRequest) {
         Optional<Order> orderOptional = adminOrderRepository.findById(orderRequest.getId());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER" + EntityProperties.NOT_EXIST);
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
 
         return orderOptional.get();
@@ -341,7 +345,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             return null;
         } else {
             Address address = adminAddressRepository.findById(order.getAddress().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Address" + EntityProperties.NOT_FOUND));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("address.notfound")));
 
             if (orderRequest.getAddressShipping() != null) {
                 if (orderRequest.getAddressShipping().getProvinceName().equals("")) {
@@ -376,7 +380,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (adminCartItemRequests != null) {
             for (AdminCartItemRequest request : adminCartItemRequests) {
                 ProductDetail productDetail = adminProductDetailRepository.findById(request.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found"));
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
                 float price = productDetail.getPrice();
                 total += price * request.getQuantity();
                 productDetail.setQuantity(productDetail.getQuantity() - request.getQuantity());
@@ -392,7 +396,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (AdminCartItemRequest clientCartItemRequest : adminOrderRequest.getCartItems()) {
             ProductDetail productDetail = adminProductDetailRepository.findById(clientCartItemRequest.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
             if (productDetail != null) {
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setProductDetail(productDetail);
@@ -419,10 +423,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
             if (employeeResponse != null) {
                 Employee employee = adminEmployeeRepository.findById(employeeResponse.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Employee" + EntityProperties.NOT_FOUND));
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
                 order.setEmployee(employee);
             } else {
-                throw new ResourceNotFoundException("Please! Login!");
+                throw new ResourceNotFoundException(messageUtil.getMessage("error.not_login"));
             }
         }
     }
