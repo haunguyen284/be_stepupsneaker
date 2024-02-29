@@ -292,9 +292,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ApiException("Your order is in completed status!");
         }
 
-        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY &&
-                orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION &&
-                orderSave.getStatus() != OrderStatus.DELIVERING) {
+        if (orderSave.getStatus() == OrderStatus.WAIT_FOR_DELIVERY &&
+                orderSave.getStatus() == OrderStatus.WAIT_FOR_CONFIRMATION &&
+                orderSave.getStatus() == OrderStatus.DELIVERING) {
             throw new ApiException("Orders cannot be cancel while the status is being shipped or completed !");
         }
 
