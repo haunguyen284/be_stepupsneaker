@@ -17,6 +17,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,9 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     private PaginationUtil paginationUtil;
     private AdminProductDetailRepository adminProductDetailRepository;
     private AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public AdminPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
@@ -69,7 +73,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public Object create(AdminPromotionRequest request) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findByCode(request.getCode());
         if (promotionOptional.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("promotion.code.exist"));
         }
         request.setImage(cloudinaryUpload.upload(request.getImage()));
         Promotion promotion = adminPromotionRepository.save(AdminPromotionMapper.INSTANCE.adminPromotionRequestToPromotion(request));
@@ -82,12 +86,12 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse update(AdminPromotionRequest request) {
         Optional<Promotion> optionalPromotion = adminPromotionRepository.findByCode(request.getId(), request.getCode());
         if (optionalPromotion.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("promotion.code.exist"));
         }
 
         optionalPromotion = adminPromotionRepository.findById(request.getId());
         if (optionalPromotion.isEmpty()) {
-            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
         Promotion newPromotion = optionalPromotion.get();
         newPromotion.setName(request.getName());
@@ -105,7 +109,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse findById(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
 
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotionOptional.get());
@@ -115,7 +119,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public Boolean delete(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
         Promotion newPromotion = promotionOptional.get();
         newPromotion.setDeleted(true);
@@ -125,7 +129,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
 
     public void productDetailsInPromotion(Promotion model, List<String> productDetailIds) {
         Promotion promotion = adminPromotionRepository.findById(model.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("PROMOTION" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound")));
         if (promotion.getPromotionProductDetailList() == null) {
             promotion.setPromotionProductDetailList(new ArrayList<>());
         }

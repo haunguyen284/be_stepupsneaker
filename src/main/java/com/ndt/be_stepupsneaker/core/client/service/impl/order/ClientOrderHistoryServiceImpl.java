@@ -8,6 +8,7 @@ import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderHistoryServ
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,9 @@ public class ClientOrderHistoryServiceImpl implements ClientOrderHistoryService 
     private final PaginationUtil paginationUtil;
 
     @Autowired
+    private MessageUtil messageUtil;
+
+    @Autowired
     public ClientOrderHistoryServiceImpl(
             ClientOrderHistoryRepository clientOrderHistoryRepository,
             PaginationUtil paginationUtil
@@ -35,7 +39,7 @@ public class ClientOrderHistoryServiceImpl implements ClientOrderHistoryService 
     public PageableObject<ClientOrderHistoryResponse> findAllEntity(ClientOrderHistoryRequest orderHistoryRequest) {
         Pageable pageable = paginationUtil.pageable(orderHistoryRequest);
         if (orderHistoryRequest.getOrder() == null) {
-            throw new ResourceNotFoundException("Order Not Found !");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_history.notfound"));
         }
         Page<OrderHistory> resp = clientOrderHistoryRepository.findAllOrderHistory(orderHistoryRequest, pageable);
         Page<ClientOrderHistoryResponse> clientOrderHistoryResponses = resp.map(ClientOrderHistoryMapper.INSTANCE::orderHistoryToClientOrderHistoryResponse);
@@ -56,7 +60,7 @@ public class ClientOrderHistoryServiceImpl implements ClientOrderHistoryService 
     public ClientOrderHistoryResponse findById(String id) {
         Optional<OrderHistory> orderHistory = clientOrderHistoryRepository.findById(id);
         if (orderHistory.isEmpty()) {
-            throw new RuntimeException("ORDER HISTORY IS NOT EXIST");
+            throw new RuntimeException(messageUtil.getMessage("order.order_history.notfound"));
         }
         return ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(orderHistory.get());
     }

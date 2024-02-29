@@ -16,8 +16,10 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,9 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     private final PaginationUtil paginationUtil;
     private final MySessionInfo mySessionInfo;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<ClientCartDetailResponse> findAllEntity(ClientCartDetailRequest request) {
         Pageable pageable = paginationUtil.pageable(request);
@@ -54,10 +59,10 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
         Cart thisSessionCart = cart();
 
         if (request.getQuantity() > 5) {
-            throw new ApiException("You can only add a maximum of 5 products to your cart!");
+            throw new ApiException(messageUtil.getMessage("cart.quantity.max"));
         }
         ProductDetail productDetail = adminProductDetailRepository.findById(request.getProductDetail())
-                .orElseThrow(() -> new ResourceNotFoundException("Product Detail not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
 
         int requestedQuantity = request.getQuantity();
         int availableQuantity = productDetail.getQuantity();
@@ -91,7 +96,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     public ClientCartDetailResponse findById(String id) {
         CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(id, cart());
         if (cartDetail == null) {
-            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("cart.cart_detail.notfound"));
         }
         return ClientCartDetailMapper.INSTANCE.cartDetailToClientCartDetailResponse(cartDetail);
     }
@@ -150,16 +155,16 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
         CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(), thisSessionCart);
 
         if (cartDetail == null) {
-            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("cart.cart_detail.notfound"));
         }
 
         ProductDetail productDetail = adminProductDetailRepository.findById(request.getProductDetail())
-                .orElseThrow(() -> new ResourceNotFoundException("Product Detail not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
 
         int requestedQuantity = request.getQuantity();
         int availableQuantity = productDetail.getQuantity();
         if (requestedQuantity > 5) {
-            throw new ApiException("You can only add a maximum of 5 products to your cart!");
+            throw new ApiException(messageUtil.getMessage("cart.quantity.max"));
         }
 
         validateRequestedQuantity(requestedQuantity, availableQuantity);
@@ -177,7 +182,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
         CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(request.getId(), thisSessionCart);
 
         if (cartDetail == null) {
-            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("cart.cart_detail.notfound"));
         }
 
         if (request.getQuantity() == 1) {
@@ -197,7 +202,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
         CartDetail cartDetail = clientCartDetailRepository.findByIdAndCart(id, thisSessionCart);
 
         if (cartDetail == null) {
-            throw new ResourceNotFoundException("Cart Detail" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("cart.cart_detail.notfound"));
         }
 
         clientCartDetailRepository.delete(cartDetail);
@@ -241,13 +246,13 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
 
     private void validateRequestedQuantity(int requestedQuantity, int availableQuantity) {
         if (requestedQuantity > availableQuantity) {
-            throw new ApiException("The requested quantity exceeds the available stock for the product!");
+            throw new ApiException(messageUtil.getMessage("cart.quantity.exceed"));
         }
     }
 
     private Cart cart() {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         return clientCartRepository.findById(customerResponse.getCart().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Cart" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("cart.cart_detail.notfound")));
     }
 }

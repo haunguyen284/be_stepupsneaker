@@ -14,6 +14,7 @@ import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,6 +31,9 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final PaginationUtil paginationUtil;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public AdminOrderDetailServiceImpl(
@@ -65,10 +69,10 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(orderDetailRequest.getId());
         Optional<Order> orderOptional = adminOrderRepository.findById(orderDetailRequest.getOrder());
         if (orderDetailOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
 
         OrderDetail orderDetail = orderDetailOptional.get();
@@ -77,7 +81,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
         orderDetail.setProductDetail(adminProductDetailRepository.findById(orderDetailRequest.getProductDetail()).orElse(null));
         ProductDetail productDetail = orderDetail.getProductDetail();
         if (productDetail.getQuantity() < orderDetail.getQuantity()) {
-            throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+            throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
         }
         if (orderDetailRequest.getQuantity() > orderDetail.getQuantity()) {
             totalQuantity = orderDetailRequest.getQuantity() - orderDetail.getQuantity();
@@ -101,15 +105,15 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
         for (AdminOrderDetailRequest orderDetailRequest : orderDetailRequests) {
             List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderDetailRequest.getOrder());
             ProductDetail productDetail = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail" + EntityProperties.NOT_FOUND));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
             if (orderDetailRequest.getQuantity() > productDetail.getQuantity()) {
-                throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
             }
             for (OrderDetail detail : orderDetails) {
                 if (detail.getProductDetail().getId() == productDetail.getId()) {
                     int totalQuantity = detail.getQuantity() + orderDetailRequest.getQuantity();
                     if (detail.getProductDetail().getQuantity() < totalQuantity) {
-                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                        throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
                     }
                     detail.setQuantity(totalQuantity);
                     detail.setTotalPrice(detail.getQuantity() * detail.getProductDetail().getPrice());
@@ -146,7 +150,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     public AdminOrderDetailResponse findById(String id) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(id);
         if (orderDetailOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
 
         return AdminOrderDetailMapper.INSTANCE.orderDetailToAdminOrderDetailResponse(orderDetailOptional.get());
@@ -156,7 +160,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     public Boolean delete(String id) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(id);
         if (orderDetailOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
         OrderDetail orderDetail = orderDetailOptional.get();
         ProductDetail productDetail = orderDetail.getProductDetail();

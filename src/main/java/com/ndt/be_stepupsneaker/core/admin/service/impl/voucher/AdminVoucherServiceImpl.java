@@ -14,6 +14,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,6 +34,9 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     private CustomerVoucherRepository customerVoucherRepository;
     private ScheduledService scheduledService;
     private CloudinaryUpload cloudinaryUpload;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public AdminVoucherServiceImpl(AdminVoucherRepository adminVoucherRepository,
@@ -56,11 +60,11 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public Object create(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("voucher.code.exist"));
         }
         if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
             if (voucherRequest.getValue() > 70){
-                throw new ApiException("Value exceeds the allowable percentage!");
+                throw new ApiException(messageUtil.getMessage("voucher.value.max"));
             }
         }
         voucherRequest.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
@@ -73,12 +77,12 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public AdminVoucherResponse update(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getId(), voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("voucher.code.exist"));
         }
 
         optionalVoucher = adminVoucherRepository.findById(voucherRequest.getId());
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setName(voucherRequest.getName());
@@ -92,7 +96,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         newVoucher.setType(voucherRequest.getType());
         if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
             if (voucherRequest.getValue() > 50){
-                throw new ApiException("Value exceeds the allowable percentage!");
+                throw new ApiException(messageUtil.getMessage("voucher.value.max"));
             }
         }
         newVoucher.setValue(voucherRequest.getValue());
@@ -103,7 +107,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public AdminVoucherResponse findById(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
 
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(optionalVoucher.get());
@@ -113,7 +117,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public Boolean delete(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setDeleted(true);

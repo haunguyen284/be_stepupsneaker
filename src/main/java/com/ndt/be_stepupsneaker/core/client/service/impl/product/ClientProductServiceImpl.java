@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductRepo
 import com.ndt.be_stepupsneaker.core.client.service.product.ClientProductService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Product;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,9 @@ public class ClientProductServiceImpl implements ClientProductService {
 
     @Autowired
     private ClientProductRepository clientProductRepository;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Override
     public PageableObject<ClientProductResponse> findAllEntity(ClientProductRequest request) {
@@ -49,7 +53,7 @@ public class ClientProductServiceImpl implements ClientProductService {
     public ClientProductResponse findById(String id) {
         Optional<Product> productOptional = clientProductRepository.findById(id);
         if (productOptional.isEmpty()){
-            throw new RuntimeException("NOT FOUND");
+            throw new RuntimeException(messageUtil.getMessage("product.notfound"));
         }
 
         return ClientProductMapper.INSTANCE.productToClientProductResponse(productOptional.get());

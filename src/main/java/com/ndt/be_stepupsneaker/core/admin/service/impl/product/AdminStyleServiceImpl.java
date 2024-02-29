@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Style;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,9 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminStyleResponse> findAllEntity(AdminStyleRequest soleRequest) {
 
@@ -39,7 +43,7 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     public Object create(AdminStyleRequest soleRequest) {
         Optional<Style> brandOptional = adminStyleRepository.findByName(soleRequest.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.style.name.exist"));
         }
         Style sole = adminStyleRepository.save(AdminStyleMapper.INSTANCE.adminStyleRequestToStyle(soleRequest));
 
@@ -50,12 +54,12 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     public AdminStyleResponse update(AdminStyleRequest soleRequest) {
         Optional<Style> brandOptional = adminStyleRepository.findByName(soleRequest.getId(), soleRequest.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.style.name.exist"));
         }
 
         brandOptional = adminStyleRepository.findById(soleRequest.getId());
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("Style IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.style.notfound"));
         }
         Style soleSave = brandOptional.get();
         soleSave.setName(soleRequest.getName());
@@ -67,7 +71,7 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     public AdminStyleResponse findById(String id) {
         Optional<Style> soleOptional = adminStyleRepository.findById(id);
         if (soleOptional.isEmpty()){
-            throw new ResourceNotFoundException("MATERIAL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.style.notfound"));
         }
 
         return AdminStyleMapper.INSTANCE.colorToAdminStyleResponse(soleOptional.get());
@@ -77,7 +81,7 @@ public class AdminStyleServiceImpl implements AdminStyleService {
     public Boolean delete(String id) {
         Optional<Style> soleOptional = adminStyleRepository.findById(id);
         if (soleOptional.isEmpty()){
-            throw new ResourceNotFoundException("MATERIAL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.style.notfound"));
         }
         Style sole = soleOptional.get();
         sole.setDeleted(true);

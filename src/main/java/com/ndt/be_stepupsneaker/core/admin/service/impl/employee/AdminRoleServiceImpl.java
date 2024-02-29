@@ -43,7 +43,7 @@ public class AdminRoleServiceImpl implements AdminRoleService {
     public Object create(AdminRoleRequest roleDTO) {
         Optional<Role> optionalRole = adminRoleRepository.findByName(roleDTO.getName());
         if (optionalRole.isPresent()){
-            throw new ApiException("Role name is exist");
+            throw new ApiException(messageUtil.getMessage("employee.role.exist"));
         }
 
         Role role = adminRoleRepository.save(AdminRoleMapper.INSTANCE.adminRoleRequestToRole(roleDTO));
@@ -54,11 +54,11 @@ public class AdminRoleServiceImpl implements AdminRoleService {
     public AdminRoleRsponse update(AdminRoleRequest roleDTO) {
         Optional<Role> optionalRole = adminRoleRepository.findByName(roleDTO.getName());
         if (optionalRole.isPresent()){
-            throw new ApiException("Role name is exist");
+            throw new ApiException(messageUtil.getMessage("employee.role.exist"));
         }
         optionalRole = adminRoleRepository.findById(roleDTO.getId());
         if (optionalRole.isEmpty()){
-            throw new ResourceNotFoundException("Role is nt exist");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.role.notfound"));
         }
         Role role = optionalRole.get();
         role.setName(roleDTO.getName());
@@ -69,7 +69,7 @@ public class AdminRoleServiceImpl implements AdminRoleService {
     public AdminRoleRsponse findById(String id) {
         Optional<Role> optionalRole = adminRoleRepository.findById(id);
         if (optionalRole.isEmpty()){
-            throw  new RuntimeException("LOOI");
+            throw  new RuntimeException(messageUtil.getMessage("employee.role.notfound"));
 
         }
         return AdminRoleMapper.INSTANCE.roleToAdminRoleResponse(optionalRole.get());
@@ -79,7 +79,7 @@ public class AdminRoleServiceImpl implements AdminRoleService {
     public Boolean delete(String id) {
         Optional<Role> optionalRole = adminRoleRepository.findById(id);
         if (optionalRole.isEmpty()){
-            throw  new RuntimeException("Role is not exist");
+            throw  new RuntimeException(messageUtil.getMessage("employee.role.notfound"));
         }
         Role role = optionalRole.get();
         role.setDeleted(true);

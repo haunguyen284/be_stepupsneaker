@@ -16,11 +16,13 @@ import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.VNPayUtil;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -38,6 +40,9 @@ public class VNPayServiceImpl implements VNPayService {
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientVoucherRepository clientVoucherRepository;
     private final EmailService emailService;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Override
     public String createOrder(int total, String orderInfor) {
@@ -153,11 +158,11 @@ public class VNPayServiceImpl implements VNPayService {
         transactionInfo.setTotalPrice(request.getParameter("vnp_Amount"));
         Optional<Order> orderOptional = clientOrderRepository.findById(transactionInfo.getOrderInfo());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Order Not Found!");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         if (result == 1) {
             PaymentMethod paymentMethod = clientPaymentMethodRepository.findByName("Card")
-                    .orElseThrow(() -> new ResourceNotFoundException("Payment Method Not Found !"));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
             Payment payment = new Payment();
             payment.setOrder(orderOptional.get());
             payment.setPaymentMethod(paymentMethod);
@@ -173,7 +178,7 @@ public class VNPayServiceImpl implements VNPayService {
         } else {
             for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {
                 ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("ProductDetail Not Found !"));
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
                 productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
                 clientProductDetailRepository.save(productDetail);
             }

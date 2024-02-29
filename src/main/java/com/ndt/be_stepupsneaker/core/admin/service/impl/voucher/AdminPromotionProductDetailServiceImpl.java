@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,9 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     private PaginationUtil paginationUtil;
     private AdminCustomerRepository adminCustomerRepository;
     private AdminVoucherRepository adminVoucherRepository;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public AdminPromotionProductDetailServiceImpl(AdminPromotionProductDetailRepository adminPromotionProductDetailRepository,
@@ -56,7 +60,7 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     public AdminPromotionProductDetailResponse findById(String id) {
         Optional<PromotionProductDetail> optionalPromotionProductDetail = adminPromotionProductDetailRepository.findById(id);
         if (optionalPromotionProductDetail.isEmpty()) {
-            throw new ResourceNotFoundException("PromotionProductDetail IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.product.notfound"));
         }
         return AdminPromotionProductDetailMapper.INSTANCE.promotionProductDetailToAdminPromotionProductDetailResponse(optionalPromotionProductDetail.get());
     }
@@ -65,7 +69,7 @@ public class AdminPromotionProductDetailServiceImpl implements AdminPromotionPro
     public Boolean delete(String id) {
         Optional<PromotionProductDetail> optionalPromotionProductDetail = adminPromotionProductDetailRepository.findById(id);
         if (optionalPromotionProductDetail.isEmpty()) {
-            throw new ResourceNotFoundException("PromotionProductDetail NOT FOUND :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.product.notfound"));
         }
         PromotionProductDetail newPromotionProductDetail = optionalPromotionProductDetail.get();
         newPromotionProductDetail.setDeleted(true);

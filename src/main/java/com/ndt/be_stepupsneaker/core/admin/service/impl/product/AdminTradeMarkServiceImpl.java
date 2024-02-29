@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.TradeMark;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,63 +26,66 @@ public class AdminTradeMarkServiceImpl implements AdminTradeMarkService {
 
     @Autowired
     private PaginationUtil paginationUtil;
+    
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Override
-    public PageableObject<AdminTradeMarkResponse> findAllEntity(AdminTradeMarkRequest soleRequest) {
+    public PageableObject<AdminTradeMarkResponse> findAllEntity(AdminTradeMarkRequest tradeMarkRequest) {
 
-        Pageable pageable = paginationUtil.pageable(soleRequest);
-        Page<TradeMark> resp = adminTradeMarkRepository.findAllTradeMark(soleRequest, soleRequest.getStatus(), pageable);
+        Pageable pageable = paginationUtil.pageable(tradeMarkRequest);
+        Page<TradeMark> resp = adminTradeMarkRepository.findAllTradeMark(tradeMarkRequest, tradeMarkRequest.getStatus(), pageable);
         Page<AdminTradeMarkResponse> adminTradeMarkResponses = resp.map(AdminTradeMarkMapper.INSTANCE::colorToAdminTradeMarkResponse);
         return new PageableObject<>(adminTradeMarkResponses);
     }
 
     @Override
-    public Object create(AdminTradeMarkRequest soleRequest) {
-        Optional<TradeMark> brandOptional = adminTradeMarkRepository.findByName(soleRequest.getName());
+    public Object create(AdminTradeMarkRequest tradeMarkRequest) {
+        Optional<TradeMark> brandOptional = adminTradeMarkRepository.findByName(tradeMarkRequest.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.trade_mark.name.exist"));
         }
-        TradeMark sole = adminTradeMarkRepository.save(AdminTradeMarkMapper.INSTANCE.adminTradeMarkRequestToTradeMark(soleRequest));
+        TradeMark tradeMark = adminTradeMarkRepository.save(AdminTradeMarkMapper.INSTANCE.adminTradeMarkRequestToTradeMark(tradeMarkRequest));
 
-        return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(sole);
+        return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(tradeMark);
     }
 
     @Override
-    public AdminTradeMarkResponse update(AdminTradeMarkRequest soleRequest) {
-        Optional<TradeMark> brandOptional = adminTradeMarkRepository.findByName(soleRequest.getId(), soleRequest.getName());
+    public AdminTradeMarkResponse update(AdminTradeMarkRequest tradeMarkRequest) {
+        Optional<TradeMark> brandOptional = adminTradeMarkRepository.findByName(tradeMarkRequest.getId(), tradeMarkRequest.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.trade_mark.name.exist"));
         }
 
-        brandOptional = adminTradeMarkRepository.findById(soleRequest.getId());
+        brandOptional = adminTradeMarkRepository.findById(tradeMarkRequest.getId());
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("TRADEMARK IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.trade_mark.notfound"));
         }
-        TradeMark soleSave = brandOptional.get();
-        soleSave.setName(soleRequest.getName());
-        soleSave.setStatus(soleRequest.getStatus());
-        return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(adminTradeMarkRepository.save(soleSave));
+        TradeMark tradeMarkSave = brandOptional.get();
+        tradeMarkSave.setName(tradeMarkRequest.getName());
+        tradeMarkSave.setStatus(tradeMarkRequest.getStatus());
+        return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(adminTradeMarkRepository.save(tradeMarkSave));
     }
 
     @Override
     public AdminTradeMarkResponse findById(String id) {
-        Optional<TradeMark> soleOptional = adminTradeMarkRepository.findById(id);
-        if (soleOptional.isEmpty()){
-            throw new ResourceNotFoundException("TRADEMARK IS NOT EXIST");
+        Optional<TradeMark> tradeMarkOptional = adminTradeMarkRepository.findById(id);
+        if (tradeMarkOptional.isEmpty()){
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.trade_mark.notfound"));
         }
 
-        return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(soleOptional.get());
+        return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(tradeMarkOptional.get());
     }
 
     @Override
     public Boolean delete(String id) {
-        Optional<TradeMark> soleOptional = adminTradeMarkRepository.findById(id);
-        if (soleOptional.isEmpty()){
-            throw new ResourceNotFoundException("TRADEMARK NOT FOUND");
+        Optional<TradeMark> tradeMarkOptional = adminTradeMarkRepository.findById(id);
+        if (tradeMarkOptional.isEmpty()){
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.trade_mark.notfound"));
         }
-        TradeMark sole = soleOptional.get();
-        sole.setDeleted(true);
-        adminTradeMarkRepository.save(sole);
+        TradeMark tradeMark = tradeMarkOptional.get();
+        tradeMark.setDeleted(true);
+        adminTradeMarkRepository.save(tradeMark);
         return true;
     }
 }

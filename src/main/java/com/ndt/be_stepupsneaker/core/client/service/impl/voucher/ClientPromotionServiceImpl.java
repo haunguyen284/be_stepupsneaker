@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class ClientPromotionServiceImpl implements ClientPromotionService {
     private ClientPromotionRepository clientPromotionRepository;
     private PaginationUtil paginationUtil;
     private ClientProductDetailRepository clientProductDetailRepository;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     @Autowired
     public ClientPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
@@ -68,7 +72,7 @@ public class ClientPromotionServiceImpl implements ClientPromotionService {
     public ClientPromotionResponse findById(String id) {
         Optional<Promotion> promotionOptional = clientPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PROMOTION IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
 
         return ClientPromotionMapper.INSTANCE.promotionToClientPromotionResponse(promotionOptional.get());

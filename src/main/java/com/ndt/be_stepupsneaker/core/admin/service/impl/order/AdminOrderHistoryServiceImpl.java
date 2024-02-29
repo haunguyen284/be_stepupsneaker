@@ -7,7 +7,9 @@ import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRep
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderHistoryService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,9 @@ public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
 
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final PaginationUtil paginationUtil;
+
+    @Autowired
+    private MessageUtil messageUtil;
 
     public AdminOrderHistoryServiceImpl(
             AdminOrderHistoryRepository adminOrderHistoryRepository,
@@ -50,7 +55,7 @@ public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
     public AdminOrderHistoryResponse findById(String id) {
         Optional<OrderHistory> orderHistory = adminOrderHistoryRepository.findById(id);
         if(orderHistory.isEmpty()){
-            throw new RuntimeException("ORDER HISTORY IS NOT EXIST");
+            throw new RuntimeException(messageUtil.getMessage("order.order_history.notfound"));
         }
         return AdminOrderHistoryMapper.INSTANCE.orderHistoryToAdminOrderHistoryResponse(orderHistory.get());
     }
