@@ -95,7 +95,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         newVoucher.setStartDate(voucherRequest.getStartDate());
         newVoucher.setType(voucherRequest.getType());
         if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
-            if (voucherRequest.getValue() > 50){
+            if (voucherRequest.getValue() > 70){
                 throw new ApiException(messageUtil.getMessage("voucher.value.max"));
             }
         }

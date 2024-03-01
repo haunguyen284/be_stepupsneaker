@@ -5,8 +5,10 @@ import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.repository.voucher.BaseUtilRepository;
 import com.ndt.be_stepupsneaker.repository.voucher.PromotionRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
+@Transactional
 public interface AdminPromotionRepository extends PromotionRepository, BaseUtilRepository<Promotion> {
 
     @Query("""
@@ -45,5 +48,6 @@ public interface AdminPromotionRepository extends PromotionRepository, BaseUtilR
     Optional<Promotion> findByCode(@Param("id") String id, @Param("code") String code);
 
     Optional<Promotion> findByCode(String code);
+    
 
 }

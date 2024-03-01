@@ -69,12 +69,6 @@ public class ScheduledServiceImpl implements ScheduledService {
         LocalDateTime currentDateTime = LocalDateTime.now();
         Long currentLongTime = ConvertUtil.convertLocalDateTimeToLong(currentDateTime);
         adminVoucherRepository.updateStatusAutomatically(currentLongTime);
-    }
-
-    @Override
-    public void updatePromotionStatusAutomatically() {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        Long currentLongTime = ConvertUtil.convertLocalDateTimeToLong(currentDateTime);
         adminPromotionRepository.updateStatusAutomatically(currentLongTime);
     }
 

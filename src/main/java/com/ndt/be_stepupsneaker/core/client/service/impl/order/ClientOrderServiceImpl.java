@@ -30,6 +30,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepo
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.cart.CartDetail;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
@@ -164,7 +165,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         float shippingFee = calculateShippingFee(totalMoney, newAddress);
         orderSave.setShippingMoney(shippingFee);
         orderSave.setOriginMoney(totalMoney);
-        setOrderInfo(orderSave);
+        orderSave.setCustomer(setOrderInfo(clientOrderRequest));
+        orderSave.setEmployee(null);
         applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
         orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
@@ -272,7 +274,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderUpdate.setFullName(orderRequest.getFullName());
         orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
         orderUpdate.setNote(orderRequest.getNote());
-        setOrderInfo(orderUpdate);
+        orderUpdate.setCustomer(setOrderInfo(orderRequest));
         applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney());
         Order order = clientOrderRepository.save(orderUpdate);
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
@@ -367,12 +369,12 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
 
     // Thông tin người dùng và nhân viên set vào order
-    private void setOrderInfo(Order order) {
-        if (order.getCustomer() == null && order.getEmail() != null) {
-            Customer customer = clientCustomerRepository.findByEmail(order.getEmail()).orElse(null);
-            order.setCustomer(customer);
+    private Customer setOrderInfo(ClientOrderRequest orderRequest) {
+        if (orderRequest.getCustomer() == null && orderRequest.getEmail() != null) {
+            Customer customer = clientCustomerRepository.findByEmail(orderRequest.getEmail()).orElse(null);
+            return customer;
         }
-        order.setEmployee(null);
+        return null;
     }
 
     // Thêm khuyến mãi vào order
@@ -580,7 +582,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                     .filter(this::isValid)
                     .map(this::calculateMoneyPromotion)
                     .max(Float::compare);
-            promotionValue = maxMoneyPromotion.orElse(productDetail.getPrice());
+            promotionValue = maxMoneyPromotion.orElse(0.0f);
         }
         return promotionValue;
     }

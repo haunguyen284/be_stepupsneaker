@@ -14,7 +14,6 @@ public class ScheduledController {
     public void updateDiscountStatusDaily() {
         scheduledService.updateVoucherStatusAutomatically();
         scheduledService.updateOrderAutomatically();
-        scheduledService.updatePromotionStatusAutomatically();
         scheduledService.deleteOrderAutomaticallyByTypeAndStatus();
     }
 

@@ -292,13 +292,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         Order orderSave = orderOptional.get();
-        if (orderSave.getStatus() == OrderStatus.COMPLETED) {
-            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
-        }
-
-        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY &&
-                orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION &&
-                orderSave.getStatus() != OrderStatus.DELIVERING) {
+        if (orderSave.getStatus() == OrderStatus.COMPLETED || orderSave.getStatus() == OrderStatus.CANCELED) {
             throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
