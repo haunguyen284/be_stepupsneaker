@@ -252,6 +252,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             if (order.getOrderDetails() != null) {
                 adminOrderDetailRepository.deleteAll(order.getOrderDetails());
             }
+
             adminOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
             adminOrderRepository.delete(order);
         } else {
@@ -315,7 +316,44 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public AdminOrderResponse checkOutAdmin(AdminOrderRequest orderRequest) {
-        return null;
+        Order orderSave = getOrderById(orderRequest);
+        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION && orderSave.getStatus() != OrderStatus.PENDING) {
+            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
+        }
+        List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderSave.getId());
+        float totalMoney = totalMoneyOrderDetails(orderDetails);
+        orderSave.setShippingMoney(0);
+        orderSave.setOriginMoney(totalMoney);
+        orderSave.setEmail(orderRequest.getEmail());
+        orderSave.setType(OrderType.OFFLINE);
+        orderSave.setFullName(orderRequest.getFullName());
+        orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
+        orderSave.setNote(orderRequest.getNote());
+        orderSave.setStatus(OrderStatus.COMPLETED);
+        setOrderInfo(orderSave);
+        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
+        Order order = adminOrderRepository.save(orderSave);
+//        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
+//        if (existingOrderHistoryOptional.isEmpty()) {
+//            OrderHistory orderHistory = new OrderHistory();
+//            orderHistory.setOrder(order);
+//            orderHistory.setActionStatus(order.getStatus());
+//            orderHistory.setNote(orderRequest.getOrderHistoryNote());
+//            orderHistory.setActionDescription(order.getStatus().action_description);
+//            clientOrderHistoryRepository.save(orderHistory);
+//        }
+        AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
+        return adminOrderResponse;
+    }
+
+    public float totalMoneyOrderDetails(List<OrderDetail> orderDetails) {
+        float total = 0.0f;
+        if (orderDetails != null) {
+            for (OrderDetail orderDetail : orderDetails) {
+                total += orderDetail.getPrice() * orderDetail.getQuantity();
+            }
+        }
+        return total;
     }
 
 
