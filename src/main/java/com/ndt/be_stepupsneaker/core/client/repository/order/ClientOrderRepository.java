@@ -87,7 +87,7 @@ public interface ClientOrderRepository extends OrderRepository {
     )
     List<Statistic> getDailyOrderBetween(@Param("start") Long start, @Param("end") Long end);
 
-    Optional<Order> findByIdAndCustomer_Id(String orderId, String customerId);
+    Optional<Order> findByIdAndCustomer_Id(String id, String customerId);
 
 
 }

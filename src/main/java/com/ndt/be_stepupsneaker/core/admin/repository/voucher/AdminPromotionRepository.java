@@ -48,6 +48,6 @@ public interface AdminPromotionRepository extends PromotionRepository, BaseUtilR
     Optional<Promotion> findByCode(@Param("id") String id, @Param("code") String code);
 
     Optional<Promotion> findByCode(String code);
-    
+
 
 }

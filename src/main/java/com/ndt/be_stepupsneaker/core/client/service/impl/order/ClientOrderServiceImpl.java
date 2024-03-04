@@ -370,8 +370,15 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     // Thông tin người dùng và nhân viên set vào order
     private Customer setOrderInfo(ClientOrderRequest orderRequest) {
-        if (orderRequest.getCustomer() == null && orderRequest.getEmail() != null) {
+        if ( orderRequest.getCustomer() == null)
+        {
             Customer customer = clientCustomerRepository.findByEmail(orderRequest.getEmail()).orElse(null);
+            return customer;
+        }
+        ClientCustomerResponse clientCustomerResponse = mySessionInfo.getCurrentCustomer();
+        if (clientCustomerResponse != null) {
+            Customer customer = clientCustomerRepository.findById(clientCustomerResponse.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
             return customer;
         }
         return null;
