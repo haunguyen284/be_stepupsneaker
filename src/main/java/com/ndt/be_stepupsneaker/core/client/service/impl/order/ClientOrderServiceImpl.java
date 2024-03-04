@@ -46,11 +46,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
-import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
-import com.ndt.be_stepupsneaker.infrastructure.constant.NotificationEmployeeType;
-import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
-import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
+import com.ndt.be_stepupsneaker.infrastructure.constant.*;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
@@ -370,8 +366,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
     // Thông tin người dùng và nhân viên set vào order
     private Customer setOrderInfo(ClientOrderRequest orderRequest) {
-        if ( orderRequest.getCustomer() == null)
-        {
+        if (orderRequest.getCustomer() == null) {
             Customer customer = clientCustomerRepository.findByEmail(orderRequest.getEmail()).orElse(null);
             return customer;
         }
@@ -519,7 +514,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         payment.setOrder(order);
         payment.setPaymentMethod(paymentMethod);
         payment.setTotalMoney(order.getTotalMoney());
-        payment.setTransactionCode(orderRequest.getTransactionInfo() == null ? "CASH" : orderRequest.getTransactionInfo().getTransactionCode());
+        if (orderRequest.getTransactionInfo() == null) {
+            payment.setTransactionCode("PENDING");
+            payment.setPaymentStatus(PaymentStatus.PENDING);
+        } else {
+            payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode());
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+        }
         payment.setDescription(order.getNote());
         clientPaymentResponses.add(ClientPaymentMapper.INSTANCE.paymentToClientPaymentResponse(clientPaymentRepository.save(payment)));
         return clientPaymentResponses;
