@@ -21,5 +21,7 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest);
 
+    AdminOrderResponse checkOutAdmin(AdminOrderRequest orderRequest);
+
 
 }

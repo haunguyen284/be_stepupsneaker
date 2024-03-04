@@ -313,6 +313,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         return adminOrderResponse;
     }
 
+    @Override
+    public AdminOrderResponse checkOutAdmin(AdminOrderRequest orderRequest) {
+        return null;
+    }
+
 
     private List<AdminOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
         List<AdminOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
