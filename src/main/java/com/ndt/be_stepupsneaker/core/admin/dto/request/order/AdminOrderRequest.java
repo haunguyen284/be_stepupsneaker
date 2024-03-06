@@ -68,6 +68,8 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String note;
 
+    private String paymentMethod;
+
     private String orderHistoryNote;
     
     private OrderStatus status;

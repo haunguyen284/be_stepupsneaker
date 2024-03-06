@@ -49,8 +49,10 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundExcepti
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
+import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +64,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminOrderServiceImpl implements AdminOrderService {
 
     private final AdminOrderRepository adminOrderRepository;
@@ -77,38 +80,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final EmailService emailService;
     private final ClientOrderServiceImpl clientOrderServiceImpl;
-
-    @Autowired
-    private MessageUtil messageUtil;
+    private final MessageUtil messageUtil;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
-
-    @Autowired
-    public AdminOrderServiceImpl(
-            AdminOrderRepository adminOrderRepository,
-            AdminOrderHistoryRepository adminOrderHistoryRepository,
-            AdminCustomerRepository adminCustomerRepository,
-            AdminAddressRepository adminAddressRepository,
-            AdminEmployeeRepository adminEmployeeRepository,
-            AdminVoucherRepository adminVoucherRepository,
-            AdminVoucherHistoryRepository adminVoucherHistoryRepository,
-            PaginationUtil paginationUtil,
-            MySessionInfo mySessionInfo, AdminOrderDetailRepository adminOrderDetailRepository,
-            AdminProductDetailRepository adminProductDetailRepository, EmailService emailService, ClientOrderServiceImpl clientOrderService, ClientOrderServiceImpl clientOrderServiceImpl, AdminPaymentMethodRepository adminPaymentMethodRepository) {
-        this.adminOrderRepository = adminOrderRepository;
-        this.adminOrderHistoryRepository = adminOrderHistoryRepository;
-        this.adminCustomerRepository = adminCustomerRepository;
-        this.adminAddressRepository = adminAddressRepository;
-        this.adminEmployeeRepository = adminEmployeeRepository;
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.adminVoucherHistoryRepository = adminVoucherHistoryRepository;
-        this.paginationUtil = paginationUtil;
-        this.mySessionInfo = mySessionInfo;
-        this.adminOrderDetailRepository = adminOrderDetailRepository;
-        this.adminProductDetailRepository = adminProductDetailRepository;
-        this.emailService = emailService;
-        this.clientOrderServiceImpl = clientOrderServiceImpl;
-        this.adminPaymentMethodRepository = adminPaymentMethodRepository;
-    }
+    private final OrderUtil orderUtil;
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
@@ -124,7 +98,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (pendingOrder > EntityProperties.LENGTH_PENDING_ORDER) {
             throw new ApiException(messageUtil.getMessage("order.create_max"));
         }
-
         orderRequest.setType(OrderType.OFFLINE);
         Order orderSave = AdminOrderMapper.INSTANCE.adminOrderRequestToOrder(orderRequest);
         if (orderRequest.getCustomer() == null) {
@@ -172,15 +145,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
             }
             int quantityChange = cartItemRequest.getQuantity() - orderDetailUpdate.getQuantity();
-            float promotionValue = clientOrderServiceImpl.getPromotionValueOfProductDetail(productDetailUpdate);
+            float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetailUpdate);
             float newProductPrice = productDetailUpdate.getPrice() - promotionValue;
             if (orderDetailUpdate.getPrice() != newProductPrice && quantityChange > 0) {
-                OrderDetail newOrderDetail = new OrderDetail();
-                newOrderDetail.setProductDetail(productDetailUpdate);
-                newOrderDetail.setQuantity(quantityChange);
-                newOrderDetail.setPrice(newProductPrice);
-                newOrderDetail.setTotalPrice(newProductPrice * quantityChange);
-                newOrderDetail.setOrder(orderSave);
+                OrderDetail newOrderDetail = orderUtil.createOrderDetail(productDetailUpdate, orderSave, quantityChange, newProductPrice);
                 orderDetailsUpdate.add(newOrderDetail);
             } else {
                 orderDetailUpdate.setQuantity(cartItemRequest.getQuantity());
@@ -202,34 +170,27 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             }
         }
         if (orderDetailsRemove.size() > 0) {
-            clientOrderServiceImpl.revertQuantityProductDetailWhenRemoveOrderDetail(orderDetailsRemove);
+            orderUtil.revertQuantityProductDetailWhenRemoveOrderDetail(orderDetailsRemove);
             adminOrderDetailRepository.deleteAll(orderDetailsRemove);
         }
 
         adminProductDetailRepository.saveAll(productDetailsUpdate);
         adminOrderDetailRepository.saveAll(orderDetailsUpdate);
 
-        float totalMoney = clientOrderServiceImpl.totalMoneyOrderDetails(orderDetailsUpdate);
-        float shippingFee = clientOrderServiceImpl.calculateShippingFee(totalMoney, address);
+        float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetailsUpdate);
+        float shippingFee = orderUtil.calculateShippingFee(totalMoney, address);
         orderSave.setShippingMoney(shippingFee);
         orderSave.setOriginMoney(totalMoney);
         orderSave.setEmail(orderRequest.getEmail());
-        orderSave.setType(OrderType.ONLINE);
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
         setOrderInfo(orderSave);
-        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
+        orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
         Order order = adminOrderRepository.save(orderSave);
-//        Optional<OrderHistory> existingOrderHistoryOptional = clientOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
-//        if (existingOrderHistoryOptional.isEmpty()) {
-//            OrderHistory orderHistory = new OrderHistory();
-//            orderHistory.setOrder(order);
-//            orderHistory.setActionStatus(order.getStatus());
-//            orderHistory.setNote(orderRequest.getOrderHistoryNote());
-//            orderHistory.setActionDescription(order.getStatus().action_description);
-//            clientOrderHistoryRepository.save(orderHistory);
-//        }
+        if (order.getTotalMoney() != order.getPayments().get(0).getTotalMoney()) {
+            orderUtil.updatePayment(order);
+        }
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         if (adminOrderResponse.getAddress() != null) {
@@ -308,9 +269,12 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
         orderSave.setEmployee(employee);
         Voucher voucher = orderSave.getVoucher();
-        if (orderSave.getStatus() == OrderStatus.CANCELED && voucher != null) {
-            voucher.setQuantity(voucher.getQuantity() + 1);
-            adminVoucherRepository.save(voucher);
+        if (orderSave.getStatus() == OrderStatus.CANCELED) {
+            if (voucher != null) {
+                voucher.setQuantity(voucher.getQuantity() + 1);
+                adminVoucherRepository.save(voucher);
+            }
+            orderUtil.revertQuantityProductDetailWhenCancelOrder(orderSave);
         }
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
@@ -327,7 +291,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
         List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderSave.getId());
-        float totalMoney = totalMoneyOrderDetails(orderDetails);
+        float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
         orderSave.setShippingMoney(0);
         orderSave.setOriginMoney(totalMoney);
         orderSave.setEmail(orderRequest.getEmail());
@@ -337,7 +301,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setNote(orderRequest.getNote());
         orderSave.setStatus(OrderStatus.COMPLETED);
         setOrderInfo(orderSave);
-        clientOrderServiceImpl.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney());
+        orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
         Order order = adminOrderRepository.save(orderSave);
         Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
@@ -347,18 +311,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderHistory.setNote(orderRequest.getOrderHistoryNote());
             adminOrderHistoryRepository.save(orderHistory);
         }
+        createPayment(order, orderRequest);
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
         return adminOrderResponse;
-    }
-
-    public float totalMoneyOrderDetails(List<OrderDetail> orderDetails) {
-        float total = 0.0f;
-        if (orderDetails != null) {
-            for (OrderDetail orderDetail : orderDetails) {
-                total += orderDetail.getPrice() * orderDetail.getQuantity();
-            }
-        }
-        return total;
     }
 
 
@@ -415,46 +370,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
     }
 
-
-    public float totalCartItem(List<AdminCartItemRequest> adminCartItemRequests) {
-        List<ProductDetail> productDetails = new ArrayList<>();
-        float total = 0.0f;
-        if (adminCartItemRequests != null) {
-            for (AdminCartItemRequest request : adminCartItemRequests) {
-                ProductDetail productDetail = adminProductDetailRepository.findById(request.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
-                float price = productDetail.getPrice();
-                total += price * request.getQuantity();
-                productDetail.setQuantity(productDetail.getQuantity() - request.getQuantity());
-                productDetails.add(productDetail);
-            }
-            adminProductDetailRepository.saveAll(productDetails);
-
-        }
-        return total;
-    }
-
-    private List<AdminOrderDetailResponse> createOrderDetails(Order order, AdminOrderRequest adminOrderRequest) {
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (AdminCartItemRequest clientCartItemRequest : adminOrderRequest.getCartItems()) {
-            ProductDetail productDetail = adminProductDetailRepository.findById(clientCartItemRequest.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
-            if (productDetail != null) {
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setProductDetail(productDetail);
-                orderDetail.setQuantity(clientCartItemRequest.getQuantity());
-                orderDetail.setOrder(order);
-                orderDetail.setPrice(productDetail.getPrice());
-                orderDetail.setTotalPrice(orderDetail.getPrice() * orderDetail.getQuantity());
-                orderDetails.add(orderDetail);
-            }
-        }
-        return adminOrderDetailRepository.saveAll(orderDetails)
-                .stream()
-                .map(AdminOrderDetailMapper.INSTANCE::orderDetailToAdminOrderDetailResponse)
-                .collect(Collectors.toList());
-    }
-
     private void setOrderInfo(Order order) {
         if (order.getCustomer() == null && order.getEmail() != null) {
             Customer customer = adminCustomerRepository.findByEmail(order.getEmail()).orElse(null);
@@ -471,6 +386,23 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 throw new ResourceNotFoundException(messageUtil.getMessage("error.not_login"));
             }
         }
+    }
+
+    private Payment createPayment(Order order, AdminOrderRequest orderRequest) {
+        PaymentMethod paymentMethod = adminPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setPaymentMethod(paymentMethod);
+        payment.setTotalMoney(order.getTotalMoney());
+        if (orderRequest.getTransactionInfo() == null) {
+            payment.setTransactionCode("COMPLETED");
+        } else {
+            payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode());
+        }
+        payment.setPaymentStatus(PaymentStatus.COMPLETED);
+        payment.setDescription(order.getNote());
+        return payment;
     }
 
 

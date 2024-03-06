@@ -18,7 +18,5 @@ public interface ClientPaymentMethodRepository extends PaymentMethodRepository {
             """)
     Optional<PaymentMethod> findByName(@Param("id") String id, @Param("name") String name);
 
-    @Query("SELECT x FROM PaymentMethod x WHERE x.name = :name")
-    Optional<PaymentMethod> findByNameMethod(@Param("name") String name);
 
 }
