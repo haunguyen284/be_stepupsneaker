@@ -16,6 +16,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,28 +26,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
 
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final PaginationUtil paginationUtil;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public AdminOrderDetailServiceImpl(
-            AdminProductDetailRepository adminProductDetailRepository,
-            AdminOrderRepository adminOrderRepository,
-            AdminOrderDetailRepository adminOrderDetailRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.adminProductDetailRepository = adminProductDetailRepository;
-        this.adminOrderRepository = adminOrderRepository;
-        this.adminOrderDetailRepository = adminOrderDetailRepository;
-        this.paginationUtil = paginationUtil;
-    }
 
     @Override
     public PageableObject<AdminOrderDetailResponse> findAllEntity(AdminOrderDetailRequest orderDetailRequest) {

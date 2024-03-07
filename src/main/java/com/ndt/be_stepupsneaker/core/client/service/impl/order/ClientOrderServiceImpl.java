@@ -68,7 +68,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final ClientCustomerRepository clientCustomerRepository;
     private final ClientAddressRepository clientAddressRepository;
     private final ClientVoucherRepository clientVoucherRepository;
-    private final ClientVoucherHistoryRepository clientVoucherHistoryRepository;
     private final PaginationUtil paginationUtil;
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientOrderDetailRepository clientOrderDetailRepository;
