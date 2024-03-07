@@ -221,7 +221,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, orderRequest.getEmail());
+        sendMailAutoEntity.sendMailAutoUpdateOrder(order, orderRequest.getEmail());
         notificationOrder(order, NotificationEmployeeType.ORDER_CHANGED);
         return clientOrderResponse;
     }

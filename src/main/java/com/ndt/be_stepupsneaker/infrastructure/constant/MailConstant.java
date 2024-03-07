@@ -26,8 +26,8 @@ public class MailConstant {
             "                              <td>\n" +
             "                                <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\" class=\"wrapper\" bgcolor=\"#f5f5f5\">\n" +
             "                                  <tr>\n" +
-            "                                    <td style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-left:10px;\"><a href=\"\" style=\"color:#a4acae; text-decoration:none;\">A sale so good, we couldn’t wait for Black Friday.</a></td>\n" +
-            "                                    <td class=\"hidden\" align=\"right\" style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-right:10px;\"><a href=\"#\" style=\"color:#a4acae; text-decoration:underline;\">View in web browser </a></td>\n" +
+            "                                    <td style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-left:10px;\"><a href=\"\" style=\"color:#a4acae; text-decoration:none;\">Mua đơn hàng trên 5 triệu để nhận miễn phí ship.</a></td>\n" +
+            "                                    <td class=\"hidden\" align=\"right\" style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-right:10px;\"><a href=\"#\" style=\"color:#a4acae; text-decoration:underline;\">Xem trong trình duyệt web </a></td>\n" +
             "                                  </tr>\n" +
             "                                </table>\n" +
             "                              </td>\n" +
@@ -160,10 +160,10 @@ public class MailConstant {
             + "                            <tr>\n"
             + "                              <td class=\"mobileContainer mobileFooter nowrap\" align=\"center\" style=\"font-family:Helvetica, Arial, sans-serif; font-size:11px; line-height:18px; color:#939c9e; padding-left:30px; padding-right:30px; padding-bottom:40px; background-color:#ffffff;  width:100%;\">\n"
             + "\n"
-            + "                                <a href=\"#\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Unsubscribe</a> | <a href=\"https://blog.fitbit.com?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Blog</a> | <a href=\"https://www.fitbit.com/careers?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">We're Hiring</a>\n"
+            + "                                <a href=\"#\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Đăng kí thành viên</a> | <a href=\"https://blog.fitbit.com?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Bài viết</a> | <a href=\"https://www.fitbit.com/careers?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Liên hệ</a>\n"
             + "                                <br>\n"
             + "\n"
-            + "                                <a href=\"https://www.fitbit.com/legal/trademark-list\" style=\"text-decoration:none; color:#939c9e;font-size:11px\"><span class=\"nowrap\">Step Up Sneaker and the Sneaker logo are trademarks or registered trademarks of Fitbit, Inc. in the VN and other Sneaker. Additional Sneaker trademarks can be found at www.fitbit.com/legal/trademark-list. Third-party trademarks mentioned are the property of their respective owners. </span></a>\n"
+            + "                                <a href=\"https://www.fitbit.com/legal/trademark-list\" style=\"text-decoration:none; color:#939c9e;font-size:11px\"><span class=\"nowrap\">Step Up Sneaker - nơi bạn tìm thấy sự kết hợp hoàn hảo giữa phong cách và thoải mái. Chúng tôi cam kết mang đến cho bạn những bước đi tự tin và phong cách mỗi ngày. </span></a>\n"
             + "                                <br>\n"
             + "                                <a href=\"\" style=\"text-decoration:none; color:#939c9e;font-size:11px\"><span class=\"nowrap\">Step Up Sneaker, 199 Trịnh Văn Bô, 14th Floor,&nbsp;Nam Từ Liêm,&nbsp;Hà Nội&nbsp;_ 2023</span></a>\n"
             + "                              </td>\n"

@@ -197,7 +197,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         if (adminOrderResponse.getAddress() != null) {
-            sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, orderRequest.getEmail());
+            sendMailAutoEntity.sendMailAutoUpdateOrder(order, orderRequest.getEmail());
         }
         return adminOrderResponse;
     }
@@ -283,7 +283,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoUpdateOrderToClient(adminOrderResponse, adminOrderResponse.getEmail());
+        sendMailAutoEntity.sendMailAutoUpdateOrder(newOrder, adminOrderResponse.getEmail());
         return adminOrderResponse;
     }
 

@@ -13,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminVoucherHistoryResponse {
+
     private AdminOrderNoOrderDetailResponse order;
 
     private AdminVoucherResponse voucher;
