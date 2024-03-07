@@ -13,6 +13,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,26 +21,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminPromotionProductDetailServiceImpl implements AdminPromotionProductDetailService {
 
-    private AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
-    private PaginationUtil paginationUtil;
-    private AdminCustomerRepository adminCustomerRepository;
-    private AdminVoucherRepository adminVoucherRepository;
+    private final AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
+    private final PaginationUtil paginationUtil;
+    private final AdminCustomerRepository adminCustomerRepository;
+    private final AdminVoucherRepository adminVoucherRepository;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public AdminPromotionProductDetailServiceImpl(AdminPromotionProductDetailRepository adminPromotionProductDetailRepository,
-                                                  PaginationUtil paginationUtil,
-                                                  AdminCustomerRepository adminCustomerRepository,
-                                                  AdminVoucherRepository adminVoucherRepository) {
-        this.adminPromotionProductDetailRepository = adminPromotionProductDetailRepository;
-        this.paginationUtil = paginationUtil;
-        this.adminCustomerRepository = adminCustomerRepository;
-        this.adminVoucherRepository = adminVoucherRepository;
-    }
 
     @Override
     public PageableObject<AdminPromotionProductDetailResponse> findAllEntity(AdminPromotionProductDetailRequest PromotionProductDetailRequest) {

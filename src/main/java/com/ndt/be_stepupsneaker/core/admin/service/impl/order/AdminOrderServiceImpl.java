@@ -290,9 +290,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public AdminOrderResponse checkOutAdmin(AdminOrderRequest orderRequest) {
         Order orderSave = getOrderById(orderRequest);
-//        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION && orderSave.getStatus() != OrderStatus.PENDING) {
-//            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
-//        }
         List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderSave.getId());
         float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
         orderSave.setShippingMoney(0);

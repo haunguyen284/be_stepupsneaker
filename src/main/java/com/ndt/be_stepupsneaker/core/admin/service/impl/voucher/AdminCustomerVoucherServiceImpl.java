@@ -17,6 +17,7 @@ import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,29 +30,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherService {
 
-    private AdminCustomerVoucherRepository adminCustomerVoucherRepository;
-    private PaginationUtil paginationUtil;
-    private AdminCustomerRepository adminCustomerRepository;
-    private AdminVoucherRepository adminVoucherRepository;
-    private EmailService emailService;
+    private final AdminCustomerVoucherRepository adminCustomerVoucherRepository;
+    private final PaginationUtil paginationUtil;
+    private final AdminCustomerRepository adminCustomerRepository;
+    private final AdminVoucherRepository adminVoucherRepository;
+    private final EmailService emailService;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public AdminCustomerVoucherServiceImpl(AdminCustomerVoucherRepository adminCustomerVoucherRepository,
-                                           PaginationUtil paginationUtil,
-                                           AdminCustomerRepository adminCustomerRepository,
-                                           AdminVoucherRepository adminVoucherRepository,
-                                           EmailService emailService) {
-        this.adminCustomerVoucherRepository = adminCustomerVoucherRepository;
-        this.paginationUtil = paginationUtil;
-        this.adminCustomerRepository = adminCustomerRepository;
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.emailService = emailService;
-    }
 
     @Override
     public PageableObject<AdminCustomerVoucherResponse> findAllEntity(AdminCustomerVoucherRequest customerVoucherRequest) {

@@ -123,7 +123,7 @@ public class OrderUtil {
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
-        return 0.0f;
+        return 36500f;
     }
 
     // Set giá trị cho shippingRequest để tính ship
@@ -209,7 +209,7 @@ public class OrderUtil {
                 order.setReduceMoney(discount);
                 order.setTotalMoney(finalTotalPrice + shippingFee);
                 // update lại voucherHistory
-                if (!order.getVoucherHistories().isEmpty()) {
+                if (order.getVoucherHistories() != null && action.equals("update")) {
                     VoucherHistory voucherHistory = adminVoucherHistoryRepository
                             .findById(order.getVoucherHistories().get(0).getId())
                             .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.history.notfound")));
@@ -224,7 +224,9 @@ public class OrderUtil {
                     voucherHistory.setMoneyAfterReduction(order.getOriginMoney() - order.getReduceMoney());
                     AdminVoucherHistoryMapper.INSTANCE.voucherHistoryToAdminVoucherHistoryResponse(adminVoucherHistoryRepository.save(voucherHistory));
                 } else {
-                    createVoucherHistory(order);
+                    if (action.equals("update")) {
+                        createVoucherHistory(order);
+                    }
                 }
             }
 

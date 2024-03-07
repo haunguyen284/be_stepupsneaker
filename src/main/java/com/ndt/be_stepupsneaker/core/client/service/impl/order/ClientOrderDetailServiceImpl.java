@@ -11,6 +11,7 @@ import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,28 +22,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
 
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientOrderRepository clientOrderRepository;
     private final ClientOrderDetailRepository clientOrderDetailRepository;
     private final PaginationUtil paginationUtil;
-
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public ClientOrderDetailServiceImpl(
-            ClientProductDetailRepository clientProductDetailRepository,
-            ClientOrderRepository clientOrderRepository,
-            ClientOrderDetailRepository clientOrderDetailRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.clientOrderDetailRepository = clientOrderDetailRepository;
-        this.clientOrderRepository = clientOrderRepository;
-        this.clientProductDetailRepository = clientProductDetailRepository;
-        this.paginationUtil = paginationUtil;
-    }
+    private final MessageUtil messageUtil;
 
     @Override
     public PageableObject<ClientOrderDetailResponse> findAllEntity(ClientOrderDetailRequest orderDetailRequest) {

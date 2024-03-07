@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,21 +18,13 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AdminOrderHistoryServiceImpl implements AdminOrderHistoryService {
 
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final PaginationUtil paginationUtil;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    public AdminOrderHistoryServiceImpl(
-            AdminOrderHistoryRepository adminOrderHistoryRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.adminOrderHistoryRepository = adminOrderHistoryRepository;
-        this.paginationUtil = paginationUtil;
-    }
 
     @Override
     public PageableObject<AdminOrderHistoryResponse> findAllEntity(AdminOrderHistoryRequest orderHistoryRequest) {

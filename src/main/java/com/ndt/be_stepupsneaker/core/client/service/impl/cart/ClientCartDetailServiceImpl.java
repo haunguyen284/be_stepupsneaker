@@ -42,9 +42,7 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     private final ClientCartRepository clientCartRepository;
     private final PaginationUtil paginationUtil;
     private final MySessionInfo mySessionInfo;
-
-    @Autowired
-    private MessageUtil messageUtil;
+    private final MessageUtil messageUtil;
 
     @Override
     public PageableObject<ClientCartDetailResponse> findAllEntity(ClientCartDetailRequest request) {

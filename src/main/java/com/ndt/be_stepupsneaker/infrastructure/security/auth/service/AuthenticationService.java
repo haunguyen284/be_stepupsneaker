@@ -21,6 +21,7 @@ import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePassw
 import com.ndt.be_stepupsneaker.infrastructure.security.config.JwtService;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -42,15 +43,16 @@ public class AuthenticationService {
     private final ClientCustomerRepository clientCustomerRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final MySessionInfo mySessionInfo;
+    private final MessageUtil messageUtil;
 
     public AuthenticationResponse registerEmployee(AdminEmployeeRequest request) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("Email" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         employeeOptional = adminEmployeeRepository.findByPhoneNumber(request.getPhoneNumber());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("PhoneNumber" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("address.phone.exist"));
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(request));
@@ -67,7 +69,7 @@ public class AuthenticationService {
         Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(request.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
-            throw new ApiException("Email" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(request));
@@ -92,14 +94,14 @@ public class AuthenticationService {
                     )
             );
         } catch (AuthenticationException exception) {
-            throw new ApiException("Invalid credentials!");
+            throw new ApiException(messageUtil.getMessage("username.or.password.incorrect"));
         }
         if (employee != null && passwordEncoder.matches(request.getPassword(), employee.getPassword())) {
             jwtToken = jwtService.generateToken(employee);
         } else if (customer != null && passwordEncoder.matches(request.getPassword(), customer.getPassword())) {
             jwtToken = jwtService.generateToken(customer);
         } else {
-            throw new ApiException("Invalid credentials!");
+            throw new ApiException(messageUtil.getMessage("username.or.password.incorrect"));
         }
         return AuthenticationResponse.builder()
                 .token(jwtToken)
@@ -126,9 +128,9 @@ public class AuthenticationService {
 
     public void passwordCompare(ChangePasswordRequest request, String passwordUser) {
         if (!passwordEncoder.matches(request.getCurrentPassword(), passwordUser)) {
-            throw new ApiException("Current password is incorrect!");
+            throw new ApiException(messageUtil.getMessage("current.password.is.incorrect"));
         } else if (!request.getEnterThePassword().equals(request.getNewPassword())) {
-            throw new ApiException("The re-entered password does not match!");
+            throw new ApiException(messageUtil.getMessage("re_entered.password.in.incorrect"));
         }
     }
 }

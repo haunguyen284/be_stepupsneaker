@@ -27,4 +27,6 @@ public class AdminPaymentResponse {
 
     private Long createdAt;
 
+    private Long updatedAt;
+
 }

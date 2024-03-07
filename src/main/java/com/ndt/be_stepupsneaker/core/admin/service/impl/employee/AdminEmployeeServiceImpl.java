@@ -46,8 +46,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     private final AdminCustomerRepository adminCustomerRepository;
 
-    @Autowired
-    private MessageUtil messageUtil;
+    private final MessageUtil messageUtil;
 
     @Override
     public PageableObject<AdminEmployeeResponse> findAllEntity(AdminEmployeeRequest employeeRequest) {

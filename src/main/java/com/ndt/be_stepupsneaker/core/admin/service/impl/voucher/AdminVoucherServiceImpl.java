@@ -16,6 +16,7 @@ import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -25,31 +26,16 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AdminVoucherServiceImpl implements AdminVoucherService {
 
 
     @Qualifier("adminVoucherRepository")
-    private AdminVoucherRepository adminVoucherRepository;
-    private PaginationUtil paginationUtil;
-    private CustomerVoucherRepository customerVoucherRepository;
-    private ScheduledService scheduledService;
-    private CloudinaryUpload cloudinaryUpload;
+    private final AdminVoucherRepository adminVoucherRepository;
+    private final PaginationUtil paginationUtil;
+    private final CloudinaryUpload cloudinaryUpload;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public AdminVoucherServiceImpl(AdminVoucherRepository adminVoucherRepository,
-                                   PaginationUtil paginationUtil,
-                                   CustomerVoucherRepository customerVoucherRepository,
-                                   ScheduledService scheduledService,
-                                   CloudinaryUpload cloudinaryUpload) {
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.paginationUtil = paginationUtil;
-        this.customerVoucherRepository = customerVoucherRepository;
-        this.scheduledService = scheduledService;
-        this.cloudinaryUpload = cloudinaryUpload;
-    }
 
     @Override
     public PageableObject<AdminVoucherResponse> findAllEntity(AdminVoucherRequest voucherRequest) {

@@ -13,6 +13,8 @@ import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import jdk.jfr.Registered;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,29 +22,15 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ClientPromotionServiceImpl implements ClientPromotionService {
-    private CloudinaryUpload cloudinaryUpload;
-    private ScheduledService scheduledService;
-    private ClientPromotionRepository clientPromotionRepository;
-    private PaginationUtil paginationUtil;
-    private ClientProductDetailRepository clientProductDetailRepository;
+    private final CloudinaryUpload cloudinaryUpload;
+    private final ScheduledService scheduledService;
+    private final ClientPromotionRepository clientPromotionRepository;
+    private final PaginationUtil paginationUtil;
+    private final ClientProductDetailRepository clientProductDetailRepository;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public ClientPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
-                                      ScheduledService scheduledService,
-                                      ClientPromotionRepository ClientPromotionRepository,
-                                      PaginationUtil paginationUtil,
-                                      ClientProductDetailRepository clientProductDetailRepository) {
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.scheduledService = scheduledService;
-        this.clientPromotionRepository = ClientPromotionRepository;
-        this.paginationUtil = paginationUtil;
-        this.clientProductDetailRepository = clientProductDetailRepository;
-
-    }
 
     @Override
     public PageableObject<ClientPromotionResponse> findAllEntity(ClientPromotionRequest request) {

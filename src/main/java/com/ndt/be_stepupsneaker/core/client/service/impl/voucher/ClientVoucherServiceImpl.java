@@ -13,6 +13,7 @@ import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -23,31 +24,18 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ClientVoucherServiceImpl implements ClientVoucherService {
 
 
     @Qualifier("clientVoucherRepository")
-    private ClientVoucherRepository ClientVoucherRepository;
-    private PaginationUtil paginationUtil;
-    private CustomerVoucherRepository customerVoucherRepository;
-    private ScheduledService scheduledService;
-    private CloudinaryUpload cloudinaryUpload;
+    private final ClientVoucherRepository ClientVoucherRepository;
+    private final PaginationUtil paginationUtil;
+    private final CustomerVoucherRepository customerVoucherRepository;
+    private final ScheduledService scheduledService;
+    private final CloudinaryUpload cloudinaryUpload;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public ClientVoucherServiceImpl(ClientVoucherRepository ClientVoucherRepository,
-                                    PaginationUtil paginationUtil,
-                                    CustomerVoucherRepository customerVoucherRepository,
-                                    ScheduledService scheduledService,
-                                    CloudinaryUpload cloudinaryUpload) {
-        this.ClientVoucherRepository = ClientVoucherRepository;
-        this.paginationUtil = paginationUtil;
-        this.customerVoucherRepository = customerVoucherRepository;
-        this.scheduledService = scheduledService;
-        this.cloudinaryUpload = cloudinaryUpload;
-    }
 
     @Override
     public PageableObject<ClientVoucherResponse> findAllEntity(ClientVoucherRequest voucherRequest) {

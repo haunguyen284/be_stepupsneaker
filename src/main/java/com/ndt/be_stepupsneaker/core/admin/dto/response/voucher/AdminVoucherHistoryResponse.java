@@ -24,4 +24,6 @@ public class AdminVoucherHistoryResponse {
     private float moneyReduction;
 
     private Long createdAt;
+
+    private Long updatedAt;
 }

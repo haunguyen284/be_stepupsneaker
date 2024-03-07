@@ -19,6 +19,7 @@ import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,31 +30,15 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminPromotionServiceImpl implements AdminPromotionService {
-    private CloudinaryUpload cloudinaryUpload;
-    private ScheduledService scheduledService;
-    private AdminPromotionRepository adminPromotionRepository;
-    private PaginationUtil paginationUtil;
-    private AdminProductDetailRepository adminProductDetailRepository;
-    private AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
-
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public AdminPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
-                                     ScheduledService scheduledService,
-                                     AdminPromotionRepository adminPromotionRepository,
-                                     PaginationUtil paginationUtil,
-                                     AdminProductDetailRepository adminProductDetailRepository,
-                                     AdminPromotionProductDetailRepository adminPromotionProductDetailRepository) {
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.scheduledService = scheduledService;
-        this.adminPromotionRepository = adminPromotionRepository;
-        this.paginationUtil = paginationUtil;
-        this.adminProductDetailRepository = adminProductDetailRepository;
-        this.adminPromotionProductDetailRepository = adminPromotionProductDetailRepository;
-    }
+    private final CloudinaryUpload cloudinaryUpload;
+    private final ScheduledService scheduledService;
+    private final AdminPromotionRepository adminPromotionRepository;
+    private final PaginationUtil paginationUtil;
+    private final AdminProductDetailRepository adminProductDetailRepository;
+    private final AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
+    private final MessageUtil messageUtil;
 
     @Override
     public PageableObject<AdminPromotionResponse> findAllEntity(AdminPromotionRequest request) {

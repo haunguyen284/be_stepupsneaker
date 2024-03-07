@@ -5,8 +5,10 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.ListCustomerIdAnd
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -23,14 +25,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin/customerVoucher")
+@RequiredArgsConstructor
 public class AdminCustomerVoucherController {
 
-    private AdminCustomerVoucherService adminCustomerVoucherService;
-
-    @Autowired
-    public AdminCustomerVoucherController(AdminCustomerVoucherService adminCustomerVoucherService) {
-        this.adminCustomerVoucherService = adminCustomerVoucherService;
-    }
+    private final AdminCustomerVoucherService adminCustomerVoucherService;
+    private final MessageUtil messageUtil;
 
     // not use this function
     @GetMapping("")
@@ -59,9 +58,9 @@ public class AdminCustomerVoucherController {
             @RequestBody ListCustomerIdAndVoucherIdRequest customerIdRequest) {
         Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIdRequest.getCustomer());
         if (deleted) {
-            return ResponseHelper.getResponse("CUSTOMERS DELETED SUCCESSFULLY.", HttpStatus.OK);
+            return ResponseHelper.getResponse("CUSTOMERS "+messageUtil.getMessage("deleted.success"), HttpStatus.OK);
         } else {
-            return ResponseHelper.getResponse("NO CUSTOMERS WERE DELETED", HttpStatus.NOT_FOUND);
+            return ResponseHelper.getResponse(messageUtil.getMessage("delete.failed"), HttpStatus.NOT_FOUND);
         }
     }
 }

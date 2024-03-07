@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,28 +26,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminPaymentServiceImpl implements AdminPaymentService {
 
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final AdminOrderRepository adminOrderRepository;
     private final PaginationUtil paginationUtil;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    private MessageUtil messageUtil;
-
-    @Autowired
-    public AdminPaymentServiceImpl(
-            AdminPaymentRepository adminPaymentRepository,
-            AdminPaymentMethodRepository adminPaymentMethodRepository,
-            AdminOrderRepository adminOrderRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.adminPaymentRepository = adminPaymentRepository;
-        this.adminPaymentMethodRepository = adminPaymentMethodRepository;
-        this.adminOrderRepository = adminOrderRepository;
-        this.paginationUtil = paginationUtil;
-    }
 
     @Override
     public PageableObject<AdminPaymentResponse> findAllEntity(AdminPaymentRequest paymentRequest) {

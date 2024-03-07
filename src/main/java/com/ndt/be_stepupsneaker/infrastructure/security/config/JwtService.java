@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -31,6 +32,7 @@ import java.util.function.Function;
 public class JwtService {
     private final AdminCustomerRepository adminCustomerRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
+    private final MessageUtil messageUtil;
 
     public String generateToken(UserDetails userDetails) {
         Optional<Employee> optionalEmployee = adminEmployeeRepository.findByEmail(userDetails.getUsername());
@@ -47,7 +49,7 @@ public class JwtService {
             extraClaims.put("role", optionalEmployee.get().getRole().getName());
             extraClaims.put("fullName", optionalEmployee.get().getFullName());
         } else {
-            throw new ResourceNotFoundException("User Not Found!");
+            throw new ResourceNotFoundException(messageUtil.getMessage("user.notfound"));
         }
 
         return Jwts.builder()
