@@ -52,10 +52,6 @@ public class ClientAddressServiceImpl implements ClientAddressService {
     // Tạo address bắt buộc phải cho id customer
     @Override
     public Object create(ClientAddressRequest addressDTO) {
-        Optional<Address> addressOptional = clientAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("address.phone.exist"));
-        }
         Optional<Customer> customerOptional = clientCustomerRepository.findById(addressDTO.getCustomer());
         if (!customerOptional.isPresent()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
@@ -79,11 +75,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Override
     public ClientAddressResponse update(ClientAddressRequest addressDTO) {
-        Optional<Address> addressOptional = clientAddressRepository.findByPhoneNumber(addressDTO.getId(), addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()) {
-            throw new ApiException((messageUtil.getMessage("address.phone.exist")));
-        }
-        addressOptional = clientAddressRepository.findById(addressDTO.getId());
+        Optional<Address> addressOptional = clientAddressRepository.findById(addressDTO.getId());
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }

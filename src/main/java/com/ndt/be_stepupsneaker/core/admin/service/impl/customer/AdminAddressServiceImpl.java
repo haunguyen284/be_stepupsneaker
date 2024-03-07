@@ -44,10 +44,6 @@ public class AdminAddressServiceImpl implements AdminAddressService {
 
     @Override
     public Object create(AdminAddressRequest addressDTO) {
-        Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()) {
-            throw new ApiException(messageUtil.getMessage("address.phone.exist"));
-        }
         Optional<Customer> customerOptional = adminCustomerRepository.findById(addressDTO.getCustomer());
         if (customerOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
@@ -71,11 +67,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
 
     @Override
     public AdminAddressResponse update(AdminAddressRequest addressDTO) {
-        Optional<Address> addressOptional = adminAddressRepository.findByPhoneNumber(addressDTO.getId(), addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()) {
-            throw new ApiException(messageUtil.getMessage("address.phone.exist"));
-        }
-        addressOptional = adminAddressRepository.findById(addressDTO.getId());
+        Optional<Address> addressOptional = adminAddressRepository.findById(addressDTO.getId());
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }
