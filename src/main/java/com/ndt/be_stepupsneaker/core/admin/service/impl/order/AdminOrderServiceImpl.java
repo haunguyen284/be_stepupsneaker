@@ -304,6 +304,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             Customer customer = adminCustomerRepository.findById(orderRequest.getCustomer())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
             orderSave.setCustomer(customer);
+        } else {
+            orderSave.setCustomer(null);
         }
         setOrderInfo(orderSave);
         orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
