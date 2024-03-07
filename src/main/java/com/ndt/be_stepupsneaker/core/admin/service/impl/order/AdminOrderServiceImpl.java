@@ -2,16 +2,20 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminCartItemRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.payment.AdminPaymentRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderHistoryResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderDetailMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderHistoryMapper;
+import com.ndt.be_stepupsneaker.core.admin.mapper.payment.AdminPaymentMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentMethodRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
@@ -73,16 +77,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminAddressRepository adminAddressRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final AdminVoucherRepository adminVoucherRepository;
-    private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
     private final PaginationUtil paginationUtil;
     private final MySessionInfo mySessionInfo;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final EmailService emailService;
-    private final ClientOrderServiceImpl clientOrderServiceImpl;
     private final MessageUtil messageUtil;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final OrderUtil orderUtil;
+    private final AdminPaymentRepository adminPaymentRepository;
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
@@ -287,9 +290,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public AdminOrderResponse checkOutAdmin(AdminOrderRequest orderRequest) {
         Order orderSave = getOrderById(orderRequest);
-        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION && orderSave.getStatus() != OrderStatus.PENDING) {
-            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
-        }
+//        if (orderSave.getStatus() != OrderStatus.WAIT_FOR_DELIVERY && orderSave.getStatus() != OrderStatus.WAIT_FOR_CONFIRMATION && orderSave.getStatus() != OrderStatus.PENDING) {
+//            throw new ApiException(messageUtil.getMessage("order.can_not_update"));
+//        }
         List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderSave.getId());
         float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
         orderSave.setShippingMoney(0);
@@ -299,20 +302,28 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
-        orderSave.setStatus(OrderStatus.COMPLETED);
+        if (orderRequest.getCustomer() != null) {
+            Customer customer = adminCustomerRepository.findById(orderRequest.getCustomer())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
+            orderSave.setCustomer(customer);
+        }
         setOrderInfo(orderSave);
         orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
-        Order order = adminOrderRepository.save(orderSave);
-        Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(order.getId(), order.getStatus());
-        if (existingOrderHistoryOptional.isEmpty()) {
-            OrderHistory orderHistory = new OrderHistory();
-            orderHistory.setOrder(order);
-            orderHistory.setActionStatus(order.getStatus());
-            orderHistory.setNote(orderRequest.getOrderHistoryNote());
-            adminOrderHistoryRepository.save(orderHistory);
+        if (!orderRequest.getPayments().isEmpty()) {
+            orderSave.setStatus(OrderStatus.COMPLETED);
+            Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(orderSave.getId(), orderSave.getStatus());
+            if (existingOrderHistoryOptional.isEmpty()) {
+                OrderHistory orderHistory = new OrderHistory();
+                orderHistory.setOrder(orderSave);
+                orderHistory.setActionStatus(orderSave.getStatus());
+                orderHistory.setNote(orderRequest.getOrderHistoryNote());
+                adminOrderHistoryRepository.save(orderHistory);
+            }
+            createPayment(orderSave, orderRequest);
         }
-        createPayment(order, orderRequest);
-        AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
+        AdminOrderResponse adminOrderResponse = AdminOrderMapper
+                .INSTANCE
+                .orderToAdminOrderResponse(adminOrderRepository.save(orderSave));
         return adminOrderResponse;
     }
 
@@ -388,21 +399,29 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
     }
 
-    private Payment createPayment(Order order, AdminOrderRequest orderRequest) {
-        PaymentMethod paymentMethod = adminPaymentMethodRepository.findByNameMethod(orderRequest.getPaymentMethod())
-                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
-        Payment payment = new Payment();
-        payment.setOrder(order);
-        payment.setPaymentMethod(paymentMethod);
-        payment.setTotalMoney(order.getTotalMoney());
-        if (orderRequest.getTransactionInfo() == null) {
-            payment.setTransactionCode("COMPLETED");
-        } else {
-            payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode());
+    private List<AdminPaymentResponse> createPayment(Order order, AdminOrderRequest orderRequest) {
+        List<Payment> payments = new ArrayList<>();
+        for (AdminPaymentRequest paymentRequest : orderRequest.getPayments()) {
+            PaymentMethod paymentMethod = adminPaymentMethodRepository.findById(paymentRequest.getPaymentMethod())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
+            Payment payment = new Payment();
+            payment.setOrder(order);
+            payment.setPaymentMethod(paymentMethod);
+            payment.setTotalMoney(paymentRequest.getTotalMoney());
+            if (paymentMethod.getName().equals("Cash")) {
+                payment.setTransactionCode("Cash");
+            } else {
+                payment.setTransactionCode(paymentRequest.getTransactionCode());
+            }
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+            payment.setDescription(order.getNote());
+            payments.add(payment);
         }
-        payment.setPaymentStatus(PaymentStatus.COMPLETED);
-        payment.setDescription(order.getNote());
-        return payment;
+        List<AdminPaymentResponse> adminPaymentResponses = adminPaymentRepository.saveAll(payments)
+                .stream()
+                .map(AdminPaymentMapper.INSTANCE::paymentToAdminPaymentResponse)
+                .collect(Collectors.toList());
+        return adminPaymentResponses;
     }
 
 

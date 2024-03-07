@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.payment.AdminPaymentRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
@@ -68,10 +69,10 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String note;
 
-    private String paymentMethod;
+    private List<AdminPaymentRequest> payments;
 
     private String orderHistoryNote;
-    
+
     private OrderStatus status;
 
     private TransactionInfo transactionInfo;
