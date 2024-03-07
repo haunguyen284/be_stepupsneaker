@@ -86,6 +86,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final OrderUtil orderUtil;
     private final AdminPaymentRepository adminPaymentRepository;
+    private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
@@ -222,7 +223,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             if (order.getOrderDetails() != null) {
                 adminOrderDetailRepository.deleteAll(order.getOrderDetails());
             }
-
+            adminVoucherHistoryRepository.deleteAllByOrder(order);
             adminOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
             adminOrderRepository.delete(order);
         } else {

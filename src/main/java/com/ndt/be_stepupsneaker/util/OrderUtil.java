@@ -209,7 +209,7 @@ public class OrderUtil {
                 order.setReduceMoney(discount);
                 order.setTotalMoney(finalTotalPrice + shippingFee);
                 // update lại voucherHistory
-                if (order.getVoucherHistories() != null && action.equals("update")) {
+                if (order.getVoucherHistories() != null && action.equals("update")&& !order.getVoucherHistories().isEmpty() ) {
                     VoucherHistory voucherHistory = adminVoucherHistoryRepository
                             .findById(order.getVoucherHistories().get(0).getId())
                             .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.history.notfound")));
