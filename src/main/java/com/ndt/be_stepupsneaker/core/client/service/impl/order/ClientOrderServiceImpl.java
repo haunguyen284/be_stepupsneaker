@@ -114,22 +114,22 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         orderUtil.createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
+            orderUtil.createOrderHistory(newOrder, OrderStatus.PENDING, "PENDING");
             ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
-            clientOrderResponse.setOrderDetails(createOrderDetails(newOrder, clientOrderRequest));
+            clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             String urlVnPay = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-            sendMailAutoEntity.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(),urlVnPay);
+            sendMailAutoEntity.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
             return urlVnPay;
         }
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
+        orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
         if (newOrder.getPayments() == null) {
             List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
             clientOrderResponse.setPayments(clientPaymentResponse);
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
-        clientOrderResponse.setOrderHistories(clientOrderHistoryResponse);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
         notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);

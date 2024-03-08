@@ -1,5 +1,8 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.vnpay;
 
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
@@ -9,8 +12,14 @@ import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDeta
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
+import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
@@ -19,6 +28,7 @@ import com.ndt.be_stepupsneaker.util.VNPayUtil;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +46,9 @@ public class VNPayServiceImpl implements VNPayService {
     private final ClientPaymentMethodRepository clientPaymentMethodRepository;
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientVoucherRepository clientVoucherRepository;
+    private final AdminOrderDetailRepository adminOrderDetailRepository;
+    private final AdminOrderHistoryRepository adminOrderHistoryRepository;
+    private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
     private final EmailService emailService;
     private final MessageUtil messageUtil;
     private final OrderUtil orderUtil;
@@ -145,6 +158,7 @@ public class VNPayServiceImpl implements VNPayService {
         }
     }
 
+    @Transactional
     @Override
     public Order authenticateVnPay(HttpServletRequest request) {
         int result = orderReturn(request);
@@ -169,24 +183,38 @@ public class VNPayServiceImpl implements VNPayService {
             clientPaymentRepository.save(payment);
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
+            orderUtil.createOrderHistory(order, OrderStatus.WAIT_FOR_DELIVERY, "Wai for delivery");
             SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
             sendMailAutoEntity.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
             return clientOrderRepository.save(order);
+        } else if (result == 11 || result == 15) {
+            revertForeignKeyConstraint(orderOptional.get());
+
         } else {
-            orderUtil.createOrderHistory(orderOptional.get(),OrderStatus.PENDING,"PENDING" );
-//            for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {
-//                ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
-//                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
-//                productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
-//                clientProductDetailRepository.save(productDetail);
-//            }
-//            Voucher voucher = orderOptional.get().getVoucher();
-//            if (voucher != null) {
-//                voucher.setQuantity(voucher.getQuantity() + 1);
-//                clientVoucherRepository.save(voucher);
-//            }
+            revertForeignKeyConstraint(orderOptional.get());
         }
         return null;
+    }
+
+    @Transactional
+    public void revertForeignKeyConstraint(Order order) {
+        for (OrderDetail orderDetail : order.getOrderDetails()) {
+            ProductDetail productDetail = orderDetail.getProductDetail();
+            productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+            clientProductDetailRepository.save(productDetail);
+        }
+        Voucher voucher = order.getVoucher();
+        if (voucher != null) {
+            voucher.setQuantity(voucher.getQuantity() + 1);
+            clientVoucherRepository.save(voucher);
+        }
+        List<OrderHistory> orderHistories = order.getOrderHistories();
+        adminOrderHistoryRepository.deleteAll(orderHistories);
+        List<OrderDetail> orderDetail = order.getOrderDetails();
+        adminOrderDetailRepository.deleteAll(orderDetail);
+        List<VoucherHistory> voucherHistories = order.getVoucherHistories();
+        adminVoucherHistoryRepository.deleteAll(voucherHistories);
+        clientOrderRepository.delete(order);
     }
 
 }

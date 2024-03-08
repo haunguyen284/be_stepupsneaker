@@ -215,7 +215,7 @@ public class OrderUtil {
                 order.setReduceMoney(discount);
                 order.setTotalMoney(finalTotalPrice + shippingFee);
                 // update lại voucherHistory
-                if (order.getVoucherHistories() != null && action.equals("update")&& !order.getVoucherHistories().isEmpty() ) {
+                if (order.getVoucherHistories() != null && action.equals("update") && !order.getVoucherHistories().isEmpty()) {
                     VoucherHistory voucherHistory = adminVoucherHistoryRepository
                             .findById(order.getVoucherHistories().get(0).getId())
                             .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.history.notfound")));
@@ -286,13 +286,11 @@ public class OrderUtil {
     }
 
     // Tạo orderHistory
-    public List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
+    public OrderHistory createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
         OrderHistory orderHistory = new OrderHistory();
         orderHistory.setOrder(order);
         orderHistory.setActionStatus(orderStatus);
         orderHistory.setNote(orderHistoryNote);
-        clientOrderHistoryResponses.add(ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(adminOrderHistoryRepository.save(orderHistory)));
-        return clientOrderHistoryResponses;
+        return adminOrderHistoryRepository.save(orderHistory);
     }
 }

@@ -14,7 +14,6 @@ public class ScheduledController {
     public void updateDiscountStatusDaily() {
         scheduledService.updateVoucherStatusAutomatically();
         scheduledService.updateOrderAutomatically();
-        scheduledService.deleteOrderAutomaticallyByTypeAndStatus();
     }
 
     @Scheduled(cron = "0 0 0 1 * ?") // Chạy vào ngày đầu tiên của mỗi tháng

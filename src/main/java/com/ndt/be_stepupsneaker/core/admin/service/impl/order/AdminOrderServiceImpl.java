@@ -217,6 +217,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 adminOrderDetailRepository.deleteAll(order.getOrderDetails());
             }
             adminVoucherHistoryRepository.deleteAllByOrder(order);
+            adminVoucherHistoryRepository.deleteAllByOrder(order);
             adminOrderHistoryRepository.deleteAllByOrder(List.of(order.getId()));
             adminOrderRepository.delete(order);
         } else {
@@ -258,6 +259,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Order orderSave = orderOptional.get();
         if (orderSave.getStatus() == OrderStatus.COMPLETED || orderSave.getStatus() == OrderStatus.CANCELED) {
+            System.out.println("===============PaymentStatus"+orderSave.getPayments().get(0).getPaymentStatus());
             throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
@@ -272,6 +274,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 adminVoucherRepository.save(voucher);
             }
             orderUtil.revertQuantityProductDetailWhenCancelOrder(orderSave);
+        }
+        if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
+            Payment payment = orderSave.getPayments().get(0);
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+            adminPaymentRepository.save(payment);
         }
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
