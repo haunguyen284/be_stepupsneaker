@@ -114,12 +114,13 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
         orderUtil.createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
+            ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
+            clientOrderResponse.setOrderDetails(createOrderDetails(newOrder, clientOrderRequest));
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
+            String urlVnPay = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-            Order order = clientOrderRepository.findById(newOrder.getId()).orElseThrow();
-            System.out.println("=============================="+order.getOrderDetails().get(0).getId());
-            sendMailAutoEntity.sendMailAutoCheckoutVnPay(order, clientOrderRequest.getEmail(), vnPayService.createOrder((int) totalVnPay, newOrder.getId()));
-            return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
+            sendMailAutoEntity.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(),urlVnPay);
+            return urlVnPay;
         }
         List<ClientOrderHistoryResponse> clientOrderHistoryResponse = orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);

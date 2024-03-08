@@ -239,7 +239,7 @@ public class SendMailAutoEntity {
         emailService.sendEmail(email);
     }
 
-    public void sendMailAutoCheckoutVnPay(Order order, String emailReq, String urlVnPay) {
+    public void sendMailAutoCheckoutVnPay(ClientOrderResponse clientOrderResponse, String emailReq, String urlVnPay) {
         String[] toEmail = new String[1];
         Email email = new Email();
         email.setSubject("STEP UP SNEAKER thông báo cho bạn vừa tạo đơn hàng thanh toán bằng Vnpay ...");
@@ -260,10 +260,10 @@ public class SendMailAutoEntity {
         emailBody += "</tr>";
         emailBody += "</thead>";
         emailBody += "<tbody>";
-        List<OrderDetail> orderDetails = order.getOrderDetails();
+        List<ClientOrderDetailResponse> orderDetails = clientOrderResponse.getOrderDetails();
         if (orderDetails != null && !orderDetails.isEmpty()) {
-            for (OrderDetail orderDetail : orderDetails) {
-                ProductDetail productDetail = orderDetail.getProductDetail();
+            for (ClientOrderDetailResponse orderDetail : orderDetails) {
+                ClientProductDetailResponse productDetail = orderDetail.getProductDetail();
                 if (productDetail != null) {
                     float totalPrice = orderDetail.getQuantity() * productDetail.getPrice();
                     emailBody += "<tr>";
@@ -279,29 +279,29 @@ public class SendMailAutoEntity {
         emailBody += "</table>";
         emailBody += "</td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
-        emailBody += "<tr><td colspan='4'><strong>Họ và tên:</strong> " + order.getFullName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Họ và tên:</strong> " + clientOrderResponse.getFullName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Địa chỉ giao hàng     :</strong> "
-                + order.getAddress().getMore() + ", "
-                + order.getAddress().getWardName() + ", "
-                + order.getAddress().getDistrictName() + ", "
-                + order.getAddress().getProvinceName() + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + order.getAddress().getPhoneNumber() + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + EntityProperties.URL_FE_TRACKING + order.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+                + clientOrderResponse.getAddress().getMore() + ", "
+                + clientOrderResponse.getAddress().getWardName() + ", "
+                + clientOrderResponse.getAddress().getDistrictName() + ", "
+                + clientOrderResponse.getAddress().getProvinceName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<p>Nếu bạn gặp sự cố khi thanh toán, vui lòng nhấp vào liên kết bên dưới để thanh toán lại đơn hàng! Liên kết này sẽ có hiệu lực 15 phút kể từ lúc bắt đầu gửi mail.</p>"
                 + "<p><a href=\"" + urlVnPay + "\">Thanh toán lại</a></p>"
                 + "<p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua.</p>";
         email.setBody(emailBody);
-        emailBody += "<tr><td><strong>Phí vận chuyển :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getShippingMoney()) + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Tiền được giảm       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getReduceMoney()) + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Tổng tiền   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getTotalMoney()) + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Ngày tạo   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(order.getCreatedAt()) + "</td></tr>";
+        emailBody += "<tr><td><strong>Phí vận chuyển :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getShippingMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Tiền được giảm       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getReduceMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Tổng tiền   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getTotalMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Ngày tạo   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (order.getCustomer() == null) {
+        if (clientOrderResponse.getCustomer() == null) {
             toEmail[0] = emailReq;
         } else {
-            toEmail[0] = order.getCustomer().getEmail();
+            toEmail[0] = clientOrderResponse.getCustomer().getEmail();
         }
         email.setToEmail(toEmail);
         emailService.sendEmail(email);

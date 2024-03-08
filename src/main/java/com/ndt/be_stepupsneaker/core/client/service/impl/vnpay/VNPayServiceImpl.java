@@ -42,6 +42,7 @@ public class VNPayServiceImpl implements VNPayService {
 
     @Override
     public String createOrder(int total, String orderInfor) {
+        System.out.println("Đã chạy ========================");
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String vnp_TxnRef = VNPayUtil.getRandomNumber(8);
