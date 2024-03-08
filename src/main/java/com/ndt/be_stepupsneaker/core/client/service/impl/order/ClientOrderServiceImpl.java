@@ -5,13 +5,10 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.*;
 import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
-import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherHistoryResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderDetailMapper;
-import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.payment.ClientPaymentMapper;
-import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherHistoryMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientAddressRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderDetailRepository;
@@ -20,7 +17,6 @@ import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderReposito
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentMethodRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDetailRepository;
-import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderService;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
@@ -30,12 +26,10 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.notification.NotificationEmployee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
-import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
-import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.*;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
@@ -118,12 +112,16 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
         orderUtil.createVoucherHistory(newOrder);
         if (clientOrderRequest.getTransactionInfo() == null && clientOrderRequest.getPaymentMethod().equals("Card")) {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
+            SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+            Order order = clientOrderRepository.findById(newOrder.getId()).orElseThrow();
+            System.out.println("=============================="+order.getOrderDetails().get(0).getId());
+            sendMailAutoEntity.sendMailAutoCheckoutVnPay(order, clientOrderRequest.getEmail(), vnPayService.createOrder((int) totalVnPay, newOrder.getId()));
             return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
         }
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponse = orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
         if (newOrder.getPayments() == null) {
             List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
@@ -339,17 +337,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     }
 
 
-    // Tạo orderHistory
-    private List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
-        List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
-        OrderHistory orderHistory = new OrderHistory();
-        orderHistory.setOrder(order);
-        orderHistory.setActionStatus(orderStatus);
-        orderHistory.setNote(orderHistoryNote);
-        clientOrderHistoryResponses.add(ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(clientOrderHistoryRepository.save(orderHistory)));
-        return clientOrderHistoryResponses;
-    }
-
     // Tạo orderDetail
     private List<ClientOrderDetailResponse> createOrderDetails(Order order, ClientOrderRequest clientOrderRequest) {
         List<OrderDetail> orderDetails = new ArrayList<>();
@@ -415,9 +402,14 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderUtil.revertQuantityProductDetailWhenCancelOrder(order);
         order.setStatus(OrderStatus.CANCELED);
         Order newOrder = clientOrderRepository.save(order);
-        createOrderHistory(newOrder, OrderStatus.CANCELED, orderHistoryNote);
+        orderUtil.createOrderHistory(newOrder, OrderStatus.CANCELED, orderHistoryNote);
         notificationOrder(newOrder, NotificationEmployeeType.ORDER_CHANGED);
         return true;
+    }
+
+    @Override
+    public ClientOrderResponse createCheckoutVnPay(ClientOrderRequest orderRequest) {
+        return null;
     }
 
 

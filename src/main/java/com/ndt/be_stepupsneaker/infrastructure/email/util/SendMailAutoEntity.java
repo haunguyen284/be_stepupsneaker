@@ -1,9 +1,6 @@
 package com.ndt.be_stepupsneaker.infrastructure.email.util;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderDetailResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
-import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderDetailResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.product.ClientProductDetailResponse;
@@ -18,11 +15,11 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.email.model.Email;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
+import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
-import com.ndt.be_stepupsneaker.util.OrderUtil;
-import lombok.RequiredArgsConstructor;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +28,12 @@ import java.util.List;
 public class SendMailAutoEntity {
     private EmailService emailService;
 
+
     @Autowired
     public SendMailAutoEntity(EmailService emailService) {
         this.emailService = emailService;
     }
+
 
     public void sendMailAutoPassWord(Customer customer, String passWord, Employee employee) {
         String[] toEmail = new String[1];
@@ -236,6 +235,74 @@ public class SendMailAutoEntity {
                 + "<p>Cảm ơn!</p>";
         email.setBody(emailBody);
         toEmail[0] = recipientEmail;
+        email.setToEmail(toEmail);
+        emailService.sendEmail(email);
+    }
+
+    public void sendMailAutoCheckoutVnPay(Order order, String emailReq, String urlVnPay) {
+        String[] toEmail = new String[1];
+        Email email = new Email();
+        email.setSubject("STEP UP SNEAKER thông báo cho bạn vừa tạo đơn hàng thanh toán bằng Vnpay ...");
+        String emailTitle = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailTitle += "<tr><td colspan='4' style='text-align: center;'><strong>Thông tin đơn hàng thanh toán bằng VnPay</strong></td></tr>";
+        emailTitle += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        email.setTitleEmail(emailTitle);
+        String emailBody = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'>";
+        emailBody += "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailBody += "<thead style='background-color: #f0f0f0;'>";
+        emailBody += "<tr>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tên sản phẩm</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Số lượng</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Giá sản phẩm</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tổng tiền</th>";
+        emailBody += "</tr>";
+        emailBody += "</thead>";
+        emailBody += "<tbody>";
+        List<OrderDetail> orderDetails = order.getOrderDetails();
+        if (orderDetails != null && !orderDetails.isEmpty()) {
+            for (OrderDetail orderDetail : orderDetails) {
+                ProductDetail productDetail = orderDetail.getProductDetail();
+                if (productDetail != null) {
+                    float totalPrice = orderDetail.getQuantity() * productDetail.getPrice();
+                    emailBody += "<tr>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + productDetail.getProduct().getName() + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + orderDetail.getQuantity() + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(productDetail.getPrice()) + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(totalPrice) + "</td>";
+                    emailBody += "</tr>";
+                }
+            }
+        }
+        emailBody += "</tbody>";
+        emailBody += "</table>";
+        emailBody += "</td></tr>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Họ và tên:</strong> " + order.getFullName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Địa chỉ giao hàng     :</strong> "
+                + order.getAddress().getMore() + ", "
+                + order.getAddress().getWardName() + ", "
+                + order.getAddress().getDistrictName() + ", "
+                + order.getAddress().getProvinceName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + order.getAddress().getPhoneNumber() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + EntityProperties.URL_FE_TRACKING + order.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<p>Nếu bạn gặp sự cố khi thanh toán, vui lòng nhấp vào liên kết bên dưới để thanh toán lại đơn hàng! Liên kết này sẽ có hiệu lực 15 phút kể từ lúc bắt đầu gửi mail.</p>"
+                + "<p><a href=\"" + urlVnPay + "\">Thanh toán lại</a></p>"
+                + "<p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua.</p>";
+        email.setBody(emailBody);
+        emailBody += "<tr><td><strong>Phí vận chuyển :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getShippingMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Tiền được giảm       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getReduceMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Tổng tiền   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getTotalMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Ngày tạo   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(order.getCreatedAt()) + "</td></tr>";
+        emailBody += "</table>";
+        email.setBody(emailBody);
+        if (order.getCustomer() == null) {
+            toEmail[0] = emailReq;
+        } else {
+            toEmail[0] = order.getCustomer().getEmail();
+        }
         email.setToEmail(toEmail);
         emailService.sendEmail(email);
     }

@@ -2,18 +2,22 @@ package com.ndt.be_stepupsneaker.util;
 
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherHistoryMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientShippingRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderHistoryResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientShippingDataResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientShippingResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherHistoryResponse;
+import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherHistoryMapper;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
@@ -21,6 +25,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +52,7 @@ public class OrderUtil {
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
+    private final AdminOrderHistoryRepository adminOrderHistoryRepository;
 
     //   Kiểm tra đợt giảm giá còn hạn hoặc bắt đầu hay chưa
     public boolean isValid(PromotionProductDetail ppd) {
@@ -277,5 +283,16 @@ public class OrderUtil {
             return productDetail;
         }).collect(Collectors.toList());
         adminProductDetailRepository.saveAll(productDetails);
+    }
+
+    // Tạo orderHistory
+    public List<ClientOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
+        List<ClientOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
+        OrderHistory orderHistory = new OrderHistory();
+        orderHistory.setOrder(order);
+        orderHistory.setActionStatus(orderStatus);
+        orderHistory.setNote(orderHistoryNote);
+        clientOrderHistoryResponses.add(ClientOrderHistoryMapper.INSTANCE.orderHistoryToClientOrderHistoryResponse(adminOrderHistoryRepository.save(orderHistory)));
+        return clientOrderHistoryResponses;
     }
 }

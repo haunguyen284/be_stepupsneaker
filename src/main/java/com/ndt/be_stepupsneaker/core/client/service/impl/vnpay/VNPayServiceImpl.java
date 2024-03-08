@@ -9,20 +9,17 @@ import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDeta
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
 import com.ndt.be_stepupsneaker.core.client.service.vnpay.VNPayService;
 import com.ndt.be_stepupsneaker.entity.order.Order;
-import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
-import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
+import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.VNPayUtil;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
@@ -40,9 +37,8 @@ public class VNPayServiceImpl implements VNPayService {
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientVoucherRepository clientVoucherRepository;
     private final EmailService emailService;
-
-    @Autowired
-    private MessageUtil messageUtil;
+    private final MessageUtil messageUtil;
+    private final OrderUtil orderUtil;
 
     @Override
     public String createOrder(int total, String orderInfor) {
@@ -176,17 +172,18 @@ public class VNPayServiceImpl implements VNPayService {
             sendMailAutoEntity.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
             return clientOrderRepository.save(order);
         } else {
-            for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {
-                ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
-                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
-                productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
-                clientProductDetailRepository.save(productDetail);
-            }
-            Voucher voucher = orderOptional.get().getVoucher();
-            if (voucher != null) {
-                voucher.setQuantity(voucher.getQuantity() + 1);
-                clientVoucherRepository.save(voucher);
-            }
+            orderUtil.createOrderHistory(orderOptional.get(),OrderStatus.PENDING,"PENDING" );
+//            for (OrderDetail orderDetail : orderOptional.get().getOrderDetails()) {
+//                ProductDetail productDetail = clientProductDetailRepository.findById(orderDetail.getProductDetail().getId())
+//                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
+//                productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
+//                clientProductDetailRepository.save(productDetail);
+//            }
+//            Voucher voucher = orderOptional.get().getVoucher();
+//            if (voucher != null) {
+//                voucher.setQuantity(voucher.getQuantity() + 1);
+//                clientVoucherRepository.save(voucher);
+//            }
         }
         return null;
     }
