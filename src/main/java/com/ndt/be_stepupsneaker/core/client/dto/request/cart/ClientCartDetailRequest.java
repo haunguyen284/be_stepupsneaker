@@ -24,6 +24,8 @@ public class ClientCartDetailRequest extends PageableRequest {
 
     private String cart;
 
+    private String order;
+
     private String productDetail;
 
     private int quantity;

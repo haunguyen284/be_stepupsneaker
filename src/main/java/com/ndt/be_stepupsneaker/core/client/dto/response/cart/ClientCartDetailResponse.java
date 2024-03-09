@@ -17,6 +17,8 @@ public class ClientCartDetailResponse {
 
     private String cart;
 
+    private String order;
+
     private ClientProductDetailResponse productDetail;
 
     private int quantity;
