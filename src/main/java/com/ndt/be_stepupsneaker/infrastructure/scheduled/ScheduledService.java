@@ -8,5 +8,4 @@ public interface ScheduledService {
 
     void deleteCartDetailsByDate();
 
-    void deleteOrderAutomaticallyByTypeAndStatus();
 }

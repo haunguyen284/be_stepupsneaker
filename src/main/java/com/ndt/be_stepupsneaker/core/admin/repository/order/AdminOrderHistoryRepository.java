@@ -36,5 +36,4 @@ public interface AdminOrderHistoryRepository extends OrderHistoryRepository {
     @Query("DELETE FROM OrderHistory x WHERE x.order.id IN :orderIds")
     void deleteAllByOrder(List<String> orderIds);
 
-    Optional<OrderHistory> findByOrder_IdAndActionStatus(String order_id, OrderStatus actionStatus);
 }
