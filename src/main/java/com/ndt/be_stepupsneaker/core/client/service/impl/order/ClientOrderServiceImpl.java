@@ -117,7 +117,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
             Order order = clientOrderRepository.findById(newOrder.getId()).orElseThrow();
-            System.out.println("=============================="+order.getOrderDetails().get(0).getId());
+//            System.out.println("=============================="+order.getOrderDetails().get(0).getId());
             sendMailAutoEntity.sendMailAutoCheckoutVnPay(order, clientOrderRequest.getEmail(), vnPayService.createOrder((int) totalVnPay, newOrder.getId()));
             return vnPayService.createOrder((int) totalVnPay, newOrder.getId());
         }

@@ -105,11 +105,6 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
     }
 
     @Override
-    public Boolean deleteCartDetails(ClientCartDetailRequest cartDetailRequest) {
-        return null;
-    }
-
-    @Override
     public List<ClientCartDetailResponse> merge(List<ClientCartDetailRequest> cartDetailRequests) {
         Cart thisSessionCart = cart();
 
@@ -213,6 +208,15 @@ public class ClientCartDetailServiceImpl implements ClientCartDetailService {
         Cart thisSessionCart = cart();
 
         clientCartDetailRepository.deleteAllByCart(thisSessionCart);
+
+        return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public Object deleteAllFromCartByOrder(String orderId) {
+        Cart thisSessionCart = cart();
+
+        clientCartDetailRepository.deleteAllByCartAndOrderId(thisSessionCart, orderId);
 
         return clientCartDetailRepository.findAllByCart(thisSessionCart).stream().map(ClientCartDetailMapper.INSTANCE::cartDetailToClientCartDetailResponse).collect(Collectors.toList());
     }

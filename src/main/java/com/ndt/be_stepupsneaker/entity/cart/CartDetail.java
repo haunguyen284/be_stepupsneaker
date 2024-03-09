@@ -28,4 +28,6 @@ public class CartDetail extends PrimaryEntity{
     @Column(name = "quantity")
     private int quantity;
 
+    @Column(name = "order_id")
+    private String orderId;
 }

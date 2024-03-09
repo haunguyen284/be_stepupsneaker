@@ -94,4 +94,9 @@ public class ClientCartDetailController {
     public Object deleteCartDetails() {
         return ResponseHelper.getResponse(clientCartDetailService.deleteAllFromCart(), HttpStatus.OK);
     }
+
+    @DeleteMapping("/order/{orderId}")
+    public Object deleteCartDetailsByOrder(@PathVariable("orderId") String orderId) {
+        return ResponseHelper.getResponse(clientCartDetailService.deleteAllFromCart(), HttpStatus.OK);
+    }
 }
