@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.voucher;
 import com.ndt.be_stepupsneaker.core.client.dto.request.voucher.ClientVoucherRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
@@ -9,6 +10,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
@@ -26,8 +28,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ClientVoucherServiceImpl implements ClientVoucherService {
-
-
     @Qualifier("clientVoucherRepository")
     private final ClientVoucherRepository ClientVoucherRepository;
     private final PaginationUtil paginationUtil;
@@ -35,6 +35,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     private final ScheduledService scheduledService;
     private final CloudinaryUpload cloudinaryUpload;
     private final MessageUtil messageUtil;
+    private final MySessionInfo mySessionInfo;
 
 
     @Override
@@ -95,9 +96,10 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
 
     @Override
     public ClientVoucherResponse findByCode(String code) {
-        Optional<Voucher> optionalVoucher = ClientVoucherRepository.findByCode(code);
+        ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
+        Optional<Voucher> optionalVoucher = ClientVoucherRepository.findByCode(code, customerResponse.getId());
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.code.exist"));
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
 
         return ClientVoucherMapper.INSTANCE.voucherToClientVoucherResponse(optionalVoucher.get());
