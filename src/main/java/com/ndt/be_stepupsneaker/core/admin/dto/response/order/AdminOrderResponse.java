@@ -64,6 +64,8 @@ public class AdminOrderResponse {
 
     private String code;
 
+    private Integer versionUpdate;
+
     private OrderStatus status;
 
     private List<AdminOrderDetailResponse> orderDetails;

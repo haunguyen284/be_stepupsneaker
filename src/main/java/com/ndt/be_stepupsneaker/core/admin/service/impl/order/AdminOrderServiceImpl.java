@@ -182,6 +182,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
+        orderSave.setVersionUpdate(orderSave.getVersionUpdate() + 1);
         setOrderInfo(orderSave);
         orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
         Order order = adminOrderRepository.save(orderSave);

@@ -209,6 +209,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderUpdate.setOriginMoney(totalMoney);
         orderUpdate.setEmail(orderRequest.getEmail());
         orderUpdate.setType(OrderType.ONLINE);
+        orderUpdate.setVersionUpdate(orderUpdate.getVersionUpdate() + 1);
         orderUpdate.setFullName(orderRequest.getFullName());
         orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
         orderUpdate.setNote(orderRequest.getNote());

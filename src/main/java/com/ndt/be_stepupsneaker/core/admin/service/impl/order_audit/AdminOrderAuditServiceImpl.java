@@ -82,7 +82,7 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
                     Object oldValue = field.get(oldResponse);
                     Object newValue = field.get(newResponse);
 
-                    if (oldValue != null && newValue != null) {
+                    if (oldValue != null) {
                         if (EntityComparator.isBaseType(oldValue.getClass()) && EntityComparator.isBaseType(newValue.getClass())) {
                             if (!Objects.equals(oldValue, newValue)) {
                                 ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();

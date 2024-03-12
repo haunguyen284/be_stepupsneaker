@@ -11,26 +11,14 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -99,21 +87,24 @@ public class Order extends PrimaryEntity {
     @Nationalized
     private String note;
 
+    @Column(name = "versionUpdate")
+    private Integer versionUpdate = 0;
+
     @Column(name = "status")
     private OrderStatus status;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @NotAudited
     private List<OrderHistory> orderHistories;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @NotAudited
     private List<Payment> payments;
 
-    @OneToMany(mappedBy="order", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @NotAudited
     private List<VoucherHistory> voucherHistories;
 
@@ -126,6 +117,8 @@ public class Order extends PrimaryEntity {
         int codeLength = 5;
         String randomPart = RandomStringUtil.randomAlphaNumeric(codeLength);
         this.code = "SUS" + "-" + randomPart;
+        this.versionUpdate = 1;
     }
+
 
 }
