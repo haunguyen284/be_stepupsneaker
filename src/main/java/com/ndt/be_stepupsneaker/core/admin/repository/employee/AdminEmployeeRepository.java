@@ -35,7 +35,7 @@ public interface AdminEmployeeRepository extends EmployeeRepository {
     Optional<Employee> findByPhoneNumber(@Param("id") String id, @Param("phoneNumber") String phoneNumber);
 
     @Query("""
-            SELECT x FROM Employee x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Employee y WHERE y.id != :id'))
-            """)
+            SELECT x FROM Employee x WHERE (x.email = :email AND :email IN (SELECT y.email FROM Employee y WHERE y.id != :id))
+    """)
     Optional<Employee> findByEmail(@Param("id") String id, @Param("email") String email);
 }
