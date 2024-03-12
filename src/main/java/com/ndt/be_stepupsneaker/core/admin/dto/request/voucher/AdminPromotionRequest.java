@@ -1,7 +1,9 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.voucher;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
+import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.Max;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,8 +20,11 @@ import java.util.UUID;
 public class AdminPromotionRequest extends PageableRequest {
     private String id;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
+
     private String code;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 
     private VoucherStatus status;

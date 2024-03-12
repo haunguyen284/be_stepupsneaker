@@ -1,6 +1,8 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +19,10 @@ public class AdminOrderHistoryRequest extends PageableRequest {
 
     private String order;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String actionDescription;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String note;
 
 }
