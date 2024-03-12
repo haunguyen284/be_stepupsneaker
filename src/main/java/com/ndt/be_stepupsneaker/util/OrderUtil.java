@@ -184,27 +184,29 @@ public class OrderUtil {
             Voucher voucher = adminVoucherRepository.findById(voucherId)
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound")));
             if (voucher != null) {
-                if (voucher.getQuantity() < 1) {
-                    throw new ResourceNotFoundException(messageUtil.getMessage("voucher.expired"));
-                }
                 if (voucher.getConstraint() > totalOrderPrice) {
                     throw new ResourceNotFoundException(messageUtil.getMessage("order.eligible_voucher"));
                 }
                 if (action.equals("add")) {
-                    voucher.setQuantity(voucher.getQuantity() - 1);
-                    adminVoucherRepository.save(voucher);
+                    if (voucher.getQuantity() < 1) {
+                        throw new ResourceNotFoundException(messageUtil.getMessage("voucher.expired"));
+                    }
+                    updateQuantityVoucher(voucher, voucher.getQuantity() - 1);
                 } else {
                     if (order.getVoucher() != null) {
                         if (!voucherId.equals(order.getVoucher().getId())) {
+                            if (voucher.getQuantity() < 1) {
+                                throw new ResourceNotFoundException(messageUtil.getMessage("voucher.expired"));
+                            }
                             Voucher voucherOld = order.getVoucher();
-                            voucherOld.setQuantity(voucherOld.getQuantity() + 1);
-                            adminVoucherRepository.save(voucherOld);
-                            voucher.setQuantity(voucher.getQuantity() - 1);
-                            adminVoucherRepository.save(voucher);
+                            updateQuantityVoucher(voucherOld, voucherOld.getQuantity() + 1);
+                            updateQuantityVoucher(voucher, voucher.getQuantity() - 1);
                         }
                     } else {
-                        voucher.setQuantity(voucher.getQuantity() - 1);
-                        adminVoucherRepository.save(voucher);
+                        if (voucher.getQuantity() < 1) {
+                            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.expired"));
+                        }
+                        updateQuantityVoucher(voucher, voucher.getQuantity() - 1);
                     }
 
                 }
@@ -241,13 +243,17 @@ public class OrderUtil {
             order.setTotalMoney(totalOrderPrice + shippingFee);
             if (order.getVoucher() != null && voucherId == null) {
                 Voucher voucher = order.getVoucher();
-                voucher.setQuantity(voucher.getQuantity() + 1);
-                adminVoucherRepository.save(voucher);
+                updateQuantityVoucher(voucher, voucher.getQuantity() + 1);
                 List<VoucherHistory> voucherHistories = order.getVoucherHistories();
                 adminVoucherHistoryRepository.deleteAll(voucherHistories);
             }
             order.setVoucher(null);
         }
+    }
+
+    public Voucher updateQuantityVoucher(Voucher voucher, int quantity) {
+        voucher.setQuantity(quantity);
+        return adminVoucherRepository.save(voucher);
     }
 
     public ClientVoucherHistoryResponse createVoucherHistory(Order order) {

@@ -259,7 +259,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Order orderSave = orderOptional.get();
         if (orderSave.getStatus() == OrderStatus.COMPLETED || orderSave.getStatus() == OrderStatus.CANCELED) {
-            System.out.println("===============PaymentStatus"+orderSave.getPayments().get(0).getPaymentStatus());
             throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
