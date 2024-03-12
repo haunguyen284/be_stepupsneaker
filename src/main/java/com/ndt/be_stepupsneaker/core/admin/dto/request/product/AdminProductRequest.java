@@ -31,6 +31,7 @@ public class AdminProductRequest extends PageableRequest {
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String description;
 
     private String image;
