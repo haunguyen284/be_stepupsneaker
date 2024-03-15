@@ -104,7 +104,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
                         throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
                     }
                     detail.setQuantity(totalQuantity);
-                    detail.setTotalPrice(detail.getQuantity() * detail.getProductDetail().getPrice());
+                    detail.setTotalPrice(totalQuantity * orderDetailRequest.getPrice());
                     productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
                     adminProductDetailRepository.save(productDetail);
                     addOrderDetails.add(detail);

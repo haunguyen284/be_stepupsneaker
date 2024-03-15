@@ -92,7 +92,7 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     Optional<ProductDetail> findByProductProperties(@Param("request") AdminProductDetailRequest request);
 
     @Query("""
-    SELECT pd FROM OrderDetail od 
+    SELECT pd, SUM(od.quantity) FROM OrderDetail od 
     JOIN od.productDetail pd 
     JOIN od.order o 
     WHERE o.status = 4 
@@ -101,5 +101,5 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     ORDER BY SUM(od.quantity) DESC 
     LIMIT 5
     """)
-    List<ProductDetail> findProductDetailTrending(@Param("fromDate") Long fromDate, @Param("toDate") Long toDate);
+    List<Object[]> findProductDetailTrending(@Param("fromDate") Long fromDate, @Param("toDate") Long toDate);
 }

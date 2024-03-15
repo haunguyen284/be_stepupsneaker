@@ -42,6 +42,8 @@ public class AdminProductDetailResponse {
 
     private float moneyPromotion;
 
+    private long saleCount;
+
     private ProductStatus status;
 
     List<AdminPromotionNoProductDetailResponse> promotionProductDetails;

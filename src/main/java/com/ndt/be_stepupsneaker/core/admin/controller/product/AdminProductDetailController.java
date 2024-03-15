@@ -74,7 +74,7 @@ public class AdminProductDetailController {
     }
 
     @GetMapping("/trending")
-    public Object trending(@RequestParam("fromDate")Long fromDate, @RequestParam("toDate")Long toDate) {
+    public Object trending(@RequestParam("start")Long fromDate, @RequestParam("end")Long toDate) {
 
         return ResponseHelper.getResponse((adminProductDetailService.findByTrending(fromDate, toDate)), HttpStatus.OK);
     }

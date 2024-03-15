@@ -1,6 +1,8 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.payment;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -22,12 +24,13 @@ public class AdminPaymentRequest extends PageableRequest {
     @NotBlank(message = "Payment Method must be not null")
     private String paymentMethod;
 
-//    @NotBlank(message = "Transaction code Method must be not null")
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String transactionCode;
 
     @NotNull(message = "Total money must be not null")
     private float totalMoney;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String description;
 
 }
