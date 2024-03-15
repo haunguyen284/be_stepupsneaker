@@ -42,4 +42,6 @@ public class AdminCustomerRequest extends PageableRequest {
     private String gender;
 
     private String image;
+
+    private AdminAddressRequest address;
 }
