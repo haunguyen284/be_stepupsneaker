@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,6 +81,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     @Override
     public Object create(AdminCustomerRequest customerDTO) {
+        List<Address> addressList = new ArrayList<>();
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
@@ -92,8 +94,11 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         if (customer != null) {
             Address address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(customerDTO.getAddress());
             address.setCustomer(customer);
+            address.setIsDefault(true);
             adminAddressRepository.save(address);
+            addressList.add(address);
         }
+        customer.setAddressList(addressList);
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoPassWord(customer, passWordRandom, null);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
@@ -118,6 +123,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
         customer.setEmail(customerDTO.getEmail());
         customer.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
+        List<Address> addressList = new ArrayList<>();
         Address address;
         if (customer.getAddressList() == null) {
             address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(customerDTO.getAddress());
@@ -128,6 +134,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             addressUtil.updateAddress(address, customerDTO.getAddress());
         }
         adminAddressRepository.save(address);
+        addressList.add(address);
+        customer.setAddressList(addressList);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(adminCustomerRepository.save(customer));
 
     }

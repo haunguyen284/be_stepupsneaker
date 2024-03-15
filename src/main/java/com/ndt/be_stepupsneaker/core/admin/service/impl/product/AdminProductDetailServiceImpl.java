@@ -2,7 +2,9 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminProductDetailRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductDetailMapper;
+import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminBrandRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminColorRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminMaterialRepository;
@@ -15,6 +17,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminTradeMarkRepo
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductDetailService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
@@ -118,11 +121,17 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
 
     @Override
     public PageableObject<AdminProductDetailResponse> findByTrending(Long fromDate, Long toDate) {
-        List<ProductDetail> productDetails = adminProductDetailRepository.findProductDetailTrending(fromDate, toDate);
+        List<AdminProductDetailResponse> adminProductDetailResponses = new ArrayList<>();
         PageRequest pageRequest = PageRequest.of(0, 5);
-        Page<ProductDetail> resp = new PageImpl<>(productDetails, pageRequest, productDetails.size());
-        Page<AdminProductDetailResponse> adminProductDetailResponses = resp.map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse);
-        return new PageableObject<>(adminProductDetailResponses);
+        List<Object[]> resp = adminProductDetailRepository.findProductDetailTrending(fromDate, toDate);
+        for (Object[] result : resp) {
+            ProductDetail productDetail = (ProductDetail) result[0];
+            AdminProductDetailResponse adminProductDetailResponse = AdminProductDetailMapper.INSTANCE.productDetailToAdminProductDetailResponse(productDetail);
+            adminProductDetailResponse.setSaleCount((Long) result[1]);
+            adminProductDetailResponses.add(adminProductDetailResponse);
+        }
+        Page<AdminProductDetailResponse> adminProductDetailResponsePage = new PageImpl<>(adminProductDetailResponses, pageRequest, adminProductDetailResponses.size());
+        return new PageableObject<>(adminProductDetailResponsePage);
     }
 
 
