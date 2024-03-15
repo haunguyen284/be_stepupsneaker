@@ -45,10 +45,7 @@ import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
-import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
-import com.ndt.be_stepupsneaker.util.MessageUtil;
-import com.ndt.be_stepupsneaker.util.OrderUtil;
-import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import com.ndt.be_stepupsneaker.util.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -78,6 +75,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final MessageUtil messageUtil;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final OrderUtil orderUtil;
+    private final AddressUtil addressUtil;
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
 
@@ -356,25 +354,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("address.notfound")));
 
             if (orderRequest.getAddressShipping() != null) {
-                if (orderRequest.getAddressShipping().getProvinceName().equals("")) {
-                    address.setProvinceName(address.getProvinceName());
-                } else {
-                    address.setProvinceName(orderRequest.getAddressShipping().getProvinceName());
-                }
-                if (orderRequest.getAddressShipping().getDistrictName().equals("")) {
-                    address.setDistrictName(address.getDistrictName());
-                } else {
-                    address.setDistrictName(orderRequest.getAddressShipping().getDistrictName());
-                }
-                if (orderRequest.getAddressShipping().getWardName().equals("")) {
-                    address.setWardName(address.getWardName());
-                } else {
-                    address.setWardName(orderRequest.getAddressShipping().getWardName());
-                }
-                address.setMore(orderRequest.getAddressShipping().getMore());
-                address.setDistrictId(orderRequest.getAddressShipping().getDistrictId());
-                address.setProvinceId(orderRequest.getAddressShipping().getProvinceId());
-                address.setWardCode(orderRequest.getAddressShipping().getWardCode());
+              addressUtil.updateAddress(address,orderRequest.getAddressShipping());
             }
 
             return adminAddressRepository.save(address);

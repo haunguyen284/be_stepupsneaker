@@ -4,23 +4,23 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminCustomerReq
 import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminAddressMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminCustomerMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.customer.AdminCustomerService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
+import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
-import com.ndt.be_stepupsneaker.util.DailyStatisticUtil;
-import com.ndt.be_stepupsneaker.util.MessageUtil;
-import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import com.ndt.be_stepupsneaker.util.RandomStringUtil;
+import com.ndt.be_stepupsneaker.util.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,39 +31,26 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AdminCustomerServiceImpl implements AdminCustomerService {
 
-    private CloudinaryUpload cloudinaryUpload;
+    private final CloudinaryUpload cloudinaryUpload;
 
-    private AdminCustomerRepository adminCustomerRepository;
+    private final AdminCustomerRepository adminCustomerRepository;
 
-    private PaginationUtil paginationUtil;
+    private final PaginationUtil paginationUtil;
 
-    private EmailService emailService;
+    private final EmailService emailService;
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    private AdminEmployeeRepository adminEmployeeRepository;
+    private final AdminEmployeeRepository adminEmployeeRepository;
 
-    @Autowired
-    private MessageUtil messageUtil;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    public AdminCustomerServiceImpl(CloudinaryUpload cloudinaryUpload,
-                                    AdminCustomerRepository adminCustomerRepository,
-                                    PaginationUtil paginationUtil,
-                                    EmailService emailService,
-                                    PasswordEncoder passwordEncoder,
-                                    AdminEmployeeRepository adminEmployeeRepository
-    ) {
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.adminCustomerRepository = adminCustomerRepository;
-        this.paginationUtil = paginationUtil;
-        this.emailService = emailService;
-        this.passwordEncoder = passwordEncoder;
-        this.adminEmployeeRepository = adminEmployeeRepository;
-    }
+    private final AdminAddressRepository adminAddressRepository;
 
+    private final AddressUtil addressUtil;
 
     @Override
     public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, String voucher, String noVoucher) {
@@ -102,6 +89,11 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
         customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = adminCustomerRepository.save(AdminCustomerMapper.INSTANCE.adminCustomerRequestToCustomer(customerDTO));
+        if (customer != null) {
+            Address address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(customerDTO.getAddress());
+            address.setCustomer(customer);
+            adminAddressRepository.save(address);
+        }
         SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
         sendMailAutoEntity.sendMailAutoPassWord(customer, passWordRandom, null);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
@@ -126,6 +118,16 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
         customer.setEmail(customerDTO.getEmail());
         customer.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
+        Address address;
+        if (customer.getAddressList() == null) {
+            address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(customerDTO.getAddress());
+            address.setIsDefault(true);
+            address.setCustomer(customer);
+        } else {
+            address = adminAddressRepository.findDefaultAddressByCustomer(customer.getId());
+            addressUtil.updateAddress(address, customerDTO.getAddress());
+        }
+        adminAddressRepository.save(address);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(adminCustomerRepository.save(customer));
 
     }
