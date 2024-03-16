@@ -75,7 +75,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final MessageUtil messageUtil;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final OrderUtil orderUtil;
-    private final AddressUtil addressUtil;
+    private final EntityUtil entityUtil;
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
 
@@ -354,7 +354,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("address.notfound")));
 
             if (orderRequest.getAddressShipping() != null) {
-              addressUtil.updateAddress(address,orderRequest.getAddressShipping());
+              entityUtil.updateAddress(address,orderRequest.getAddressShipping());
             }
 
             return adminAddressRepository.save(address);

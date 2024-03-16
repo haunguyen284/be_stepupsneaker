@@ -21,7 +21,6 @@ import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,7 +50,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     private final AdminAddressRepository adminAddressRepository;
 
-    private final AddressUtil addressUtil;
+    private final EntityUtil entityUtil;
 
     @Override
     public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, String voucher, String noVoucher) {
@@ -131,7 +130,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             address.setCustomer(customer);
         } else {
             address = adminAddressRepository.findDefaultAddressByCustomer(customer.getId());
-            addressUtil.updateAddress(address, customerDTO.getAddress());
+            entityUtil.updateAddress(address, customerDTO.getAddress());
         }
         adminAddressRepository.save(address);
         addressList.add(address);
