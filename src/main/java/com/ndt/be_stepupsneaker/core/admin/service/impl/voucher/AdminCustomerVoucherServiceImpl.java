@@ -14,6 +14,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.EntityUtil;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     private final AdminVoucherRepository adminVoucherRepository;
     private final EmailService emailService;
     private final MessageUtil messageUtil;
+    private final EntityUtil entityUtil;
 
 
     @Override
@@ -79,29 +81,16 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
-        if (customerIds == null || customerIds.isEmpty()) {
-            List<Customer> customers = adminCustomerRepository.getAllByDeleted();
-            customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
-        }
+    public List<AdminCustomerVoucherResponse> createCustomerVoucher(String voucherId, List<String> customerIds) {
         List<CustomerVoucher> customerVouchers = new ArrayList<>();
-        for (String voucherId : voucherIds) {
-            for (String customerId : customerIds) {
-                Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
-                Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
-                if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
-                    throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
-                }
-                CustomerVoucher newCustomerVoucher = new CustomerVoucher();
-                newCustomerVoucher.setVoucher(optionalVoucher.get());
-                newCustomerVoucher.setCustomer(optionalCustomer.get());
-                customerVouchers.add(newCustomerVoucher);
-            }
+        Voucher voucher = adminVoucherRepository.findById(voucherId)
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound")));
+        if (customerIds != null) {
+            customerVouchers = entityUtil.addCustomersToVoucher(voucher, customerIds);
+        } else {
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoVoucherToCustomer(customerVouchers);
-        return adminCustomerVoucherRepository
-                .saveAll(customerVouchers)
+        return customerVouchers
                 .stream()
                 .map(AdminCustomerVoucherMapper.INSTANCE::customerVoucherToAdminCustomerVoucherResponse)
                 .collect(Collectors.toList());

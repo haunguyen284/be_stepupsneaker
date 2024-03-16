@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AdminCustomerVoucherService extends BaseService<AdminCustomerVoucherResponse, String, AdminCustomerVoucherRequest> {
-    List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds);
+    List<AdminCustomerVoucherResponse> createCustomerVoucher(String voucher, List<String> customerIds);
 
     Boolean deleteCustomersByVoucherIdAndCustomerIds(String voucherId, List<String> customerIds);
 }

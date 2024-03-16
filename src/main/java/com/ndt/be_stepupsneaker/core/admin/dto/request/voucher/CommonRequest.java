@@ -9,7 +9,12 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class ListCustomerIdAndVoucherIdRequest {
-    private List<String> voucher;
-    private List<String> customer;
+public class CommonRequest {
+    //customerVoucher
+    private String voucher;
+    private List<String> customers;
+
+    //promotionProductDetail
+    private String promotion;
+    private List<String> productDetails;
 }

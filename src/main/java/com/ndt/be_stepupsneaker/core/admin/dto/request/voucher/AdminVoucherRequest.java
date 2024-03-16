@@ -44,5 +44,7 @@ public class AdminVoucherRequest extends PageableRequest {
 
     private String image;
 
+    private List<String> customers;
+
 
 }

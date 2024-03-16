@@ -8,6 +8,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionProd
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminPromotionService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
@@ -15,10 +16,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
-import com.ndt.be_stepupsneaker.util.ConvertUtil;
-import com.ndt.be_stepupsneaker.util.MessageUtil;
-import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import com.ndt.be_stepupsneaker.util.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,6 +37,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
     private final MessageUtil messageUtil;
+    private final EntityUtil entityUtil;
 
     @Override
     public PageableObject<AdminPromotionResponse> findAllEntity(AdminPromotionRequest request) {
@@ -63,7 +62,9 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         request.setImage(cloudinaryUpload.upload(request.getImage()));
         Promotion promotion = adminPromotionRepository.save(AdminPromotionMapper.INSTANCE.adminPromotionRequestToPromotion(request));
         adminPromotionRepository.updateStatusBasedOnTime(promotion.getId(), promotion.getStartDate(), promotion.getEndDate());
-        productDetailsInPromotion(promotion, request.getProductDetailIds());
+        if (promotion != null && request.getProductDetailIds() != null) {
+            entityUtil.addProductDetailsToPromotion(promotion,request.getProductDetailIds());
+        }
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotion);
     }
 
@@ -86,7 +87,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         newPromotion.setEndDate(request.getEndDate());
         newPromotion.setStartDate(request.getStartDate());
         newPromotion.setValue(request.getValue());
-        productDetailsInPromotion(newPromotion, request.getProductDetailIds());
+        ;
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(newPromotion));
     }
 
@@ -112,51 +113,6 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         return true;
     }
 
-    public void productDetailsInPromotion(Promotion model, List<String> productDetailIds) {
-        Promotion promotion = adminPromotionRepository.findById(model.getId())
-                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound")));
-        if (promotion.getPromotionProductDetailList() == null) {
-            promotion.setPromotionProductDetailList(new ArrayList<>());
-        }
-        if (productDetailIds != null) {
-            List<ProductDetail> productDetails = adminProductDetailRepository.findAllById(productDetailIds);
-            Set<ProductDetail> productDetailsToUpdate = new HashSet<>();
-            List<PromotionProductDetail> promotionProductDetailsAdd = new ArrayList<>();
-
-            List<PromotionProductDetail> promotionProductDetails = productDetails
-                    .stream()
-                    .map(productDetail -> {
-                        PromotionProductDetail promotionProductDetail = new PromotionProductDetail();
-                        promotionProductDetail.setPromotion(promotion);
-                        promotionProductDetail.setProductDetail(productDetail);
-
-                        promotionProductDetailsAdd.add(promotionProductDetail);
-                        if (!productDetailsToUpdate.contains(productDetail)) {
-                            Float currentMoneyPromotion = productDetail.getMoneyPromotion();
-
-                            Optional<Float> maxMoneyPromotion = promotionProductDetail.getProductDetail().getPromotionProductDetails().stream()
-                                    .filter(ppd -> isValid(ppd))
-                                    .map(ppd -> calculateMoneyPromotion(ppd))
-                                    .max(Float::compare);
-                            System.out.println("ProductDetail ID: " + productDetail.getId());
-
-                            if (maxMoneyPromotion.isPresent() && (currentMoneyPromotion == null || maxMoneyPromotion.get() > currentMoneyPromotion)) {
-                                productDetail.setMoneyPromotion(maxMoneyPromotion.get());
-                                System.out.println("Max Money Promotion: " + maxMoneyPromotion.orElse(null));
-                            }
-
-                            productDetailsToUpdate.add(productDetail);
-                        }
-                        return promotionProductDetail;
-                    })
-                    .collect(Collectors.toList());
-            adminPromotionProductDetailRepository.saveAll(promotionProductDetailsAdd);
-            promotion.getPromotionProductDetailList().addAll(promotionProductDetails);
-            adminProductDetailRepository.saveAll(productDetailsToUpdate);
-
-        }
-
-    }
 
     public boolean isValid(PromotionProductDetail ppd) {
         Promotion promotion = ppd.getPromotion();
