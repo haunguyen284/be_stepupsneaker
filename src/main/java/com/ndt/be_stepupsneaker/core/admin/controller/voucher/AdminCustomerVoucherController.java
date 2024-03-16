@@ -45,16 +45,16 @@ public class AdminCustomerVoucherController {
     public Object create(@RequestBody @Valid CommonRequest commonRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(commonRequest.getVoucher(), commonRequest.getCustomer()), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(commonRequest.getVoucher(), commonRequest.getCustomers()), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public Object deleteCustomersByVoucherAndCustomerIds(
             @PathVariable("id") String voucherId,
             @RequestBody CommonRequest customerIdRequest) {
-        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIdRequest.getCustomer());
+        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIdRequest.getCustomers());
         if (deleted) {
-            return ResponseHelper.getResponse("CUSTOMERS "+messageUtil.getMessage("deleted.success"), HttpStatus.OK);
+            return ResponseHelper.getResponse("customer " + messageUtil.getMessage("deleted.success"), HttpStatus.OK);
         } else {
             return ResponseHelper.getResponse(messageUtil.getMessage("delete.failed"), HttpStatus.NOT_FOUND);
         }
