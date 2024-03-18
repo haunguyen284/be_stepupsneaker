@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,7 +22,6 @@ public class AdminPromotionRequest extends PageableRequest {
     private String id;
 
     @JsonDeserialize(using = CustomStringDeserializer.class)
-
     private String code;
 
     @JsonDeserialize(using = CustomStringDeserializer.class)
@@ -29,7 +29,7 @@ public class AdminPromotionRequest extends PageableRequest {
 
     private VoucherStatus status;
 
-    @Max(value = 70,message = "The value cannot exceed 70!")
+    @Max(value = 70,message = "{promotion.value.max}")
     private float value;
 
     private float constraint;

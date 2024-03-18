@@ -22,7 +22,7 @@ import java.util.UUID;
 public class AdminSoleRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "Name must be not null")
+    @NotBlank(message = "{sole.name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 

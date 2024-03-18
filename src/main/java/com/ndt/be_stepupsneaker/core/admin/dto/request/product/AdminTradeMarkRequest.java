@@ -22,7 +22,7 @@ import java.util.UUID;
 public class AdminTradeMarkRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "Name must be not null")
+    @NotBlank(message = "{trade_mark.name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 

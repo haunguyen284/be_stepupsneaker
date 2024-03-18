@@ -21,11 +21,11 @@ import java.util.UUID;
 public class AdminColorRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "Code must be not null")
+    @NotBlank(message = "{color.code.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String code;
 
-    @NotBlank(message = "Name must be not null")
+    @NotBlank(message = "{color.name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 

@@ -27,22 +27,21 @@ import java.util.UUID;
 public class AdminCustomerRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "PhoneNumber must be not null")
+    @NotBlank(message = "{customer.full_name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String fullName;
 
-    @NotBlank(message = "Email must be not null")
+    @NotBlank(message = "{customer.email.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String email;
 
-    @NotNull(message = "DateOfBirth must be not null")
+    @NotNull(message = "{customer.dob.not_blank}")
     private Long dateOfBirth;
 
     private String password;
 
     private CustomerStatus status;
 
-    @NotBlank(message = "Gender must be not null")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String gender;
 

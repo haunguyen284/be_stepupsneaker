@@ -18,16 +18,16 @@ public class AdminPaymentRequest extends PageableRequest {
 
     private String id;
 
-    @NotBlank(message = "Order must be not null")
+    @NotBlank(message = "{payment.order.not_blank}")
     private String order;
 
-    @NotBlank(message = "Payment Method must be not null")
+    @NotBlank(message = "{payment.payment_method.not_blank}")
     private String paymentMethod;
 
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String transactionCode;
 
-    @NotNull(message = "Total money must be not null")
+    @NotNull(message = "{payment.total_money.not_null}")
     private float totalMoney;
 
     @JsonDeserialize(using = CustomStringDeserializer.class)
