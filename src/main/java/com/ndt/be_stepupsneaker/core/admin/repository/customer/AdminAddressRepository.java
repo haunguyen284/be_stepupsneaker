@@ -28,7 +28,13 @@ public interface AdminAddressRepository extends AddressRepository {
     @Query("""
             SELECT x FROM Address x 
             WHERE (:customerId IS NULL OR x.customer.id  = :customerId)
-            AND
+            AND 
+            (:#{#request.wardName} IS NULL OR :#{#request.wardName} ILIKE '' OR x.wardName ILIKE  CONCAT('%', :#{#request.wardName}, '%')) 
+            AND 
+            (:#{#request.provinceName} IS NULL OR :#{#request.provinceName} ILIKE '' OR x.provinceName ILIKE  CONCAT('%', :#{#request.provinceName}, '%')) 
+            AND 
+            (:#{#request.districtName} IS NULL OR :#{#request.districtName} ILIKE '' OR x.districtName ILIKE  CONCAT('%', :#{#request.districtName}, '%')) 
+            AND 
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
             OR x.wardName ILIKE  CONCAT('%', :#{#request.q}, '%')
             OR x.provinceName ILIKE  CONCAT('%', :#{#request.q}, '%')
