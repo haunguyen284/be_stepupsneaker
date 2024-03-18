@@ -26,7 +26,15 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final PasswordResetTokenService passwordResetTokenService;
+    private final MySessionInfo mySessionInfo;
     private final MessageUtil messageUtil;
+
+
+    @GetMapping("/me")
+    public Object getMe() {
+        return ResponseHelper.getResponse(mySessionInfo.getCurrentCustomer(), HttpStatus.OK);
+    }
+
 
     @PostMapping("/register-employees")
     public ResponseEntity<AuthenticationResponse> registerEmployee(

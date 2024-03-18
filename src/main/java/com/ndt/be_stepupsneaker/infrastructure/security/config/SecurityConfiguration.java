@@ -44,6 +44,8 @@ public class SecurityConfiguration {
                                 .requestMatchers("/client/orders/**", "/admin/orders/**").permitAll()
                                 .requestMatchers("/admin/**").hasAnyRole(EntityProperties.ADMIN, EntityProperties.STAFF)
                                 .requestMatchers("/client/**").hasAnyRole(EntityProperties.CUSTOMER)
+                                .requestMatchers("/auth/client/me").hasAnyRole(EntityProperties.CUSTOMER)
+                                .requestMatchers("/auth/admin/me").hasAnyRole(EntityProperties.STAFF,EntityProperties.ADMIN)
                                 .anyRequest()
                                 .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

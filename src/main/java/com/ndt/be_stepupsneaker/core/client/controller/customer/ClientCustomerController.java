@@ -31,9 +31,14 @@ public class ClientCustomerController {
         return ResponseHelper.getResponse(response, HttpStatus.OK);
     }
 
-    @GetMapping("/me")
-    public Object getMe() {
+    @GetMapping("/client/me")
+    public Object getMeCustomer() {
         return ResponseHelper.getResponse(mySessionInfo.getCurrentCustomer(), HttpStatus.OK);
+    }
+
+    @GetMapping("/admin/me")
+    public Object getMeEmployee() {
+        return ResponseHelper.getResponse(mySessionInfo.getCurrentEmployee(), HttpStatus.OK);
     }
 
 
