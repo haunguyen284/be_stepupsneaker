@@ -124,7 +124,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         customer.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         List<Address> addressList = new ArrayList<>();
         Address address;
-        if (customer.getAddressList() == null) {
+        if (customer.getAddressList().isEmpty()) {
             address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(customerDTO.getAddress());
             address.setIsDefault(true);
             address.setCustomer(customer);

@@ -1,12 +1,10 @@
 package com.ndt.be_stepupsneaker.util;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
-import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionProductDetailRepository;
-import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -33,17 +30,17 @@ public class EntityUtil {
     private final EmailService emailService;
 
     public Address updateAddress(Address address, AdminAddressRequest addressRequest) {
-        if (addressRequest.getProvinceName().equals("")) {
+        if (addressRequest.getProvinceName() == null || addressRequest.getProvinceName().equals("")) {
             address.setProvinceName(address.getProvinceName());
         } else {
             address.setProvinceName(addressRequest.getProvinceName());
         }
-        if (addressRequest.getDistrictName().equals("")) {
+        if (addressRequest.getDistrictName() == null || addressRequest.getDistrictName().equals("")) {
             address.setDistrictName(address.getDistrictName());
         } else {
             address.setDistrictName(addressRequest.getDistrictName());
         }
-        if (addressRequest.getWardName().equals("")) {
+        if (addressRequest.getWardName() == null || addressRequest.getWardName().equals("")) {
             address.setWardName(address.getWardName());
         } else {
             address.setWardName(addressRequest.getWardName());
