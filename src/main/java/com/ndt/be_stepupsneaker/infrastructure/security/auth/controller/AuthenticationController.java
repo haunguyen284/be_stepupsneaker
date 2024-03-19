@@ -30,8 +30,14 @@ public class AuthenticationController {
     private final MessageUtil messageUtil;
 
 
-    @GetMapping("/me")
+    @GetMapping("/admin/me")
     public Object getMe() {
+        return ResponseHelper.getResponse(mySessionInfo.getCurrentEmployee(), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/client/me")
+    public Object getMeCustomer() {
         return ResponseHelper.getResponse(mySessionInfo.getCurrentCustomer(), HttpStatus.OK);
     }
 
