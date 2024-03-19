@@ -90,7 +90,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public Object create(AdminOrderRequest orderRequest) {
         Integer pendingOrder = adminOrderRepository.countAllByStatus(OrderStatus.PENDING);
-        if (pendingOrder > EntityProperties.LENGTH_PENDING_ORDER) {
+        if (pendingOrder >= EntityProperties.LENGTH_PENDING_ORDER) {
             throw new ApiException(messageUtil.getMessage("order.create_max"));
         }
         orderRequest.setType(OrderType.OFFLINE);
@@ -354,7 +354,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("address.notfound")));
 
             if (orderRequest.getAddressShipping() != null) {
-              entityUtil.updateAddress(address,orderRequest.getAddressShipping());
+                entityUtil.updateAddress(address, orderRequest.getAddressShipping());
             }
 
             return adminAddressRepository.save(address);
