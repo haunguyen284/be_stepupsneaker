@@ -36,11 +36,6 @@ public class ClientCustomerController {
         return ResponseHelper.getResponse(mySessionInfo.getCurrentCustomer(), HttpStatus.OK);
     }
 
-    @GetMapping("/admin/me")
-    public Object getMeEmployee() {
-        return ResponseHelper.getResponse(mySessionInfo.getCurrentEmployee(), HttpStatus.OK);
-    }
-
 
     @PutMapping("/change-password")
     public Object changePassword(@RequestBody @Valid ChangePasswordRequest request) {
