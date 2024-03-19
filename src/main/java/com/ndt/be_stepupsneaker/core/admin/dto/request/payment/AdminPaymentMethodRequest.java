@@ -17,7 +17,7 @@ public class AdminPaymentMethodRequest extends PageableRequest {
 
     private String id;
 
-    @NotBlank(message = "Name must not be null")
+    @NotBlank(message = "{payment_method.name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 

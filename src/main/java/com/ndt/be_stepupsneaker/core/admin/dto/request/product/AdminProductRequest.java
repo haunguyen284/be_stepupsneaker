@@ -23,11 +23,11 @@ import java.util.UUID;
 public class AdminProductRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "Code must be not null")
+    @NotBlank(message = "{product.code.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String code;
 
-    @NotBlank(message = "Name must be not null")
+    @NotBlank(message = "{product.name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 

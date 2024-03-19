@@ -18,33 +18,33 @@ import lombok.Setter;
 public class AdminEmployeeRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "FullName must be not null")
+    @NotBlank(message = "{employee.full_name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String fullName;
 
-    @NotBlank(message = "Email must be not null")
+    @NotBlank(message = "{employee.email.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String email;
 
-    @NotBlank(message = "Password must be not null")
+    @NotBlank(message = "{employee.password.not_blank}")
     private String password;
 
-    @NotNull(message = "Status must be not null")
+    @NotNull(message = "{employee.status.not_blank}")
     private EmployeeStatus status;
 
-    @NotBlank(message = "Address must be not null")
+    @NotBlank(message = "{employee.address.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String address;
 
-    @NotBlank(message = "Gender must be not null")
+    @NotBlank(message = "{employee.gender.not_blank}")
     private String gender;
 
-    @NotBlank(message = "PhoneNumber must be not null")
+    @NotBlank(message = "{employee.phone.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String phoneNumber;
 
     private String image;
 
-    @NotBlank(message = "Role must be not null")
+    @NotBlank(message = "{employee.role.not_blank}")
     private String role;
 }

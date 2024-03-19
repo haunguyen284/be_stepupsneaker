@@ -41,7 +41,7 @@ public class NotificationEmployeeController {
         return notificationEmployeeService.findAllNotificationFlux();
     }
 
-    @GetMapping("/orders/sse")
+    @GetMapping("/sse/orders")
     public Flux<ServerSentEvent<List<NotificationOrderResponse>>> steamNotificationOrder() {
         return notificationEmployeeService.getOrderCountByStatusFlux();
     }

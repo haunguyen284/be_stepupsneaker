@@ -21,7 +21,7 @@ import java.util.UUID;
 public class AdminBrandRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "Name must be not null")
+    @NotBlank(message = "{brand.name.not_blank}")
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 
