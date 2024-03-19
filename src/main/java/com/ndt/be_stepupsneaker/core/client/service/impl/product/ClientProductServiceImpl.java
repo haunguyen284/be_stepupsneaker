@@ -43,6 +43,8 @@ public class ClientProductServiceImpl implements ClientProductService {
             Product product = (Product) result[0];
             ClientProductResponse clientProductResponse = ClientProductMapper.INSTANCE.productToClientProductResponse(product);
             clientProductResponse.setSaleCount((Long) result[1]);
+            clientProductResponse.setPrice((Float) result[2]);
+            clientProductResponse.setQuantity((Long) result[3]);
             clientProductResponses.add(clientProductResponse);
         }
         Page<ClientProductResponse> clientProductResponsePage = new PageImpl<>(clientProductResponses, pageable, resp.getTotalElements());

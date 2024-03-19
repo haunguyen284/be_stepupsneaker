@@ -27,6 +27,10 @@ public class ClientProductResponse {
 
     private Long saleCount;
 
+    private Long quantity;
+
+    private float price;
+
     private Set<ClientProductDetailResponse> productDetails;
 
     private Long createdAt;
