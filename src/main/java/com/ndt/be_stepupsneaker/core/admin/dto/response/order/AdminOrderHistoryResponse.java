@@ -20,6 +20,10 @@ public class AdminOrderHistoryResponse {
 
     private String note;
 
+    private String orderId;
+
+    private String orderCode;
+
     private Long createdAt;
 
 }

@@ -12,6 +12,8 @@ public interface AdminOrderHistoryMapper {
 
     AdminOrderHistoryMapper INSTANCE = Mappers.getMapper( AdminOrderHistoryMapper.class );
 
+    @Mapping(target = "orderId", source = "order.id")
+    @Mapping(target = "orderCode", source = "order.code")
     AdminOrderHistoryResponse orderHistoryToAdminOrderHistoryResponse(OrderHistory orderHistory);
 
     @Mapping(target = "order.id", source = "order")
