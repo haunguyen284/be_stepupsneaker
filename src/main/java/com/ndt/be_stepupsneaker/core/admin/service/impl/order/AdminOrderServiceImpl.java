@@ -360,7 +360,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             newOrder.setStatus(orderRequest.isCOD() == true ? OrderStatus.WAIT_FOR_DELIVERY : OrderStatus.WAIT_FOR_CONFIRMATION);
             Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
             if (existingOrderHistoryOptional.isEmpty()) {
-                if (newOrder.isCOD() == true) {
+                if (orderRequest.isCOD() == true) {
                     orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
                 } else {
                     orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
