@@ -93,6 +93,9 @@ public class Order extends PrimaryEntity {
     @Column(name = "status")
     private OrderStatus status;
 
+    @Column(name = "is_cod")
+    private boolean isCOD;
+
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 

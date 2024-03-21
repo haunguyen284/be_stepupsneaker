@@ -1,6 +1,8 @@
 package com.ndt.be_stepupsneaker.util;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherHistoryMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderHistoryRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentRepository;
@@ -15,6 +17,7 @@ import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherHi
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherHistoryMapper;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.OrderHistory;
@@ -53,6 +56,7 @@ public class OrderUtil {
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
+    private final AdminCustomerRepository adminCustomerRepository;
 
     //   Kiểm tra đợt giảm giá còn hạn hoặc bắt đầu hay chưa
     public boolean isValid(PromotionProductDetail ppd) {
@@ -208,9 +212,7 @@ public class OrderUtil {
                         }
                         updateQuantityVoucher(voucher, voucher.getQuantity() - 1);
                     }
-
                 }
-
                 order.setVoucher(voucher);
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
                 float finalTotalPrice = Math.max(0, totalOrderPrice - discount);
@@ -298,5 +300,15 @@ public class OrderUtil {
         orderHistory.setActionStatus(orderStatus);
         orderHistory.setNote(orderHistoryNote);
         return adminOrderHistoryRepository.save(orderHistory);
+    }
+
+    public Customer getCustomer(AdminOrderRequest request) {
+        if (request.getCustomer() != null) {
+            Customer customer = adminCustomerRepository.findById(request.getCustomer())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
+            return customer;
+        } else {
+            return null;
+        }
     }
 }

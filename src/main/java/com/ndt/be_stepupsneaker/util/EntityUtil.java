@@ -49,6 +49,7 @@ public class EntityUtil {
         address.setDistrictId(addressRequest.getDistrictId());
         address.setProvinceId(addressRequest.getProvinceId());
         address.setWardCode(addressRequest.getWardCode());
+        address.setPhoneNumber(addressRequest.getPhoneNumber());
         return address;
     }
 

@@ -68,6 +68,8 @@ public class AdminOrderResponse {
 
     private OrderStatus status;
 
+    private boolean isCOD;
+
     private List<AdminOrderDetailResponse> orderDetails;
 
     private List<AdminOrderHistoryResponse> orderHistories;

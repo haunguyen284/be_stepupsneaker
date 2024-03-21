@@ -9,12 +9,19 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminAddressMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderHistoryMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.payment.AdminPaymentMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentMethodRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
+import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderDetailResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
+import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
+import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
@@ -36,10 +43,7 @@ import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
-import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
-import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
-import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.*;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
@@ -171,9 +175,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
         adminProductDetailRepository.saveAll(productDetailsUpdate);
         adminOrderDetailRepository.saveAll(orderDetailsUpdate);
-
+        float shippingFee = 0.0f;
         float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetailsUpdate);
-        float shippingFee = orderUtil.calculateShippingFee(totalMoney, address);
+        if (orderSave.getShippingMoney() == 0) {
+            shippingFee = orderSave.getShippingMoney();
+        } else {
+            shippingFee = orderUtil.calculateShippingFee(totalMoney, address);
+        }
         orderSave.setShippingMoney(shippingFee);
         orderSave.setOriginMoney(totalMoney);
         orderSave.setEmail(orderRequest.getEmail());
@@ -298,13 +306,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
-        if (orderRequest.getCustomer() != null) {
-            Customer customer = adminCustomerRepository.findById(orderRequest.getCustomer())
-                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
-            orderSave.setCustomer(customer);
-        } else {
-            orderSave.setCustomer(null);
-        }
+        orderSave.setCustomer(orderUtil.getCustomer(orderRequest));
         setOrderInfo(orderSave);
         orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
         if (!orderRequest.getPayments().isEmpty()) {
@@ -322,6 +324,54 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         AdminOrderResponse adminOrderResponse = AdminOrderMapper
                 .INSTANCE
                 .orderToAdminOrderResponse(adminOrderRepository.save(orderSave));
+        return adminOrderResponse;
+    }
+
+    @Override
+    public AdminOrderResponse checkoutSellDelivery(AdminOrderRequest orderRequest) {
+        Order orderUpdate = getOrderById(orderRequest);
+        Address address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(orderRequest.getAddressShipping());
+        if (orderRequest.getAddressShipping().getCustomer() == null) {
+            address.setCustomer(null);
+        }
+        Address addressOrder = adminAddressRepository.save(address);
+        orderUpdate.setAddress(addressOrder);
+        List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderUpdate.getId());
+        float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
+        float shippingFee = 0.0f;
+        if (orderRequest.getShippingMoney() == 0) {
+            shippingFee = orderUtil.calculateShippingFee(totalMoney, addressOrder);
+        } else {
+            shippingFee = orderRequest.getShippingMoney();
+        }
+        orderUpdate.setShippingMoney(shippingFee);
+        orderUpdate.setType(OrderType.ONLINE);
+        orderUpdate.setOriginMoney(totalMoney);
+        orderUpdate.setFullName(orderRequest.getFullName());
+        orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
+        orderUpdate.setEmail(orderRequest.getEmail());
+        orderUpdate.setCustomer(orderUtil.getCustomer(orderRequest));
+        setOrderInfo(orderUpdate);
+        orderUtil.applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney(), "update");
+        orderUpdate.setExpectedDeliveryDate(addressOrder.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
+        Order newOrder = adminOrderRepository.save(orderUpdate);
+        orderUtil.createVoucherHistory(newOrder);
+        if (!orderRequest.getPayments().isEmpty()) {
+            newOrder.setStatus(orderRequest.isCOD() == true ? OrderStatus.WAIT_FOR_DELIVERY : OrderStatus.WAIT_FOR_CONFIRMATION);
+            Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
+            if (existingOrderHistoryOptional.isEmpty()) {
+                if (newOrder.isCOD() == true) {
+                    orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
+                } else {
+                    orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
+                }
+            }
+            createPayment(newOrder, orderRequest);
+        }
+
+        AdminOrderResponse adminOrderResponse = AdminOrderMapper
+                .INSTANCE
+                .orderToAdminOrderResponse(adminOrderRepository.save(newOrder));
         return adminOrderResponse;
     }
 

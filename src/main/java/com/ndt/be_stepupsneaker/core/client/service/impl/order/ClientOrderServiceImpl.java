@@ -165,7 +165,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
                     throw new ApiException(messageUtil.getMessage("order.product.exceed"));
                 }
             }
-
             int quantityChange = cartItemRequest.getQuantity() - orderDetailUpdate.getQuantity();
             float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetailUpdate);
             float newProductPrice = productDetailUpdate.getPrice() - promotionValue;

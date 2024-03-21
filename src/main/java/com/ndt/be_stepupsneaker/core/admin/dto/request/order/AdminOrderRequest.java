@@ -70,6 +70,8 @@ public class AdminOrderRequest extends PageableRequest {
 
     private OrderType type;
 
+    private boolean isCOD;
+
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String note;
 
