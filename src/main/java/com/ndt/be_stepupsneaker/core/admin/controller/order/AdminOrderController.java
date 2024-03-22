@@ -78,7 +78,7 @@ public class AdminOrderController {
         return ResponseHelper.getResponse(adminOrderService.confirmationOrder(adminOrderRequest), HttpStatus.OK);
     }
 
-    @PutMapping("/check-out/{id}")
+    @PutMapping("/direct/check-out/{id}")
     public Object checkOut(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult) {
         adminOrderRequest.setId(id);
 
