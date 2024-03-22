@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
+import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +35,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final PaginationUtil paginationUtil;
     private final MessageUtil messageUtil;
+    private final OrderUtil orderUtil;
 
 
     @Override
@@ -78,9 +80,12 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
             totalQuantity = orderDetail.getQuantity() - orderDetailRequest.getQuantity();
             productDetail.setQuantity(productDetail.getQuantity() + totalQuantity);
         }
+        float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetail);
         orderDetail.setQuantity(orderDetailRequest.getQuantity());
-        orderDetail.setPrice(orderDetailRequest.getPrice());
+        orderDetail.setPrice(productDetail.getPrice() - promotionValue);
+        orderDetail.setTotalPrice(orderDetail.getQuantity() * orderDetail.getPrice());
         orderDetail.setStatus(orderDetailRequest.getStatus());
+
         adminProductDetailRepository.save(productDetail);
         adminOrderDetailRepository.save(orderDetail);
         return AdminOrderDetailMapper.INSTANCE.orderDetailToAdminOrderDetailResponse(orderDetail);
@@ -103,8 +108,9 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
                     if (detail.getProductDetail().getQuantity() < totalQuantity) {
                         throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
                     }
+                    float promotionValue = orderUtil.getPromotionValueOfProductDetail(detail.getProductDetail());
                     detail.setQuantity(totalQuantity);
-                    detail.setTotalPrice(totalQuantity * orderDetailRequest.getPrice());
+                    detail.setTotalPrice(totalQuantity * (detail.getProductDetail().getPrice() - promotionValue));
                     productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
                     adminProductDetailRepository.save(productDetail);
                     addOrderDetails.add(detail);
@@ -122,6 +128,12 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
             productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
             productDetails.add(productDetail);
             OrderDetail newOrderDetail = AdminOrderDetailMapper.INSTANCE.adminOrderDetailRequestToOrderDetail(orderDetailRequest);
+            ProductDetail productDetail1 = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
+            float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetail1);
+
+            newOrderDetail.setTotalPrice((productDetail1.getPrice() - promotionValue) * orderDetailRequest.getQuantity());
+            newOrderDetail.setPrice(productDetail1.getPrice() - promotionValue);
             addOrderDetails.add(newOrderDetail);
         }
         adminProductDetailRepository.saveAll(productDetails);

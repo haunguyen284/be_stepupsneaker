@@ -25,7 +25,6 @@ public class AdminOrderDetailRequest extends PageableRequest {
 
     private float price;
 
-
     private float totalPrice;
 
     private OrderStatus status;
