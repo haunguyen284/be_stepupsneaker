@@ -214,7 +214,11 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
         orderUpdate.setNote(orderRequest.getNote());
         orderUpdate.setCustomer(setOrderInfo(orderRequest));
-        orderUtil.applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, "update");
+        if (orderUpdate.getCustomer() == null && orderUpdate.getVoucher() != null) {
+            orderUtil.applyVoucherToOrder(orderUpdate, null, totalMoney, "update");
+        } else {
+            orderUtil.applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, "update");
+        }
         orderUpdate.setTotalMoney(orderUpdate.getTotalMoney() + shippingFee);
         Order order = clientOrderRepository.save(orderUpdate);
         if (order.getTotalMoney() != order.getPayments().get(0).getTotalMoney()) {
