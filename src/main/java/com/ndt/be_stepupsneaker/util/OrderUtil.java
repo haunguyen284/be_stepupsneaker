@@ -31,6 +31,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
@@ -183,7 +184,7 @@ public class OrderUtil {
     }
 
     // Thêm khuyến mãi vào order
-    public void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, float shippingFee, String action) {
+    public void applyVoucherToOrder(Order order, String voucherId, float totalOrderPrice, String action) {
         if (voucherId != null && !voucherId.isBlank()) {
             Voucher voucher = adminVoucherRepository.findById(voucherId)
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound")));
@@ -217,7 +218,7 @@ public class OrderUtil {
                 float discount = voucher.getType() == VoucherType.CASH ? voucher.getValue() : (voucher.getValue() / 100) * totalOrderPrice;
                 float finalTotalPrice = Math.max(0, totalOrderPrice - discount);
                 order.setReduceMoney(discount);
-                order.setTotalMoney(finalTotalPrice + shippingFee);
+                order.setTotalMoney(finalTotalPrice);
                 // update lại voucherHistory
                 if (order.getVoucherHistories() != null && action.equals("update") && !order.getVoucherHistories().isEmpty()) {
                     VoucherHistory voucherHistory = adminVoucherHistoryRepository
@@ -242,14 +243,16 @@ public class OrderUtil {
 
         } else {
             order.setReduceMoney(0);
-            order.setTotalMoney(totalOrderPrice + shippingFee);
+            order.setTotalMoney(totalOrderPrice);
             if (order.getVoucher() != null && voucherId == null) {
                 Voucher voucher = order.getVoucher();
                 updateQuantityVoucher(voucher, voucher.getQuantity() + 1);
                 List<VoucherHistory> voucherHistories = order.getVoucherHistories();
                 adminVoucherHistoryRepository.deleteAll(voucherHistories);
+                order.setVoucherHistories(null);
             }
             order.setVoucher(null);
+
         }
     }
 
@@ -304,9 +307,11 @@ public class OrderUtil {
 
     public Customer getCustomer(AdminOrderRequest request) {
         if (request.getCustomer() != null) {
-            Customer customer = adminCustomerRepository.findById(request.getCustomer())
+            return adminCustomerRepository.findById(request.getCustomer())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
-            return customer;
+        } else if (request.getCustomer() == null && request.getEmail() != null) {
+            return adminCustomerRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
         } else {
             return null;
         }

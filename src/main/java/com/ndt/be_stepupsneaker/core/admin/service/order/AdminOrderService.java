@@ -25,5 +25,13 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     AdminOrderResponse checkoutSellDelivery(AdminOrderRequest orderRequest);
 
+    AdminOrderResponse applyCustomerToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyVoucherToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyShippingToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyNoteToOrder(AdminOrderRequest orderRequest);
+
 
 }

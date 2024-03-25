@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.customer.AdminCustomerRe
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order_audit.ChangeDetailResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherHistoryResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
@@ -73,5 +74,7 @@ public class AdminOrderResponse {
     private List<AdminOrderHistoryResponse> orderHistories;
 
     private List<AdminPaymentResponse> payments;
+
+    private List<AdminVoucherHistoryResponse> voucherHistories;
 
 }

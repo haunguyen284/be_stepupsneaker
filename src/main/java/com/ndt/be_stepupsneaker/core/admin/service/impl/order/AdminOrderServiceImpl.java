@@ -189,8 +189,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
         orderSave.setVersionUpdate(orderSave.getVersionUpdate() + 1);
-        setOrderInfo(orderSave);
-        orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
+        orderSave.setEmployee(applyEmployeeToOrder());
+        orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, "update");
+        orderSave.setTotalMoney(orderSave.getTotalMoney() + orderSave.getShippingMoney());
         Order order = adminOrderRepository.save(orderSave);
         if (order.getTotalMoney() != order.getPayments().get(0).getTotalMoney()) {
             orderUtil.updatePayment(order);
@@ -306,9 +307,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setFullName(orderRequest.getFullName());
         orderSave.setPhoneNumber(orderRequest.getPhoneNumber());
         orderSave.setNote(orderRequest.getNote());
-        orderSave.setCustomer(orderUtil.getCustomer(orderRequest));
-        setOrderInfo(orderSave);
-        orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "update");
+        orderSave.setEmployee(applyEmployeeToOrder());
+        if (orderSave.getVoucher() == null) {
+            orderSave.setTotalMoney(totalMoney);
+        }
         if (!orderRequest.getPayments().isEmpty()) {
             orderSave.setStatus(OrderStatus.COMPLETED);
             Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(orderSave.getId(), orderSave.getStatus());
@@ -338,41 +340,99 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderUpdate.setAddress(addressOrder);
         List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderUpdate.getId());
         float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
-        float shippingFee = 0.0f;
-        if (orderRequest.getShippingMoney() == 0) {
-            shippingFee = orderUtil.calculateShippingFee(totalMoney, addressOrder);
-        } else {
-            shippingFee = orderRequest.getShippingMoney();
-        }
-        orderUpdate.setShippingMoney(shippingFee);
         orderUpdate.setType(OrderType.ONLINE);
         orderUpdate.setOriginMoney(totalMoney);
         orderUpdate.setFullName(orderRequest.getFullName());
         orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
         orderUpdate.setEmail(orderRequest.getEmail());
-        orderUpdate.setCustomer(orderUtil.getCustomer(orderRequest));
-        setOrderInfo(orderUpdate);
-        orderUtil.applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney(), "update");
-        orderUpdate.setExpectedDeliveryDate(addressOrder.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
+        orderUpdate.setEmployee(applyEmployeeToOrder());
+        if (orderUpdate.getShippingMoney() == 0 && orderUpdate.getVoucher() == null) {
+            orderUpdate.setTotalMoney(totalMoney);
+        }
+        orderUpdate.setExpectedDeliveryDate(orderUpdate.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = adminOrderRepository.save(orderUpdate);
         orderUtil.createVoucherHistory(newOrder);
-        if (!orderRequest.getPayments().isEmpty()) {
-            newOrder.setStatus(orderRequest.isCOD() == true ? OrderStatus.WAIT_FOR_DELIVERY : OrderStatus.WAIT_FOR_CONFIRMATION);
-            Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
-            if (existingOrderHistoryOptional.isEmpty()) {
-                if (orderRequest.isCOD() == true) {
-                    orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
-                } else {
-                    orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
-                }
-            }
+        if (orderRequest.isCOD() == true) {
+            newOrder.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
+            PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Cash")
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
+            Payment payment = new Payment();
+            payment.setOrder(newOrder);
+            payment.setPaymentMethod(paymentMethod);
+            payment.setDescription(newOrder.getNote());
+            payment.setTotalMoney(newOrder.getTotalMoney());
+            payment.setTransactionCode("Cash");
+            payment.setPaymentStatus(PaymentStatus.PENDING);
+            adminPaymentRepository.save(payment);
+        } else {
+            newOrder.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
             createPayment(newOrder, orderRequest);
+        }
+        Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
+        if (existingOrderHistoryOptional.isEmpty()) {
+            if (orderRequest.isCOD() == true) {
+                orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
+            } else {
+                orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
+            }
         }
 
         AdminOrderResponse adminOrderResponse = AdminOrderMapper
                 .INSTANCE
                 .orderToAdminOrderResponse(adminOrderRepository.save(newOrder));
         return adminOrderResponse;
+    }
+
+    @Override
+    public AdminOrderResponse applyCustomerToOrder(AdminOrderRequest orderRequest) {
+        Order order = getOrderById(orderRequest);
+        order.setCustomer(orderUtil.getCustomer(orderRequest));
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
+    }
+
+    @Override
+    public AdminOrderResponse applyVoucherToOrder(AdminOrderRequest orderRequest) {
+        Order order = getOrderById(orderRequest);
+        if (order.getOrderDetails().isEmpty()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
+        }
+        List<OrderDetail> orderDetails = order.getOrderDetails();
+        float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
+        orderUtil.applyVoucherToOrder(order, orderRequest.getVoucher(), totalMoney, "update");
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
+    }
+
+    @Override
+    public AdminOrderResponse applyShippingToOrder(AdminOrderRequest orderRequest) {
+        Order order = getOrderById(orderRequest);
+        float shippingFee = 0.0f;
+        if (order.getOrderDetails().isEmpty()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
+        }
+        float totalMoney = orderUtil.totalMoneyOrderDetails(order.getOrderDetails());
+        if (totalMoney >= EntityProperties.IS_FREE_SHIPPING) {
+            shippingFee = 0;
+        }
+        if (order.getShippingMoney() != 0 && orderRequest.getShippingMoney() == 0) {
+            shippingFee = orderRequest.getShippingMoney();
+        } else if (order.getShippingMoney() == 0 && orderRequest.getShippingMoney() != 0) {
+            shippingFee = orderRequest.getShippingMoney();
+        }
+
+        order.setShippingMoney(shippingFee);
+        if (order.getVoucher() == null) {
+            order.setTotalMoney(order.getOriginMoney() + shippingFee);
+        } else {
+            order.setTotalMoney(order.getTotalMoney() + shippingFee);
+        }
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
+    }
+
+    @Override
+    public AdminOrderResponse applyNoteToOrder(AdminOrderRequest orderRequest) {
+        Order order = getOrderById(orderRequest);
+        order.setNote(orderRequest.getNote());
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
     }
 
 
@@ -402,30 +462,20 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         } else {
             Address address = adminAddressRepository.findById(order.getAddress().getId())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("address.notfound")));
-
             if (orderRequest.getAddressShipping() != null) {
                 entityUtil.updateAddress(address, orderRequest.getAddressShipping());
             }
-
             return adminAddressRepository.save(address);
         }
     }
 
-    private void setOrderInfo(Order order) {
-        if (order.getCustomer() == null && order.getEmail() != null) {
-            Customer customer = adminCustomerRepository.findByEmail(order.getEmail()).orElse(null);
-            order.setCustomer(customer);
-        }
-
-        if (order.getEmployee() == null) {
-            AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
-            if (employeeResponse != null) {
-                Employee employee = adminEmployeeRepository.findById(employeeResponse.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
-                order.setEmployee(employee);
-            } else {
-                throw new ResourceNotFoundException(messageUtil.getMessage("error.not_login"));
-            }
+    private Employee applyEmployeeToOrder() {
+        AdminEmployeeResponse employeeResponse = mySessionInfo.getCurrentEmployee();
+        if (employeeResponse != null) {
+            return adminEmployeeRepository.findById(employeeResponse.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
+        } else {
+            throw new ResourceNotFoundException(messageUtil.getMessage("error.not_login"));
         }
     }
 

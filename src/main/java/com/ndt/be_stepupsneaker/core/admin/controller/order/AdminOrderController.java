@@ -96,5 +96,35 @@ public class AdminOrderController {
         return ResponseHelper.getResponse(adminOrderService.checkoutSellDelivery(adminOrderRequest), HttpStatus.OK);
     }
 
+    @PutMapping("/apply-customer/{id}")
+    public Object applyCustomerToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyCustomerToOrder(orderRequest), HttpStatus.OK);
+    }
 
+    @PutMapping("/apply-voucher/{id}")
+    public Object applyVoucherToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyVoucherToOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/apply-shipping/{id}")
+    public Object applyShippingToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyShippingToOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/apply-note/{id}")
+    public Object applyNoteToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyNoteToOrder(orderRequest), HttpStatus.OK);
+    }
 }

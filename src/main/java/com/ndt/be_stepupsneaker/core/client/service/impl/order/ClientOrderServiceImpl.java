@@ -108,7 +108,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderSave.setOriginMoney(totalMoney);
         orderSave.setCustomer(setOrderInfo(clientOrderRequest));
         orderSave.setEmployee(null);
-        orderUtil.applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalMoney, orderSave.getShippingMoney(), "add");
+        orderUtil.applyVoucherToOrder(orderSave, clientOrderRequest.getVoucher(), totalMoney, "add");
+        orderSave.setTotalMoney(orderSave.getTotalMoney() + shippingFee);
         orderSave.setExpectedDeliveryDate(newAddress.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = clientOrderRepository.save(orderSave);
         List<ClientOrderDetailResponse> clientOrderDetailResponses = createOrderDetails(newOrder, clientOrderRequest);
@@ -213,7 +214,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         orderUpdate.setPhoneNumber(orderRequest.getPhoneNumber());
         orderUpdate.setNote(orderRequest.getNote());
         orderUpdate.setCustomer(setOrderInfo(orderRequest));
-        orderUtil.applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, orderUpdate.getShippingMoney(), "update");
+        orderUtil.applyVoucherToOrder(orderUpdate, orderRequest.getVoucher(), totalMoney, "update");
+        orderUpdate.setTotalMoney(orderUpdate.getTotalMoney() + shippingFee);
         Order order = clientOrderRepository.save(orderUpdate);
         if (order.getTotalMoney() != order.getPayments().get(0).getTotalMoney()) {
             orderUtil.updatePayment(order);
