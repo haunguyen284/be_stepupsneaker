@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderReturnRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentMethodResponse;
@@ -126,5 +127,13 @@ public class AdminOrderController {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminOrderService.applyNoteToOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/return/{id}")
+    public Object returnOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderReturnRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.returnOrder(orderRequest), HttpStatus.OK);
     }
 }

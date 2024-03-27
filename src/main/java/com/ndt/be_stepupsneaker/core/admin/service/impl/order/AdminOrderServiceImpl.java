@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminCartItemRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderReturnRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.payment.AdminPaymentRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderHistoryResponse;
@@ -52,6 +53,7 @@ import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -433,6 +435,68 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order order = getOrderById(orderRequest);
         order.setNote(orderRequest.getNote());
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
+    }
+
+    @Override
+    public AdminOrderResponse returnOrder(AdminOrderReturnRequest orderRequest) {
+        Optional<Order> orderOptional = adminOrderRepository.findById(orderRequest.getId());
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
+        }
+        Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(orderRequest.getPaymentMethod());
+        if (paymentMethodOptional.isEmpty()){
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
+        }
+
+        float totalMoneyReturn = 0;
+        Order order = orderOptional.get();
+        if (order.getStatus() != OrderStatus.COMPLETED) {
+            throw new ApiException(messageUtil.getMessage("return_form.order.cant_create"));
+        }
+        for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
+            Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(cartItemRequest.getId());
+            if (orderDetailOptional.isEmpty()) {
+                throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
+            }
+            OrderDetail orderDetail = orderDetailOptional.get();
+            if (!order.getOrderDetails().contains(orderDetail)) {
+                throw new ApiException("order.return.not_match_order_detail");
+            }
+            int returnQuantity = orderDetail.getQuantity() - cartItemRequest.getQuantity();
+            if (returnQuantity < 0) {
+                throw new ApiException("Bad request");
+            } else if (returnQuantity == 0){
+                orderDetail.setStatus(OrderStatus.RETURNED);
+                adminOrderDetailRepository.save(orderDetail);
+                totalMoneyReturn += orderDetail.getTotalPrice();
+            } else {
+                orderDetail.setQuantity(orderDetail.getQuantity() - returnQuantity);
+                orderDetail.setTotalPrice((orderDetail.getQuantity() - returnQuantity) * orderDetail.getPrice());
+                adminOrderDetailRepository.save(orderDetail);
+                // luu them don hang chi tiet hoan tra
+                OrderDetail orderDetailReturn = new OrderDetail();
+                BeanUtils.copyProperties(orderDetail, orderDetailReturn);
+                orderDetailReturn.setId(null);
+                orderDetailReturn.setStatus(OrderStatus.RETURNED);
+                orderDetailReturn.setQuantity(returnQuantity);
+                orderDetailReturn.setTotalPrice(returnQuantity * orderDetail.getPrice());
+                totalMoneyReturn += returnQuantity * orderDetail.getPrice();
+                adminOrderDetailRepository.save(orderDetailReturn);
+            }
+        }
+        order.setStatus(OrderStatus.RETURNED);
+        order.setTotalMoney(order.getTotalMoney() - totalMoneyReturn);
+        Order orderSave = adminOrderRepository.save(order);
+
+        Payment payment = new Payment();
+        payment.setPaymentMethod(paymentMethodOptional.get());
+        payment.setOrder(orderSave);
+        payment.setTotalMoney(-totalMoneyReturn);
+        payment.setTransactionCode(orderRequest.getTransactionCode());
+        payment.setDescription(orderRequest.getDescription());
+        adminPaymentRepository.save(payment);
+
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderSave);
     }
 
 

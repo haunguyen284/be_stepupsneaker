@@ -43,5 +43,4 @@ public class OrderDetail extends PrimaryEntity {
 
     @Column(name = "status")
     private OrderStatus status;
-
 }
