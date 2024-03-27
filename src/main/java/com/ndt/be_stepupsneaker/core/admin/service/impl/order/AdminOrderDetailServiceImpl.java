@@ -95,13 +95,17 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     public List<AdminOrderDetailResponse> create(List<AdminOrderDetailRequest> orderDetailRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         List<OrderDetail> addOrderDetails = new ArrayList<>();
-        for (AdminOrderDetailRequest orderDetailRequest : orderDetailRequests) {
+        List<OrderDetail> updateOrderDetails = new ArrayList<>();
+        for (int i = 0; i < orderDetailRequests.size(); i++) {
+            AdminOrderDetailRequest orderDetailRequest = orderDetailRequests.get(i);
             List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderDetailRequest.getOrder());
             ProductDetail productDetail = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
             if (orderDetailRequest.getQuantity() > productDetail.getQuantity()) {
                 throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
             }
+
+            boolean found = false;
             for (OrderDetail detail : orderDetails) {
                 if (detail.getProductDetail().getId() == productDetail.getId()) {
                     int totalQuantity = detail.getQuantity() + orderDetailRequest.getQuantity();
@@ -113,29 +117,27 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
                     detail.setTotalPrice(totalQuantity * (detail.getProductDetail().getPrice() - promotionValue));
                     productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
                     adminProductDetailRepository.save(productDetail);
-                    addOrderDetails.add(detail);
-                    orderDetailRequests.remove(orderDetailRequest);
-                    List<AdminOrderDetailResponse> adminOrderDetailResponse = adminOrderDetailRepository.saveAll(addOrderDetails)
-                            .stream()
-                            .map(AdminOrderDetailMapper.INSTANCE::orderDetailToAdminOrderDetailResponse)
-                            .collect(Collectors.toList());
-                    addOrderDetails.clear();
-                    return adminOrderDetailResponse;
+                    updateOrderDetails.add(detail);
+                    found = true;
+                    break;
                 }
 
             }
+            if (!found) {
+                productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
+                productDetails.add(productDetail);
+                OrderDetail newOrderDetail = AdminOrderDetailMapper.INSTANCE.adminOrderDetailRequestToOrderDetail(orderDetailRequest);
+                ProductDetail productDetail1 = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
+                float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetail1);
 
-            productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
-            productDetails.add(productDetail);
-            OrderDetail newOrderDetail = AdminOrderDetailMapper.INSTANCE.adminOrderDetailRequestToOrderDetail(orderDetailRequest);
-            ProductDetail productDetail1 = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
-                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
-            float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetail1);
+                newOrderDetail.setTotalPrice((productDetail1.getPrice() - promotionValue) * orderDetailRequest.getQuantity());
+                newOrderDetail.setPrice(productDetail1.getPrice() - promotionValue);
+                addOrderDetails.add(newOrderDetail);
+            }
 
-            newOrderDetail.setTotalPrice((productDetail1.getPrice() - promotionValue) * orderDetailRequest.getQuantity());
-            newOrderDetail.setPrice(productDetail1.getPrice() - promotionValue);
-            addOrderDetails.add(newOrderDetail);
         }
+        adminOrderDetailRepository.saveAll(updateOrderDetails);
         adminProductDetailRepository.saveAll(productDetails);
         return adminOrderDetailRepository.saveAll(addOrderDetails).stream().map(AdminOrderDetailMapper.INSTANCE::orderDetailToAdminOrderDetailResponse).collect(Collectors.toList());
     }

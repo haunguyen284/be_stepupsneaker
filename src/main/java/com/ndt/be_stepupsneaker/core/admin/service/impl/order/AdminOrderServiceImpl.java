@@ -192,7 +192,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         orderSave.setNote(orderRequest.getNote());
         orderSave.setVersionUpdate(orderSave.getVersionUpdate() + 1);
         orderSave.setEmployee(applyEmployeeToOrder());
-        orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, "update");
+        if (orderSave.getCustomer() == null && orderSave.getVoucher() != null) {
+            orderUtil.applyVoucherToOrder(orderSave, null, totalMoney, "update");
+        } else {
+            orderUtil.applyVoucherToOrder(orderSave, orderRequest.getVoucher(), totalMoney, "update");
+        }
         orderSave.setTotalMoney(orderSave.getTotalMoney() + orderSave.getShippingMoney());
         Order order = adminOrderRepository.save(orderSave);
         if (order.getTotalMoney() != order.getPayments().get(0).getTotalMoney()) {
@@ -389,6 +393,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     public AdminOrderResponse applyCustomerToOrder(AdminOrderRequest orderRequest) {
         Order order = getOrderById(orderRequest);
         order.setCustomer(orderUtil.getCustomer(orderRequest));
+        if (order.getCustomer() == null && order.getVoucher() != null) {
+            List<OrderDetail> orderDetails = order.getOrderDetails();
+            float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
+            orderUtil.applyVoucherToOrder(order, null, totalMoney, "update");
+        }
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
     }
 
@@ -400,6 +409,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         List<OrderDetail> orderDetails = order.getOrderDetails();
         float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
+        order.setOriginMoney(totalMoney);
         orderUtil.applyVoucherToOrder(order, orderRequest.getVoucher(), totalMoney, "update");
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
     }
@@ -415,13 +425,19 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (totalMoney >= EntityProperties.IS_FREE_SHIPPING) {
             shippingFee = 0;
         }
-        if (order.getShippingMoney() != 0 && orderRequest.getShippingMoney() == 0) {
+        if (order.getShippingMoney() != 0
+                && orderRequest.getShippingMoney() == 0
+                && totalMoney < EntityProperties.IS_FREE_SHIPPING) {
             shippingFee = orderRequest.getShippingMoney();
-        } else if (order.getShippingMoney() == 0 && orderRequest.getShippingMoney() != 0) {
+        } else if (order.getShippingMoney() == 0
+                && orderRequest.getShippingMoney() != 0
+                && orderRequest.getShippingMoney() == 0
+                && totalMoney < EntityProperties.IS_FREE_SHIPPING) {
             shippingFee = orderRequest.getShippingMoney();
         }
 
         order.setShippingMoney(shippingFee);
+        order.setOriginMoney(totalMoney);
         if (order.getVoucher() == null) {
             order.setTotalMoney(order.getOriginMoney() + shippingFee);
         } else {
@@ -515,7 +531,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
-
         return orderOptional.get();
     }
 
