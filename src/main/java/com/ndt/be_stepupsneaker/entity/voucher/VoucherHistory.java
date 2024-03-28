@@ -32,4 +32,5 @@ public class VoucherHistory extends PrimaryEntity {
 
     @Column(name = "money_reduction")
     private float moneyReduction;
+
 }

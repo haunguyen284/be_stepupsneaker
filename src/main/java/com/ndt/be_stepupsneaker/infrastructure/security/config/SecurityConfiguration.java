@@ -41,9 +41,9 @@ public class SecurityConfiguration {
                                         "/admin/notifications", "/client/transaction/**", "/client/orders/**")
                                 .permitAll()
                                 .requestMatchers("/admin/customers/**", "/admin/orders/**", "/admin/order-details/**", "/admin/statistic/**").hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
-                                .requestMatchers(HttpMethod.GET,
-                                        "/admin/order-histories/**", "/admin/voucher-histories/**",
-                                        "/admin/product-details/**", "/admin/trade-marks/**", "/admin/products/**"
+                                .requestMatchers(HttpMethod.GET
+                                        , "/admin/order-histories/**", "/admin/voucher-histories/**"
+                                        , "/admin/product-details/**", "/admin/trade-marks/**", "/admin/products/**"
                                         , "/admin/payments/**", "/admin/payment-methods/**", "/admin/colors/**"
                                         , "/admin/brands/**", "/admin/styles/**", "/admin/soles/**", "/admin/vouchers/**"
                                         , "/admin/sizes/**", "/admin/materials/**").hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
