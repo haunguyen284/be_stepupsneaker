@@ -21,11 +21,10 @@ public interface AdminVoucherHistoryRepository extends VoucherHistoryRepository 
     SELECT x FROM VoucherHistory x 
     WHERE 
     (:#{#request.customer} IS NULL OR :#{#request.customer} ILIKE '' OR x.order.customer.id = :#{#request.customer}) 
-    AND 
-    x.deleted=false
+    AND     
+    x.deleted = FALSE
     """)
     Page<VoucherHistory> findAllVoucherHistory(@Param("request") AdminVoucherHistoryRequest request, Pageable pageable);
-
 
     @Modifying
     @Transactional

@@ -87,6 +87,7 @@ public class ScheduledServiceImpl implements ScheduledService {
                 }
             }
             adminVoucherRepository.saveAll(vouchers);
+            clientPaymentRepository.deletePaymentByOrder(expiredOrderIds);
             clientVoucherHistoryRepository.deleteVoucherHistoryByOrder(expiredOrderIds);
             adminProductDetailRepository.saveAll(productDetails);
             adminOrderDetailRepository.deleteAllByOrder(expiredOrderIds);
