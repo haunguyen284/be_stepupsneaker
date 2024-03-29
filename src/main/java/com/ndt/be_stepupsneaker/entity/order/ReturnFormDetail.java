@@ -46,5 +46,5 @@ public class ReturnFormDetail extends PrimaryEntity {
     private String urlImage;
 
     @Column(name = "resellable")
-    private boolean reSellable;
+    private boolean resellable;
 }

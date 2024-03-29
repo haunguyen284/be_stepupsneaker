@@ -28,6 +28,6 @@ public class AdminReturnFormDetailRequest extends PageableRequest {
 
     private String image;
 
-    private boolean reSellable;
+    private boolean resellable;
 
 }

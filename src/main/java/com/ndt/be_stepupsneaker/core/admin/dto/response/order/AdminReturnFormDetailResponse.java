@@ -35,5 +35,5 @@ public class AdminReturnFormDetailResponse {
 
     private String urlImage;
 
-    private boolean reSellable;
+    private boolean resellable;
 }
