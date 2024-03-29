@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.response.order;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormHistoryResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.entity.order.ReturnFormDetail;
 import com.ndt.be_stepupsneaker.entity.order.ReturnFormHistory;
@@ -21,6 +22,8 @@ import java.util.Set;
 public class AdminReturnFormResponse {
 
     private String id;
+
+    private AdminOrderNoOrderDetailResponse order;
 
     private AdminEmployeeResponse employee;
 
