@@ -18,6 +18,13 @@ public class PaginationUtil {
     }
 
     public Pageable pageable(PageableRequest paginationRequest) {
+        Sort sort = null;
+        Map<String, String> sortByMapping = new HashMap<>();
+        sortByMapping.put("voucherCode", "voucher.code");
+        sortByMapping.put("orderCode", "order.code");
+        String sortByValue = sortByMapping.getOrDefault(paginationRequest.getSortBy(), paginationRequest.getSortBy());
+        sort = paginationRequest.getOrderBy().equals("asc") ? Sort.by(sortByValue).ascending() : Sort.by(sortByValue).descending();
+        return PageRequest.of(paginationRequest.getPage(), paginationRequest.getPageSize(), sort);
 //        Pageable pageable = null;
 //        if (paginationRequest.getOrderBy().equals("asc")) {
 //            pageable = PageRequest.of(paginationRequest.getPage(), paginationRequest.getPageSize(), Sort.by(paginationRequest.getSortBy()).ascending());
@@ -26,13 +33,5 @@ public class PaginationUtil {
 //        }
 //        return pageable;
 //
-        Sort sort = null;
-        Map<String, String> sortByMapping = new HashMap<>();
-        sortByMapping.put("voucherCode", "voucher.code");
-        sortByMapping.put("orderCode", "order.code");
-        String sortByValue = sortByMapping.getOrDefault(paginationRequest.getSortBy(), paginationRequest.getSortBy());
-        sort = paginationRequest.getOrderBy().equals("asc") ? Sort.by(sortByValue).ascending() : Sort.by(sortByValue).descending();
-        return PageRequest.of(paginationRequest.getPage(), paginationRequest.getPageSize(), sort);
-
     }
 }
