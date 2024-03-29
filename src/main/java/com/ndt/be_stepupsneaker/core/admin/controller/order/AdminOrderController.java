@@ -128,12 +128,4 @@ public class AdminOrderController {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminOrderService.applyNoteToOrder(orderRequest), HttpStatus.OK);
     }
-
-    @PutMapping("/return/{id}")
-    public Object returnOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderReturnRequest orderRequest, BindingResult bindingResult) {
-        orderRequest.setId(id);
-        if (bindingResult.hasErrors())
-            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-        return ResponseHelper.getResponse(adminOrderService.returnOrder(orderRequest), HttpStatus.OK);
-    }
 }

@@ -11,6 +11,4 @@ import org.mapstruct.factory.Mappers;
 public interface AdminReturnFormMapper {
     AdminReturnFormMapper INSTANCE = Mappers.getMapper( AdminReturnFormMapper.class );
     AdminReturnFormResponse returnFormToAdminReturnFormResponse(ReturnForm returnForm);
-
-    ReturnForm adminReturnFormRequestToReturnForm(AdminReturnFormRequest adminReturnFormRequest);
 }

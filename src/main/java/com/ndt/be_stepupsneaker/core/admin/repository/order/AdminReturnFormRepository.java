@@ -18,12 +18,10 @@ public interface AdminReturnFormRepository extends ReturnFormRepository {
     @Query("""
             SELECT rf FROM ReturnForm rf
             WHERE (
-            ((:status IS NULL) OR (rf.status = :status)) 
-            AND
             rf.deleted=false 
             ) 
             """)
-    Page<ReturnForm> findAllReturnForm(@Param("status") ReturnFormStatus status, Pageable pageable);
+    Page<ReturnForm> findAllReturnForm(Pageable pageable);
 
     @Query("""
     SELECT rf FROM ReturnForm rf WHERE rf.order.id = :orderId

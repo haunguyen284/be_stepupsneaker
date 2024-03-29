@@ -1,8 +1,6 @@
 package com.ndt.be_stepupsneaker.infrastructure.constant;
 
-public enum ReturnFormStatus {
+public enum RefundStatus {
     PENDING,
-    RETURNING,
-    RECEIVED,
     COMPLETED
 }

@@ -34,7 +34,4 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     AdminOrderResponse applyNoteToOrder(AdminOrderRequest orderRequest);
 
-    AdminOrderResponse returnOrder(AdminOrderReturnRequest orderRequest);
-
-
 }

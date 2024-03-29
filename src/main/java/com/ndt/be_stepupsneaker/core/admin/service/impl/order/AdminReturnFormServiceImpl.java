@@ -1,25 +1,55 @@
 package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminCartItemRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderDetailRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormDetailRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminReturnFormResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminAddressMapper;
+import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminReturnFormDetailMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminReturnFormMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminReturnFormDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminReturnFormRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentMethodRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminReturnFormService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Address;
+import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
+import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.ReturnForm;
+import com.ndt.be_stepupsneaker.entity.order.ReturnFormDetail;
+import com.ndt.be_stepupsneaker.entity.payment.Payment;
+import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
+import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
+import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
+import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdminReturnFormServiceImpl implements AdminReturnFormService {
@@ -30,47 +60,168 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     private AdminOrderRepository adminOrderRepository;
 
     @Autowired
+    private AdminAddressRepository adminAddressRepository;
+
+    @Autowired
     private PaginationUtil paginationUtil;
 
     @Autowired
+    private MySessionInfo mySessionInfo;
+
+    @Autowired
+    private AdminEmployeeRepository adminEmployeeRepository;
+
+    @Autowired
+    private AdminPaymentMethodRepository adminPaymentMethodRepository;
+
+    @Autowired
+    private AdminOrderDetailRepository adminOrderDetailRepository;
+
+    @Autowired
+    private AdminProductDetailRepository adminProductDetailRepository;
+
+    @Autowired
+    private AdminReturnFormDetailRepository adminReturnFormDetailRepository;
+
+    @Autowired
+    private AdminPaymentRepository adminPaymentRepository;
+
+    @Autowired
+    private CloudinaryUpload cloudinaryUpload;
+
+    @Autowired
     private MessageUtil messageUtil;
+
+    @Autowired
+    private OrderUtil orderUtil;
+
     @Override
     public PageableObject<AdminReturnFormResponse> findAllEntity(AdminReturnFormRequest request) {
         Pageable pageable = paginationUtil.pageable(request);
-        Page<ReturnForm> resp = adminReturnFormRepository.findAllReturnForm(request.getStatus(), pageable);
+        Page<ReturnForm> resp = adminReturnFormRepository.findAllReturnForm(pageable);
         Page<AdminReturnFormResponse> adminReturnFormResponses = resp.map(AdminReturnFormMapper.INSTANCE::returnFormToAdminReturnFormResponse);
         return new PageableObject<>(adminReturnFormResponses);
     }
 
     @Override
+    @Transactional
     public AdminReturnFormResponse create(AdminReturnFormRequest request) {
-        Optional<Order> orderOptional = adminOrderRepository.findByCode(request.getOrderCode());
+        Optional<Order> orderOptional = adminOrderRepository.findById(request.getOrder());
         if (orderOptional.isEmpty()) {
             throw new ApiException(messageUtil.getMessage("order.notfound"));
         }
-        if (orderOptional.get().getStatus() != OrderStatus.COMPLETED){
+
+        Order order = orderOptional.get();
+        if (order.getStatus() != OrderStatus.COMPLETED) {
             throw new ApiException(messageUtil.getMessage("return_form.order.cant_create"));
         }
-        ReturnForm returnForm = AdminReturnFormMapper.INSTANCE.adminReturnFormRequestToReturnForm(request);
-        returnForm.setOrder(orderOptional.get());
-        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(adminReturnFormRepository.save(returnForm));
+
+        Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findByName(request.getPaymentType());
+        if (paymentMethodOptional.isEmpty()){
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
+        }
+
+        float totalMoneyReturn = 0;
+        List<ReturnFormDetail> returnFormDetails = new ArrayList<>();
+        for (AdminReturnFormDetailRequest returnFormDetailRequest : request.getReturnFormDetails()) {
+            Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(returnFormDetailRequest.getOrderDetail());
+            if (orderDetailOptional.isEmpty()) {
+                throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
+            }
+
+            OrderDetail orderDetail = orderDetailOptional.get();
+            if (!order.getOrderDetails().contains(orderDetail)) {
+                throw new ApiException("order.return.not_match_order_detail");
+            }
+            ReturnFormDetail returnFormDetail = AdminReturnFormDetailMapper.INSTANCE.adminReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
+            returnFormDetail.setOrderDetail(orderDetail);
+            returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
+            returnFormDetails.add(returnFormDetail);
+
+            if (returnFormDetail.isReSellable()) {
+                ProductDetail productDetail = orderDetail.getProductDetail();
+                productDetail.setQuantity(productDetail.getQuantity() + returnFormDetail.getQuantity());
+                adminProductDetailRepository.save(productDetail);
+            }
+
+            int remainQuantity = orderDetail.getQuantity() - returnFormDetailRequest.getQuantity();
+            if (remainQuantity < 0) {
+                throw new ApiException("Bad request");
+            } else if (remainQuantity == 0){
+                orderDetail.setStatus(OrderStatus.RETURNED);
+                adminOrderDetailRepository.save(orderDetail);
+                totalMoneyReturn += orderDetail.getTotalPrice();
+            } else {
+                orderDetail.setQuantity(remainQuantity);
+                orderDetail.setTotalPrice((remainQuantity) * orderDetail.getPrice());
+                adminOrderDetailRepository.save(orderDetail);
+                OrderDetail orderDetailReturn = new OrderDetail();
+                BeanUtils.copyProperties(orderDetail, orderDetailReturn);
+                orderDetailReturn.setId(null);
+                orderDetailReturn.setStatus(OrderStatus.RETURNED);
+                orderDetailReturn.setQuantity(returnFormDetailRequest.getQuantity());
+                orderDetailReturn.setTotalPrice(returnFormDetailRequest.getQuantity() * orderDetail.getPrice());
+                totalMoneyReturn += returnFormDetailRequest.getQuantity() * orderDetail.getPrice();
+                adminOrderDetailRepository.save(orderDetailReturn);
+            }
+        }
+        Order orderSave = adminOrderRepository.save(order);
+
+        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, "Đơn hàng bị trả lại");
+        order.setStatus(OrderStatus.RETURNED);
+        order.setTotalMoney(order.getTotalMoney() - totalMoneyReturn);
+
+        Payment payment = new Payment();
+        payment.setPaymentMethod(paymentMethodOptional.get());
+        payment.setOrder(orderSave);
+        payment.setTotalMoney(-totalMoneyReturn);
+        payment.setTransactionCode(request.getPaymentInfo());
+        adminPaymentRepository.save(payment);
+
+        ReturnForm returnForm = new ReturnForm();
+        Address address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(request.getAddress());
+        address.setCustomer(null);
+        Address addressSave = adminAddressRepository.save(address);
+        Employee employee = adminEmployeeRepository.findById(mySessionInfo.getCurrentEmployee().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
+
+        returnForm.setOrder(orderSave);
+        returnForm.setEmployee(employee);
+        returnForm.setAddress(addressSave);
+        returnForm.setAmountToBePaid(totalMoneyReturn);
+        returnForm.setType(ReturnFormType.OFFLINE);
+        returnForm.setPaymentInfo(request.getPaymentInfo());
+        returnForm.setPaymentType(request.getPaymentType());
+        returnForm.setReturnDeliveryStatus(ReturnDeliveryStatus.COMPLETED);
+        returnForm.setRefundStatus(RefundStatus.COMPLETED);
+
+        ReturnForm returnFormSave = adminReturnFormRepository.save(returnForm);
+        returnFormDetails.stream().map(detail -> {
+            detail.setReturnForm(returnFormSave);
+                return detail;
+            }).collect(Collectors.toList());
+
+        adminReturnFormDetailRepository.saveAll(returnFormDetails);
+
+        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(adminReturnFormRepository.findById(returnFormSave.getId()).orElseThrow());
     }
 
     @Override
     public AdminReturnFormResponse update(AdminReturnFormRequest request) {
-        Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(request.getId());
-        if (optionalReturnForm.isEmpty()) {
-            throw new ApiException(messageUtil.getMessage("return_form.notfound"));
-        }
-        Optional<Order> orderOptional = adminOrderRepository.findByCode(request.getOrderCode());
-        if (orderOptional.isPresent() && orderOptional.get().getStatus() != OrderStatus.COMPLETED){
-            throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
-        }
-        ReturnForm returnForm = optionalReturnForm.get();
-        returnForm.setReason(request.getReason());
-        returnForm.setFeedback(request.getFeedback());
-        returnForm.setStatus(request.getStatus());
-        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(adminReturnFormRepository.save(returnForm));
+//        Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(request.getId());
+//        if (optionalReturnForm.isEmpty()) {
+//            throw new ApiException(messageUtil.getMessage("return_form.notfound"));
+//        }
+//        Optional<Order> orderOptional = adminOrderRepository.findByCode(request.getOrderCode());
+//        if (orderOptional.isPresent() && orderOptional.get().getStatus() != OrderStatus.COMPLETED){
+//            throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
+//        }
+//        ReturnForm returnForm = optionalReturnForm.get();
+//        returnForm.setReason(request.getReason());
+//        returnForm.setFeedback(request.getFeedback());
+//        returnForm.setStatus(request.getStatus());
+//        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(adminReturnFormRepository.save(returnForm));
+        return null;
     }
 
     @Override
