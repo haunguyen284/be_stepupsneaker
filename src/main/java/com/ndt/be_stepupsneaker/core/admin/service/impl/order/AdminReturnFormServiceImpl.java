@@ -48,6 +48,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -138,7 +139,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
             returnFormDetails.add(returnFormDetail);
 
-            if (returnFormDetail.isReSellable()) {
+            if (returnFormDetail.isResellable()) {
                 ProductDetail productDetail = orderDetail.getProductDetail();
                 productDetail.setQuantity(productDetail.getQuantity() + returnFormDetail.getQuantity());
                 adminProductDetailRepository.save(productDetail);
@@ -175,7 +176,11 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         payment.setPaymentMethod(paymentMethodOptional.get());
         payment.setOrder(orderSave);
         payment.setTotalMoney(-totalMoneyReturn);
-        payment.setTransactionCode(request.getPaymentInfo());
+        if (!Objects.equals(request.getPaymentInfo(), "")) {
+            payment.setTransactionCode(request.getPaymentInfo());
+        } else {
+            payment.setTransactionCode("CASH");
+        }
         adminPaymentRepository.save(payment);
 
         ReturnForm returnForm = new ReturnForm();
@@ -189,11 +194,11 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         returnForm.setEmployee(employee);
         returnForm.setAddress(addressSave);
         returnForm.setAmountToBePaid(totalMoneyReturn);
-        returnForm.setType(ReturnFormType.OFFLINE);
+        returnForm.setType(request.getType());
         returnForm.setPaymentInfo(request.getPaymentInfo());
         returnForm.setPaymentType(request.getPaymentType());
-        returnForm.setReturnDeliveryStatus(ReturnDeliveryStatus.COMPLETED);
-        returnForm.setRefundStatus(RefundStatus.COMPLETED);
+        returnForm.setReturnDeliveryStatus(request.getReturnDeliveryStatus());
+        returnForm.setRefundStatus(request.getRefundStatus());
 
         ReturnForm returnFormSave = adminReturnFormRepository.save(returnForm);
         returnFormDetails.stream().map(detail -> {
@@ -226,7 +231,11 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
     @Override
     public AdminReturnFormResponse findById(String id) {
-        return null;
+        Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(id);
+        if (optionalReturnForm.isEmpty()){
+            throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
+        }
+        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(optionalReturnForm.get());
     }
 
 
