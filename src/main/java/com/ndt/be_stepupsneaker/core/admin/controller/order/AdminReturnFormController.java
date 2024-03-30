@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminReturnFormResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminReturnFormService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -39,4 +40,12 @@ public class AdminReturnFormController {
 
         return ResponseHelper.getResponse(adminReturnFormService.create(request), HttpStatus.OK);
     }
+
+    @GetMapping("/{id}")
+    public Object findById(@PathVariable("id") String id) {
+        AdminReturnFormResponse response = adminReturnFormService.findById(id);
+
+        return ResponseHelper.getResponse(response, HttpStatus.OK);
+    }
+
 }

@@ -2,6 +2,9 @@ package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,5 +32,11 @@ public class AdminReturnFormRequest extends PageableRequest {
     private String paymentInfo;
 
     private Set<AdminReturnFormDetailRequest> returnFormDetails;
+
+    private RefundStatus refundStatus;
+
+    private ReturnDeliveryStatus returnDeliveryStatus;
+
+    private ReturnFormType type;
 
 }
