@@ -35,7 +35,7 @@ public class Review extends PrimaryEntity {
     private String comment;
 
     @Column(name = "rating")
-    private int rating;
+    private double rating;
 
     @Column(name = "url_image")
     private String urlImage;
