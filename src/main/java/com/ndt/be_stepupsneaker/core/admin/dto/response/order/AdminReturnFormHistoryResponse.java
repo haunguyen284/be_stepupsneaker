@@ -19,4 +19,7 @@ public class AdminReturnFormHistoryResponse {
     private ReturnFormStatus actionStatus;
 
     private String note;
+
+    private Long createdAt;
+
 }
