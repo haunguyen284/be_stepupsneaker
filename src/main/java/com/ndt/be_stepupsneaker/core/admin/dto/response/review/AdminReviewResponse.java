@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDeta
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.product.ClientProductDetailResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReviewStatus;
+import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,5 +26,8 @@ public class AdminReviewResponse {
     private String urlImage;
 
     private ReviewStatus status;
+
+    private Long createdAt;
+
 
 }

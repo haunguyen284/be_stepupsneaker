@@ -62,7 +62,7 @@ public class ClientReviewServiceImpl implements ClientReviewService {
             Page<Review> combinedPage = new PageImpl<>(allReview, pageable, allReview.size());
             Page<ClientReviewResponse> reviewResponses = combinedPage.map(ClientReviewMapper.INSTANCE::reviewToClientReviewResponse);
             return new PageableObject<>(reviewResponses);
-        }else {
+        } else {
             Page<ClientReviewResponse> adminCustomerVoucherResponsePage = reviews.map(ClientReviewMapper.INSTANCE::reviewToClientReviewResponse);
             return new PageableObject<>(adminCustomerVoucherResponsePage);
         }
@@ -85,7 +85,9 @@ public class ClientReviewServiceImpl implements ClientReviewService {
         if (!productDetails.contains(productDetail)) {
             throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
         }
-        request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
+        if (request.getUrlImage() != null) {
+            request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
+        }
         Review review = ClientReviewMapper.INSTANCE.clientReviewRequestToReview(request);
         review.setCustomer(customer);
         review.setProductDetail(productDetail);
@@ -104,7 +106,10 @@ public class ClientReviewServiceImpl implements ClientReviewService {
         }
         review.setComment(request.getComment());
         review.setRating(request.getRating());
-        review.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
+        if (request.getUrlImage() != null) {
+            request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
+            review.setUrlImage(request.getUrlImage());
+        }
         return ClientReviewMapper.INSTANCE.reviewToClientReviewResponse(clientReviewRepository.save(review));
     }
 

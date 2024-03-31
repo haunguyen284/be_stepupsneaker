@@ -138,7 +138,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
             returnFormDetails.add(returnFormDetail);
 
-            if (returnFormDetail.isReSellable()) {
+            if (returnFormDetail.isResellable()) {
                 ProductDetail productDetail = orderDetail.getProductDetail();
                 productDetail.setQuantity(productDetail.getQuantity() + returnFormDetail.getQuantity());
                 adminProductDetailRepository.save(productDetail);

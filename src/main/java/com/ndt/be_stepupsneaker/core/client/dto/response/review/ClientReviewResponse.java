@@ -24,4 +24,6 @@ public class ClientReviewResponse {
 
     private ReviewStatus status;
 
+    private Long createdAt;
+
 }
