@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.entity.order;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,7 +25,7 @@ public class ReturnFormHistory extends PrimaryEntity {
     private ReturnForm returnForm;
 
     @Column(name = "action_status")
-    private ReturnFormStatus actionStatus;
+    private ReturnDeliveryStatus actionStatus;
 
     @Column(name = "note", length = EntityProperties.LENGTH_DESCRIPTION)
     @Nationalized

@@ -20,7 +20,7 @@ import lombok.Setter;
 @Entity
 public class ReturnFormDetail extends PrimaryEntity {
     @JoinColumn(name = "order_detail_id", referencedColumnName = "id")
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private OrderDetail orderDetail;
 
     @JoinColumn(name = "return_form_id", referencedColumnName = "id")

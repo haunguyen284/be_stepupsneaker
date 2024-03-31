@@ -41,6 +41,15 @@ public class AdminReturnFormController {
         return ResponseHelper.getResponse(adminReturnFormService.create(request), HttpStatus.OK);
     }
 
+    @PutMapping("/{id}")
+    public Object update(@PathVariable("id") String id, @RequestBody @Valid AdminReturnFormRequest request, BindingResult bindingResult){
+        request.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+
+        return ResponseHelper.getResponse(adminReturnFormService.update(request), HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
         AdminReturnFormResponse response = adminReturnFormService.findById(id);

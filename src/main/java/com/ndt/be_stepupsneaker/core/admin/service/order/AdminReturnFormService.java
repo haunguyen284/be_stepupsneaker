@@ -5,5 +5,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminReturnFormRes
 import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 
 public interface AdminReturnFormService extends BaseService<AdminReturnFormResponse, String, AdminReturnFormRequest> {
+    AdminReturnFormResponse updateReturnDeliveryStatus(AdminReturnFormRequest request);
+
 
 }
