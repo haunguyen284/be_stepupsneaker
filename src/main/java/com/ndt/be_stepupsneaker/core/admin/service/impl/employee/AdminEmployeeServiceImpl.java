@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePasswordRequest;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
@@ -93,7 +94,6 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
             throw new ResourceNotFoundException(messageUtil.getMessage("employee.role.notfound"));
         }
         Employee employee = employeeOptional.get();
-        employee.setPassword(employeeDTO.getPassword());
         employee.setGender(employeeDTO.getGender());
         employee.setEmail(employeeDTO.getEmail());
         employee.setStatus(employeeDTO.getStatus());
@@ -125,5 +125,25 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         employee.setDeleted(true);
         adminEmployeeRepository.save(employee);
         return true;
+    }
+
+    @Override
+    public AdminEmployeeResponse changePassword(ChangePasswordRequest request) {
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findById(request.getId());
+        if (employeeOptional.isEmpty()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
+        }
+        Employee employee = employeeOptional.get();
+        passwordCompare(request, employee.getPassword());
+        employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(adminEmployeeRepository.save(employee));
+    }
+
+    public void passwordCompare(ChangePasswordRequest request, String passwordUser) {
+        if (!passwordEncoder.matches(request.getCurrentPassword(), passwordUser)) {
+            throw new ApiException(messageUtil.getMessage("current.password.is.incorrect"));
+        } else if (!request.getEnterThePassword().equals(request.getNewPassword())) {
+            throw new ApiException(messageUtil.getMessage("re_entered.password.in.incorrect"));
+        }
     }
 }

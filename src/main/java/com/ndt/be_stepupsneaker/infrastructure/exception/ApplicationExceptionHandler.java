@@ -1,15 +1,14 @@
 package com.ndt.be_stepupsneaker.infrastructure.exception;
 
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,10 +45,10 @@ public class ApplicationExceptionHandler {
         return ResponseHelper.getErrorResponse(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
-        return ResponseHelper.getErrorResponse(ex.getMessage(),HttpStatus.FORBIDDEN);
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AccessException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessException ex, WebRequest request) {
+        return ResponseHelper.getErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
 
 }

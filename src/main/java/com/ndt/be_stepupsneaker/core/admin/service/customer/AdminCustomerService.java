@@ -17,7 +17,7 @@ import java.util.UUID;
 
 public interface AdminCustomerService extends BaseService<AdminCustomerResponse, String, AdminCustomerRequest> {
 
-    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest,String voucher,String noVoucher);
+    PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, String voucher, String noVoucher);
 
     AdminDailyStatisticResponse getDailyCustomersBetween(Long start, Long end);
 

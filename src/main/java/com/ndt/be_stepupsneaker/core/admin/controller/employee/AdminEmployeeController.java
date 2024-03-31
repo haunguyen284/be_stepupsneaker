@@ -51,6 +51,7 @@ public class AdminEmployeeController {
     public Object changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         return ResponseHelper.getResponse(authenticationService.changePassword(request), HttpStatus.OK);
     }
+
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminEmployeeRequest employeeDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -72,5 +73,15 @@ public class AdminEmployeeController {
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminEmployeeService.delete(id), HttpStatus.OK);
+    }
+
+    @PutMapping("/change-password/{id}")
+    public Object changePassword(@PathVariable("id") String id,
+                                 @RequestBody @Valid ChangePasswordRequest request,BindingResult bindingResult) {
+        request.setId(id);
+        if (bindingResult.hasErrors()) {
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        }
+        return ResponseHelper.getResponse(adminEmployeeService.changePassword(request), HttpStatus.OK);
     }
 }
