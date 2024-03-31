@@ -14,8 +14,6 @@ public class AdminReturnFormHistoryResponse {
 
     private String id;
 
-    private AdminReturnFormResponse returnForm;
-
     private ReturnFormStatus actionStatus;
 
     private String note;
