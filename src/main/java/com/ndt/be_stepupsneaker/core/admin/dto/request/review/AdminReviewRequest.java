@@ -15,7 +15,7 @@ public class AdminReviewRequest extends PageableRequest {
 
     private String comment;
 
-    private int rating;
+    private double rating;
 
     private String urlImage;
 

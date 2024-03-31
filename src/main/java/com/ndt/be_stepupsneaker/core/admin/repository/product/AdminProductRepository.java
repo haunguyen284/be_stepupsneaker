@@ -21,12 +21,12 @@ import java.util.UUID;
 public interface AdminProductRepository extends ProductRepository {
     @Query("""
     SELECT x, 
-    COALESCE(SUM(od.quantity), 0) AS saleCount, 
+    COALESCE(SUM(od.quantity), 0) AS saleCount,
     (SELECT MIN(pd.price) FROM ProductDetail  pd WHERE pd.product = x) as price, 
-    (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x) AS quantity 
+    (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x) AS quantity
     FROM Product x 
     LEFT JOIN x.productDetails pd 
-    LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id 
+    LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id
     WHERE (:#{#request.name} IS NULL OR :#{#request.name} ILIKE '' OR x.name ILIKE  CONCAT('%', :#{#request.name}, '%')) 
     AND
     (:#{#request.code} IS NULL OR :#{#request.code} ILIKE '' OR x.code ILIKE  CONCAT('%', :#{#request.code}, '%')) 

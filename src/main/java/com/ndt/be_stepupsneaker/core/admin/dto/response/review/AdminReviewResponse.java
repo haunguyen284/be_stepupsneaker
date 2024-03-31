@@ -21,13 +21,15 @@ public class AdminReviewResponse {
 
     private String comment;
 
-    private int rating;
+    private double rating;
 
     private String urlImage;
 
     private ReviewStatus status;
 
     private Long createdAt;
+
+    private Long updatedAt;
 
 
 }
