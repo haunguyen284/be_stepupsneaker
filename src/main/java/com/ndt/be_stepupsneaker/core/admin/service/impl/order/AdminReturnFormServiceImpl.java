@@ -259,7 +259,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
 
 
-        if (returnForm.getReturnDeliveryStatus() != ReturnDeliveryStatus.PENDING) {
+        if (returnForm.getReturnDeliveryStatus() != ReturnDeliveryStatus.RECEIVED) {
             throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
         }
 
@@ -406,6 +406,9 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
         }
         ReturnForm returnForm = optionalReturnForm.get();
+        if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
+        }
         returnForm.setReturnDeliveryStatus(request.getReturnDeliveryStatus());
         if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
             returnForm.setRefundStatus(RefundStatus.COMPLETED);
@@ -414,7 +417,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
         ReturnFormHistory returnFormHistory = new ReturnFormHistory();
         returnFormHistory.setReturnForm(returnFormSave);
-        returnFormHistory.setNote(returnForm.getReturnDeliveryStatus().action_description);
+        returnFormHistory.setNote(request.getNote());
         returnFormHistory.setActionStatus(request.getReturnDeliveryStatus());
         adminReturnFormHistoryRepository.save(returnFormHistory);
         return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(returnFormSave);

@@ -39,4 +39,6 @@ public class AdminReturnFormRequest extends PageableRequest {
 
     private ReturnFormType type;
 
+    private String note;
+
 }
