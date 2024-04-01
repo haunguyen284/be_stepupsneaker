@@ -45,6 +45,7 @@ public class ClientProductServiceImpl implements ClientProductService {
             clientProductResponse.setSaleCount((Long) result[1]);
             clientProductResponse.setPrice((Float) result[2]);
             clientProductResponse.setQuantity((Long) result[3]);
+            clientProductResponse.setAverageRating((Double) result[4]);
             clientProductResponses.add(clientProductResponse);
         }
         Page<ClientProductResponse> clientProductResponsePage = new PageImpl<>(clientProductResponses, pageable, resp.getTotalElements());

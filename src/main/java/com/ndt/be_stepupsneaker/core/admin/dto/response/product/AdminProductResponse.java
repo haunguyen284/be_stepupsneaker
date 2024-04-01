@@ -32,6 +32,7 @@ public class AdminProductResponse {
 
     private float price;
 
+
     private Set<AdminProductDetailResponse> productDetails;
 
 }

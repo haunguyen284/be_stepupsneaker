@@ -31,6 +31,8 @@ public class ClientProductResponse {
 
     private float price;
 
+    private double averageRating;
+
     private Set<ClientProductDetailResponse> productDetails;
 
     private Long createdAt;

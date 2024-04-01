@@ -22,7 +22,8 @@ public interface ClientProductRepository extends ProductRepository {
     SELECT x, 
     COALESCE(SUM(od.quantity), 0) AS saleCount, 
     (SELECT MIN(pd.price) FROM ProductDetail  pd WHERE pd.product = x) as price, 
-    (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x) AS quantity 
+    (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x) AS quantity,
+    (SELECT COALESCE(ROUND(AVG(r.rating), 1), 0) FROM Review r WHERE r.productDetail.product = x) AS averageRating
     FROM Product x 
     LEFT JOIN x.productDetails pd 
     LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id 

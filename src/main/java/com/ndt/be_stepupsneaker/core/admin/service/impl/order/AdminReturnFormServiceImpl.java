@@ -267,7 +267,15 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             if (!order.getOrderDetails().contains(orderDetail)) {
                 throw new ApiException("order.return.not_match_order_detail");
             }
-            ReturnFormDetail returnFormDetail = AdminReturnFormDetailMapper.INSTANCE.adminReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
+            ReturnFormDetail returnFormDetail;
+            if (returnFormDetailRequest.getId().contains("splited")){
+                returnFormDetail = AdminReturnFormDetailMapper.INSTANCE.adminReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
+
+            } else {
+                returnFormDetail = adminReturnFormDetailRepository.findById(returnFormDetailRequest.getId()).orElseThrow(
+                        () -> new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"))
+                );
+            }
             returnFormDetail.setOrderDetail(orderDetail);
             returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
             returnFormDetails.add(returnFormDetail);
