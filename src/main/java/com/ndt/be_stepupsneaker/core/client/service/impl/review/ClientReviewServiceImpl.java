@@ -126,7 +126,8 @@ public class ClientReviewServiceImpl implements ClientReviewService {
         Customer customer = getCustomer();
         Review review = clientReviewRepository.findByCustomerAndId(customer, id)
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("review_notfound")));
-        clientReviewRepository.delete(review);
+        review.setDeleted(true);
+        clientReviewRepository.save(review);
         return true;
     }
 
