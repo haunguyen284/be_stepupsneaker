@@ -181,7 +181,8 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         order.setTotalMoney(order.getTotalMoney() - totalMoneyReturn);
 
         // save Payment neu trang thai hoan tien thanh cong
-        if (request.getRefundStatus() == RefundStatus.COMPLETED) {
+        if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            request.setRefundStatus(RefundStatus.COMPLETED);
             Payment payment = new Payment();
             payment.setPaymentMethod(paymentMethodOptional.get());
             payment.setOrder(orderSave);
@@ -192,6 +193,8 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
                 payment.setTransactionCode("CASH");
             }
             adminPaymentRepository.save(payment);
+        } else {
+            request.setRefundStatus(RefundStatus.PENDING);
         }
 
         // save ReturnForm
@@ -233,6 +236,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     }
 
     @Override
+    @Transactional
     public AdminReturnFormResponse update(AdminReturnFormRequest request) {
         Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(request.getId());
         if (optionalReturnForm.isEmpty()) {
@@ -250,8 +254,12 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
         Order order = orderOptional.get();
         ReturnForm returnForm = optionalReturnForm.get();
+        if (request.getReturnDeliveryStatus() == returnForm.getReturnDeliveryStatus()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("return_form.return_delivery_status.invalid"));
+        }
 
-        if (returnForm.getReturnDeliveryStatus() != ReturnDeliveryStatus.PENDING) {
+
+        if (returnForm.getReturnDeliveryStatus() != ReturnDeliveryStatus.RECEIVED) {
             throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
         }
 
@@ -267,14 +275,14 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             if (!order.getOrderDetails().contains(orderDetail)) {
                 throw new ApiException("order.return.not_match_order_detail");
             }
-            ReturnFormDetail returnFormDetail;
-            if (returnFormDetailRequest.getId().contains("splited")){
-                returnFormDetail = AdminReturnFormDetailMapper.INSTANCE.adminReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
 
-            } else {
-                returnFormDetail = adminReturnFormDetailRepository.findById(returnFormDetailRequest.getId()).orElseThrow(
+            ReturnFormDetail returnFormDetail = AdminReturnFormDetailMapper.INSTANCE.adminReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
+
+            if (!returnFormDetailRequest.getId().contains("splited")){
+                ReturnFormDetail returnFormDetailDB = adminReturnFormDetailRepository.findById(returnFormDetailRequest.getId()).orElseThrow(
                         () -> new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"))
                 );
+                returnFormDetail.setId(returnFormDetailDB.getId());
             }
             returnFormDetail.setOrderDetail(orderDetail);
             returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
@@ -315,8 +323,9 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         order.setStatus(OrderStatus.RETURNED);
         order.setTotalMoney(order.getTotalMoney() - totalMoneyReturn);
 
-        // save Payment neu trang thai hoan tien thanh cong
-        if (request.getRefundStatus() == RefundStatus.COMPLETED) {
+        // save Payment neu trang thai thanh cong
+        if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            request.setReturnDeliveryStatus(ReturnDeliveryStatus.COMPLETED);
             Payment payment = new Payment();
             payment.setPaymentMethod(paymentMethodOptional.get());
             payment.setOrder(orderSave);
@@ -327,6 +336,8 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
                 payment.setTransactionCode("CASH");
             }
             adminPaymentRepository.save(payment);
+        } else {
+            request.setRefundStatus(RefundStatus.PENDING);
         }
 
         // save ReturnForm
@@ -390,17 +401,25 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
     @Override
     public AdminReturnFormResponse updateReturnDeliveryStatus(AdminReturnFormRequest request) {
-//        Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(request.getId());
-//        if (optionalReturnForm.isEmpty()){
-//            throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
-//        }
-//
-//        ReturnFormHistory returnFormHistory = new ReturnFormHistory();
-//        returnFormHistory.setReturnForm(returnFormSave);
-//        returnFormHistory.setNote("Đơn hàng đã được trả");
-//        returnFormHistory.setActionStatus(ReturnFormStatus.);
-//        adminReturnFormHistoryRepository.save(returnFormHistory);
+        Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(request.getId());
+        if (optionalReturnForm.isEmpty()){
+            throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
+        }
+        ReturnForm returnForm = optionalReturnForm.get();
+        if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
+        }
+        returnForm.setReturnDeliveryStatus(request.getReturnDeliveryStatus());
+        if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            returnForm.setRefundStatus(RefundStatus.COMPLETED);
+        }
+        ReturnForm returnFormSave = adminReturnFormRepository.save(returnForm);
 
-        return null;
+        ReturnFormHistory returnFormHistory = new ReturnFormHistory();
+        returnFormHistory.setReturnForm(returnFormSave);
+        returnFormHistory.setNote(request.getNote());
+        returnFormHistory.setActionStatus(request.getReturnDeliveryStatus());
+        adminReturnFormHistoryRepository.save(returnFormHistory);
+        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(returnFormSave);
     }
 }
