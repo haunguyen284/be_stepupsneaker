@@ -40,8 +40,10 @@ public class SecurityConfiguration {
                                         "/client/product-details/**", "/admin/notifications/sse/**","/client/product/**",
                                         "/admin/notifications", "/client/transaction/**", "/client/orders/**")
                                 .permitAll()
-                                .requestMatchers("/admin/customers/**", "/admin/orders/**", "/admin/order-details/**", "/admin/statistic/**",
-                                        "/admin/return-forms/**")
+                                .requestMatchers("/admin/customers/**"
+                                        , "/admin/orders/**"
+                                        , "/admin/order-details/**", "/admin/statistic/**"
+                                        ,"/admin/return-forms/**")
                                 .hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
                                 .requestMatchers(HttpMethod.GET
                                         , "/admin/order-histories/**", "/admin/voucher-histories/**"

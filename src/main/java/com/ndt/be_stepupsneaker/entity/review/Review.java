@@ -26,7 +26,6 @@ public class Review extends PrimaryEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private ProductDetail productDetail;
 
-
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
