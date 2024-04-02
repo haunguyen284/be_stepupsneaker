@@ -38,7 +38,8 @@ public class SecurityConfiguration {
                         req -> req
                                 .requestMatchers("/", "/error/**", "/auth/**", "/client/products/**",
                                         "/client/product-details/**", "/admin/notifications/sse/**","/client/product/**",
-                                        "/admin/notifications", "/client/transaction/**", "/client/orders/**")
+                                        "/admin/notifications", "/client/transaction/**", "/client/orders/**",
+                                        "/client/return-forms/code/**")
                                 .permitAll()
                                 .requestMatchers("/admin/customers/**", "/admin/orders/**", "/admin/order-details/**", "/admin/statistic/**",
                                         "/admin/return-forms/**")

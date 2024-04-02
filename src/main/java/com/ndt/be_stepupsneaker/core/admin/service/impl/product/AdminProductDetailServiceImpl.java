@@ -113,7 +113,14 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         for (AdminProductDetailRequest adminProductDetailRequest: productDetailRequests) {
+            Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findById(adminProductDetailRequest.getId());
+            if (productDetailOptional.isEmpty()){
+                throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
+            }
+
+            ProductDetail productDetailSave = productDetailOptional.get();
             adminProductDetailRequest.setImage(cloudinaryUpload.upload(adminProductDetailRequest.getImage()));
+            adminProductDetailRequest.setId(productDetailSave.getId());
             productDetails.add(AdminProductDetailMapper.INSTANCE.adminProductDetailRequestToProductDetail(adminProductDetailRequest));
         }
         return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());

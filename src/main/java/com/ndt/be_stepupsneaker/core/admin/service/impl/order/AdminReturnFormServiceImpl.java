@@ -35,6 +35,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
+import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnInspectionStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -145,6 +146,10 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
             returnFormDetails.add(returnFormDetail);
 
+            // nếu đơn hàng hoàn bị từ chối thì ko kiểm tra
+            if (returnFormDetailRequest.getReturnInspectionStatus() == ReturnInspectionStatus.FAILED) {
+                continue;
+            }
             // neu trang thai khac pending thi cap nhat so luong sp va hoa don chi tiet
             if (request.getReturnDeliveryStatus() != ReturnDeliveryStatus.PENDING) {
                 if (returnFormDetail.isResellable()) {
@@ -174,14 +179,30 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
                 }
             }
         }
-        Order orderSave = adminOrderRepository.save(order);
+        // nếu đơn hàng đã dùng voucher trước đó thì dùng công thức tính lại số tiền cần trả
+        float remainingMoney = order.getOriginMoney() - totalMoneyReturn;
+        float newReduceMoney = orderUtil.getMoneyReduceForTotalMoney(remainingMoney, order.getCustomer().getId());
+        if (order.getReduceMoney() > 0) {
+            totalMoneyReturn = totalMoneyReturn - order.getReduceMoney() + newReduceMoney;
+        }
+        if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            order.setOriginMoney(remainingMoney);
+            if (order.getReduceMoney() > 0) {
+                order.setReduceMoney(newReduceMoney);
+                order.setTotalMoney(remainingMoney - newReduceMoney + order.getShippingMoney());
+            } else {
+                order.setTotalMoney(remainingMoney + order.getShippingMoney());
+            }
 
-        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, OrderStatus.RETURNED.action_description);
+        }
         order.setStatus(OrderStatus.RETURNED);
-        order.setTotalMoney(order.getTotalMoney() - totalMoneyReturn);
+        Order orderSave = adminOrderRepository.save(order);
+        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, OrderStatus.RETURNED.action_description);
+
 
         // save Payment neu trang thai hoan tien thanh cong
         if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+
             request.setRefundStatus(RefundStatus.COMPLETED);
             Payment payment = new Payment();
             payment.setPaymentMethod(paymentMethodOptional.get());
@@ -254,12 +275,8 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
         Order order = orderOptional.get();
         ReturnForm returnForm = optionalReturnForm.get();
-        if (request.getReturnDeliveryStatus() == returnForm.getReturnDeliveryStatus()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("return_form.return_delivery_status.invalid"));
-        }
 
-
-        if (returnForm.getReturnDeliveryStatus() != ReturnDeliveryStatus.RECEIVED) {
+        if (request.getReturnDeliveryStatus() != ReturnDeliveryStatus.RECEIVED || returnForm.getRefundStatus() == RefundStatus.COMPLETED) {
             throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
         }
 
@@ -288,57 +305,65 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
             returnFormDetails.add(returnFormDetail);
 
-            // neu trang thai khac pending thi cap nhat so luong sp va hoa don chi tiet
-            if (request.getReturnDeliveryStatus() != ReturnDeliveryStatus.PENDING) {
-                if (returnFormDetail.isResellable()) {
-                    ProductDetail productDetail = orderDetail.getProductDetail();
-                    productDetail.setQuantity(productDetail.getQuantity() + returnFormDetail.getQuantity());
-                    adminProductDetailRepository.save(productDetail);
-                }
-                int remainQuantity = orderDetail.getQuantity() - returnFormDetailRequest.getQuantity();
-                if (remainQuantity < 0) {
-                    throw new ApiException("Bad request");
-                } else if (remainQuantity == 0){
-                    orderDetail.setStatus(OrderStatus.RETURNED);
-                    adminOrderDetailRepository.save(orderDetail);
-                    totalMoneyReturn += orderDetail.getTotalPrice();
-                } else {
-                    orderDetail.setQuantity(remainQuantity);
-                    orderDetail.setTotalPrice((remainQuantity) * orderDetail.getPrice());
-                    adminOrderDetailRepository.save(orderDetail);
-                    OrderDetail orderDetailReturn = new OrderDetail();
-                    BeanUtils.copyProperties(orderDetail, orderDetailReturn);
-                    orderDetailReturn.setId(null);
-                    orderDetailReturn.setStatus(OrderStatus.RETURNED);
-                    orderDetailReturn.setQuantity(returnFormDetailRequest.getQuantity());
-                    orderDetailReturn.setTotalPrice(returnFormDetailRequest.getQuantity() * orderDetail.getPrice());
-                    totalMoneyReturn += returnFormDetailRequest.getQuantity() * orderDetail.getPrice();
-                    adminOrderDetailRepository.save(orderDetailReturn);
-                }
+            // nếu đơn hàng hoàn bị từ chối thì ko kiểm tra
+            if (returnFormDetailRequest.getReturnInspectionStatus() == ReturnInspectionStatus.FAILED) {
+                continue;
+            }
+
+            if (returnFormDetail.isResellable()) {
+                ProductDetail productDetail = orderDetail.getProductDetail();
+                productDetail.setQuantity(productDetail.getQuantity() + returnFormDetail.getQuantity());
+                adminProductDetailRepository.save(productDetail);
+            }
+            int remainQuantity = orderDetail.getQuantity() - returnFormDetailRequest.getQuantity();
+            if (remainQuantity < 0) {
+                throw new ApiException("Bad request");
+            } else if (remainQuantity == 0){
+                orderDetail.setStatus(OrderStatus.RETURNED);
+                adminOrderDetailRepository.save(orderDetail);
+                totalMoneyReturn += orderDetail.getTotalPrice();
+            } else {
+                orderDetail.setQuantity(remainQuantity);
+                orderDetail.setTotalPrice((remainQuantity) * orderDetail.getPrice());
+                adminOrderDetailRepository.save(orderDetail);
+                OrderDetail orderDetailReturn = new OrderDetail();
+                BeanUtils.copyProperties(orderDetail, orderDetailReturn);
+                orderDetailReturn.setId(null);
+                orderDetailReturn.setStatus(OrderStatus.RETURNED);
+                orderDetailReturn.setQuantity(returnFormDetailRequest.getQuantity());
+                orderDetailReturn.setTotalPrice(returnFormDetailRequest.getQuantity() * orderDetail.getPrice());
+                totalMoneyReturn += returnFormDetailRequest.getQuantity() * orderDetail.getPrice();
+                adminOrderDetailRepository.save(orderDetailReturn);
             }
         }
+        // nếu đơn hàng đã dùng voucher trước đó thì dùng công thức tính lại số tiền cần trả
+        float remainingMoney = order.getOriginMoney() - totalMoneyReturn;
+        float newReduceMoney = orderUtil.getMoneyReduceForTotalMoney(remainingMoney, order.getCustomer().getId());
+        if (order.getReduceMoney() > 0) {
+            totalMoneyReturn = totalMoneyReturn - order.getReduceMoney() + newReduceMoney;
+        }
+        order.setOriginMoney(remainingMoney);
+        if (order.getReduceMoney() > 0) {
+            order.setReduceMoney(newReduceMoney);
+            order.setTotalMoney(remainingMoney - newReduceMoney + order.getShippingMoney());
+        } else {
+            order.setTotalMoney(remainingMoney + order.getShippingMoney());
+        }
+        order.setStatus(OrderStatus.RETURNED);
         Order orderSave = adminOrderRepository.save(order);
 
-        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, OrderStatus.RETURNED.action_description);
-        order.setStatus(OrderStatus.RETURNED);
-        order.setTotalMoney(order.getTotalMoney() - totalMoneyReturn);
-
         // save Payment neu trang thai thanh cong
-        if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
-            request.setReturnDeliveryStatus(ReturnDeliveryStatus.COMPLETED);
-            Payment payment = new Payment();
-            payment.setPaymentMethod(paymentMethodOptional.get());
-            payment.setOrder(orderSave);
-            payment.setTotalMoney(-totalMoneyReturn);
-            if (!Objects.equals(request.getPaymentInfo(), "")) {
-                payment.setTransactionCode(request.getPaymentInfo());
-            } else {
-                payment.setTransactionCode("CASH");
-            }
-            adminPaymentRepository.save(payment);
+        request.setReturnDeliveryStatus(ReturnDeliveryStatus.COMPLETED);
+        Payment payment = new Payment();
+        payment.setPaymentMethod(paymentMethodOptional.get());
+        payment.setOrder(orderSave);
+        payment.setTotalMoney(-totalMoneyReturn);
+        if (!Objects.equals(request.getPaymentInfo(), "")) {
+            payment.setTransactionCode(request.getPaymentInfo());
         } else {
-            request.setRefundStatus(RefundStatus.PENDING);
+            payment.setTransactionCode("CASH");
         }
+        adminPaymentRepository.save(payment);
 
         // save ReturnForm
         Address address = AdminAddressMapper.INSTANCE.adminAddressRequestAddress(request.getAddress());
@@ -354,17 +379,8 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         returnForm.setType(request.getType());
         returnForm.setPaymentInfo(request.getPaymentInfo());
         returnForm.setPaymentType(request.getPaymentType());
-        returnForm.setReturnDeliveryStatus(request.getReturnDeliveryStatus());
-        returnForm.setRefundStatus(request.getRefundStatus());
-
+        returnForm.setRefundStatus(RefundStatus.COMPLETED);
         ReturnForm returnFormSave = adminReturnFormRepository.save(returnForm);
-
-        // save ReturnFormHistory
-        ReturnFormHistory returnFormHistory = new ReturnFormHistory();
-        returnFormHistory.setReturnForm(returnFormSave);
-        returnFormHistory.setNote(request.getReturnDeliveryStatus().action_description);
-        returnFormHistory.setActionStatus(request.getReturnDeliveryStatus());
-        adminReturnFormHistoryRepository.save(returnFormHistory);
 
         // save list ReturnFormDetail
         returnFormDetails.stream().map(detail -> {
@@ -408,6 +424,12 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         ReturnForm returnForm = optionalReturnForm.get();
         if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
             throw new ApiException(messageUtil.getMessage("return_form.order.cant_update"));
+        }
+        Optional<ReturnFormDetail> result = returnForm.getReturnFormDetails()
+                .stream().parallel()
+                .filter(returnFormDetail -> returnFormDetail.getReturnInspectionStatus() == null).findAny();
+        if (result.isPresent() && request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
+            throw new ApiException(messageUtil.getMessage("return_form.full_fill.required"));
         }
         returnForm.setReturnDeliveryStatus(request.getReturnDeliveryStatus());
         if (request.getReturnDeliveryStatus() == ReturnDeliveryStatus.COMPLETED) {
