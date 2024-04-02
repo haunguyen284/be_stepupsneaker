@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.*;
 import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.review.OrderWithReviewCountResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderDetailMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
@@ -373,22 +374,27 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             }
             return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
         }
-        Optional<Order> orderOptional = clientOrderRepository.findByIdAndCustomer_Id(orderId, customerId);
-        if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
-        }
-        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
+        OrderWithReviewCountResponse orderWithReviewCount = clientOrderRepository.findByIdAndReviewCount(orderId, customerId)
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+
+        Order order = orderWithReviewCount.getOrder();
+        Long reviewCount = orderWithReviewCount.getCountReview();
+        ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+        clientOrderResponse.setCountReview(reviewCount.intValue());
+        return clientOrderResponse;
     }
 
     @Override
     public ClientOrderResponse findByCode(String code) {
-        Order order = clientOrderRepository.findByCode(code)
+        OrderWithReviewCountResponse orderWithReviewCount = clientOrderRepository.findByCodeAndReviewCount(code)
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
 
-        if (order.getStatus() == OrderStatus.COMPLETED) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("order.tracking.expired"));
-        }
-        return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+        Order order = orderWithReviewCount.getOrder();
+        Long reviewCount = orderWithReviewCount.getCountReview();
+        ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
+        clientOrderResponse.setCountReview(reviewCount.intValue());
+
+        return clientOrderResponse;
     }
 
     @Override

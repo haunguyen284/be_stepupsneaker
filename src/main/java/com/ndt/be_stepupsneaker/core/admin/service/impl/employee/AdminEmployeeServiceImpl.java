@@ -134,16 +134,11 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
             throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
         Employee employee = employeeOptional.get();
-        passwordCompare(request, employee.getPassword());
+        if (!request.getEnterThePassword().equals(request.getNewPassword())) {
+            throw new ApiException(messageUtil.getMessage("re_entered.password.in.incorrect"));
+        }
         employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(adminEmployeeRepository.save(employee));
     }
 
-    public void passwordCompare(ChangePasswordRequest request, String passwordUser) {
-        if (!passwordEncoder.matches(request.getCurrentPassword(), passwordUser)) {
-            throw new ApiException(messageUtil.getMessage("current.password.is.incorrect"));
-        } else if (!request.getEnterThePassword().equals(request.getNewPassword())) {
-            throw new ApiException(messageUtil.getMessage("re_entered.password.in.incorrect"));
-        }
-    }
 }

@@ -61,6 +61,8 @@ public class ClientOrderResponse {
 
     private OrderStatus status;
 
+    private int countReview;
+
     private List<ClientOrderDetailResponse> orderDetails;
 
     private List<ClientOrderHistoryResponse> orderHistories;

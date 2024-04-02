@@ -1,12 +1,10 @@
 package com.ndt.be_stepupsneaker.core.client.repository.order;
 
-import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientOrderRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.review.OrderWithReviewCountResponse;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.repository.order.OrderRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -89,5 +87,27 @@ public interface ClientOrderRepository extends OrderRepository {
 
     Optional<Order> findByIdAndCustomer_Id(String id, String customerId);
 
+    @Query("""
+                SELECT 
+                x AS order,
+                COUNT(r) AS countReview
+                FROM Order x 
+                LEFT JOIN x.orderDetails o 
+                LEFT JOIN Review r ON r.productDetail = o.productDetail
+                WHERE x.code = :code
+                GROUP BY x
+            """)
+    Optional<OrderWithReviewCountResponse> findByCodeAndReviewCount(String code);
 
+    @Query("""
+                SELECT 
+                x AS order,
+                COUNT(r) AS countReview
+                FROM Order x 
+                LEFT JOIN x.orderDetails o 
+                LEFT JOIN Review r ON r.productDetail = o.productDetail
+                WHERE x.id = :id AND x.customer.id = :customer
+                GROUP BY x
+            """)
+    Optional<OrderWithReviewCountResponse> findByIdAndReviewCount(String id,String customer);
 }

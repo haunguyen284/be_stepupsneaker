@@ -12,7 +12,7 @@ public class ChangePasswordRequest {
 
     private String id;
 
-    @NotBlank(message = "Please enter your current password!")
+//    @NotBlank(message = "Please enter your current password!")
     private String currentPassword;
 
     @NotBlank(message = "Please enter your new password!")
