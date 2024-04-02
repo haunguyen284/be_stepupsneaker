@@ -1,14 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.review;
-
-import com.ndt.be_stepupsneaker.core.admin.dto.response.review.AdminReviewResponse;
-import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
-import com.ndt.be_stepupsneaker.core.admin.mapper.review.AdminReviewMapper;
-import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminCustomerVoucherMapper;
 import com.ndt.be_stepupsneaker.core.client.dto.request.review.ClientReviewRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.review.ClientReviewResponse;
-import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.client.mapper.review.ClientReviewMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDetailRepository;
@@ -20,7 +13,6 @@ import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.review.Review;
-import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReviewStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -32,12 +24,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import javax.swing.text.View;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
