@@ -431,7 +431,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             shippingFee = orderRequest.getShippingMoney();
         } else if (order.getShippingMoney() == 0
                 && orderRequest.getShippingMoney() != 0
-                && orderRequest.getShippingMoney() == 0
                 && totalMoney < EntityProperties.IS_FREE_SHIPPING) {
             shippingFee = orderRequest.getShippingMoney();
         }
