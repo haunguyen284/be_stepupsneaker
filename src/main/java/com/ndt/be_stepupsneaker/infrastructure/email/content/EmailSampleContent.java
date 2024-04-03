@@ -7,6 +7,8 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.order.ReturnForm;
+import com.ndt.be_stepupsneaker.entity.order.ReturnFormDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
@@ -291,6 +293,84 @@ public class EmailSampleContent {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = order.getCustomer().getEmail();
+        }
+        email.setToEmail(toEmail);
+        emailService.sendEmail(email);
+    }
+
+    public void sendMailAutoReturnOrder(ReturnForm returnForm, String emailReq, String subject) {
+        String[] toEmail = new String[1];
+        Email email = new Email();
+        email.setSubject(subject);
+        String emailTitle = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailTitle += "<tr><td colspan='4' style='text-align: center;'><strong>Thông tin đơn hàng</strong></td></tr>";
+        emailTitle += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        email.setTitleEmail(emailTitle);
+        String emailBody = "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'>";
+        emailBody += "<table style='width: 100%; border-collapse: collapse; font-family: Arial, sans-serif;'>";
+        emailBody += "<thead style='background-color: #f0f0f0;'>";
+        emailBody += "<tr>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tên sản phẩm</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Số lượng</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Giá sản phẩm</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tổng tiền</th>";
+        emailBody += "</tr>";
+        emailBody += "</thead>";
+        emailBody += "<tbody>";
+
+        List<ReturnFormDetail> returnFormDetails = returnForm.getReturnFormDetails();
+        if (returnFormDetails != null && !returnFormDetails.isEmpty()) {
+            for (ReturnFormDetail returnFormDetail : returnFormDetails) {
+                OrderDetail orderDetail = returnFormDetail.getOrderDetail();
+                ProductDetail productDetail = orderDetail.getProductDetail();
+                if (productDetail != null) {
+                    emailBody += "<tr>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + productDetail.getProduct().getName() + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + returnFormDetail.getQuantity() + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(orderDetail.getPrice()) + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(orderDetail.getTotalPrice()) + "</td>";
+                    emailBody += "</tr>";
+                }
+            }
+        }
+        String clientInfo = "";
+        if (returnForm.getOrder().getCustomer() == null) {
+            clientInfo = returnForm.getOrder().getFullName();
+        } else {
+            clientInfo = returnForm.getOrder().getCustomer().getFullName();
+        }
+
+        String phone = "";
+        if (returnForm.getOrder().getAddress() == null) {
+            phone = returnForm.getOrder().getPhoneNumber();
+        } else {
+            phone = returnForm.getOrder().getAddress().getPhoneNumber();
+        }
+        emailBody += "</tbody>";
+        emailBody += "</table>";
+        emailBody += "</td></tr>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Họ và tên:</strong> " + clientInfo + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Địa chỉ trả hàng     :</strong> "
+                + returnForm.getAddress().getMore() + ", "
+                + returnForm.getAddress().getWardName() + ", "
+                + returnForm.getAddress().getDistrictName() + ", "
+                + returnForm.getAddress().getProvinceName() + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + phone + "</td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi phiếu trả hàng của bạn :</span><a href='" + EntityProperties.URL_FE_RETURN + returnForm.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+        emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
+//        emailBody += "<tr><td><strong>Phí vận chuyển :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getShippingMoney()) + "</strong></td></tr>";
+//        emailBody += "<tr><td><strong>Tiền được giảm       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getReduceMoney()) + "</strong></td></tr>";
+//        emailBody += "<tr><td><strong>Tổng tiền   :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getTotalMoney()) + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Thời gian tạo phiếu   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(returnForm.getCreatedAt()) + "</td></tr>";
+        emailBody += "</table>";
+        email.setBody(emailBody);
+        if (returnForm.getOrder().getCustomer() == null) {
+            toEmail[0] = emailReq;
+        } else {
+            toEmail[0] = returnForm.getOrder().getCustomer().getEmail();
         }
         email.setToEmail(toEmail);
         emailService.sendEmail(email);

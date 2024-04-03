@@ -35,6 +35,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -101,6 +102,9 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
     @Autowired
     private OrderUtil orderUtil;
+
+    @Autowired
+    private  EmailService emailService;
 
     @Override
     public PageableObject<AdminReturnFormResponse> findAllEntity(AdminReturnFormRequest request) {
