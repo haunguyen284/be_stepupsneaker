@@ -78,6 +78,22 @@ public class OrderUtil {
         return promotionMoney;
     }
 
+    public float getMoneyReduceForTotalMoney(float totalMoney, String customerId) {
+        List<Voucher> vouchers = adminVoucherRepository.findAllActiveByCustomerId(customerId);
+        float maxMoneyReduce = 0;
+        for (Voucher voucher: vouchers) {
+            if (totalMoney < voucher.getConstraint()) {
+                continue;
+            }
+            float voucherValue = voucher.getValue();
+            float moneyReduce = voucher.getType() == VoucherType.CASH ? voucherValue : ((totalMoney * voucherValue) / 100);
+            if (moneyReduce > maxMoneyReduce){
+                maxMoneyReduce = moneyReduce;
+            }
+        }
+        return maxMoneyReduce;
+    }
+
     // Tính giá sản phẩm thấp nhất trong promotionProductDetail theo value của Promotion
 
     public float getPromotionValueOfProductDetail(ProductDetail productDetail) {

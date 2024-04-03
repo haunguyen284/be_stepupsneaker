@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -55,6 +56,14 @@ public interface AdminVoucherRepository extends VoucherRepository, BaseUtilRepos
     Optional<Voucher> findByCode(@Param("id") String id, @Param("code") String code);
 
     Optional<Voucher> findByCode(String code);
+
+    @Query("""
+        SELECT x FROM Voucher x WHERE 
+        x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customerId) 
+        AND 
+        x.status = 0
+    """)
+    List<Voucher> findAllActiveByCustomerId(@Param("customerId") String customerId);
 
 
 }

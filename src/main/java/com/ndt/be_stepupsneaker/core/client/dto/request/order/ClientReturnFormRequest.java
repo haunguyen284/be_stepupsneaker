@@ -1,6 +1,8 @@
-package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
+package com.ndt.be_stepupsneaker.core.client.dto.request.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormDetailRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
@@ -10,34 +12,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AdminReturnFormRequest extends PageableRequest {
+public class ClientReturnFormRequest extends PageableRequest {
 
     private String id;
 
-    private AdminAddressRequest address;
+    private ClientAddressRequest address;
 
     private String order;
-
-    private float amountToBePaid;
 
     private String paymentType;
 
     private String paymentInfo;
 
-    private Set<AdminReturnFormDetailRequest> returnFormDetails;
-
-    private RefundStatus refundStatus;
-
-    private ReturnDeliveryStatus returnDeliveryStatus;
-
-    private ReturnFormType type;
+    private Set<ClientReturnFormDetailRequest> returnFormDetails;
 
     private String note;
 
