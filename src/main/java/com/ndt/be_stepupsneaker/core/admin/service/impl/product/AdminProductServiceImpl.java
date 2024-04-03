@@ -52,9 +52,9 @@ public class AdminProductServiceImpl implements AdminProductService {
         for (Object[] result : resp) {
             Product product = (Product) result[0];
             AdminProductResponse adminProductResponse = AdminProductMapper.INSTANCE.productToAdminProductResponse(product);
-            adminProductResponse.setSaleCount((Long) result[1]);
-            adminProductResponse.setPrice((Float) result[2]);
-            adminProductResponse.setQuantity((Long) result[3]);
+            adminProductResponse.setSaleCount(result[1] != null ? (Long) result[1] : 0);
+            adminProductResponse.setPrice(result[2] != null ? (Float) result[2] : 0);
+            adminProductResponse.setQuantity(result[3] != null ?(Long) result[3] : 0);
             adminProductResponses.add(adminProductResponse);
         }
         Page<AdminProductResponse> adminProductResponsePage = new PageImpl<>(adminProductResponses, pageable, resp.getTotalElements());
