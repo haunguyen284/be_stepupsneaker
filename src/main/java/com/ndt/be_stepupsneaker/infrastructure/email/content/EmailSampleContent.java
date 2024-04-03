@@ -318,6 +318,7 @@ public class EmailSampleContent {
         emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Số lượng</th>";
         emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Giá sản phẩm</th>";
         emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tổng tiền trả</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Trạng thái</th>";
         emailBody += "</tr>";
         emailBody += "</thead>";
         emailBody += "<tbody>";
@@ -333,6 +334,7 @@ public class EmailSampleContent {
                     emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + returnFormDetail.getQuantity() + "</td>";
                     emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(orderDetail.getPrice()) + "</td>";
                     emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(orderDetail.getTotalPrice()) + "</td>";
+                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + "Đồng ý/Từ chối" + "</td>";
                     emailBody += "</tr>";
                 }
             }
@@ -350,15 +352,11 @@ public class EmailSampleContent {
         } else {
             phone = returnForm.getAddress().getPhoneNumber();
         }
-        String address = "";
-        if (returnForm.getType() == ReturnFormType.OFFLINE) {
-            address = "Khách hàng trả tại quầy";
-        } else {
-            address = returnForm.getAddress().getMore() + ", "
-                    + returnForm.getAddress().getWardName() + ", "
-                    + returnForm.getAddress().getDistrictName() + ", "
-                    + returnForm.getAddress().getProvinceName();
-        }
+        String address = returnForm.getAddress().getMore() + ", "
+                + returnForm.getAddress().getWardName() + ", "
+                + returnForm.getAddress().getDistrictName() + ", "
+                + returnForm.getAddress().getProvinceName();
+
         String returnDeliveryStatus = "";
         if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.PENDING) {
             returnDeliveryStatus = "Chờ giải quyết";
