@@ -40,6 +40,8 @@ public class ClientReturnFormResponse {
 
     private RefundStatus refundStatus;
 
+    private Long createdAt;
+
     private ReturnDeliveryStatus returnDeliveryStatus;
 
     private List<ClientReturnFormDetailResponse> returnFormDetails;

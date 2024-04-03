@@ -44,6 +44,8 @@ public class AdminReturnFormResponse {
 
     private ReturnDeliveryStatus returnDeliveryStatus;
 
+    private Long createdAt;
+
     private List<AdminReturnFormDetailResponse> returnFormDetails;
 
     private List<AdminReturnFormHistoryResponse> returnFormHistories;

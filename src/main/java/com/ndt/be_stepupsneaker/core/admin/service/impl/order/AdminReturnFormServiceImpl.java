@@ -111,7 +111,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     @Override
     public PageableObject<AdminReturnFormResponse> findAllEntity(AdminReturnFormRequest request) {
         Pageable pageable = paginationUtil.pageable(request);
-        Page<ReturnForm> resp = adminReturnFormRepository.findAllReturnForm(pageable);
+        Page<ReturnForm> resp = adminReturnFormRepository.findAllReturnForm(request, pageable);
         Page<AdminReturnFormResponse> adminReturnFormResponses = resp.map(AdminReturnFormMapper.INSTANCE::returnFormToAdminReturnFormResponse);
         return new PageableObject<>(adminReturnFormResponses);
     }

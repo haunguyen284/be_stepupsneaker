@@ -13,33 +13,27 @@ import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderDetailRe
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.order.ClientReturnFormRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentMethodRepository;
-import com.ndt.be_stepupsneaker.core.client.repository.payment.ClientPaymentRepository;
 import com.ndt.be_stepupsneaker.core.client.service.order.ClientReturnFormService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
-import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.order.ReturnForm;
 import com.ndt.be_stepupsneaker.entity.order.ReturnFormDetail;
 import com.ndt.be_stepupsneaker.entity.order.ReturnFormHistory;
-import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
-import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnInspectionStatus;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
-import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,7 +41,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -75,9 +68,6 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
     private MessageUtil messageUtil;
 
     @Autowired
-    private CloudinaryUpload cloudinaryUpload;
-
-    @Autowired
     private OrderUtil orderUtil;
 
     @Autowired
@@ -88,6 +78,9 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
 
     @Autowired
     private AdminReturnFormDetailRepository adminReturnFormDetailRepository;
+
+    @Autowired
+    private EmailService emailService;
 
 
     @Override
@@ -130,7 +123,7 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
             throw new ApiException(messageUtil.getMessage("return_form.order.cant_create"));
         }
 
-        Optional<PaymentMethod> paymentMethodOptional = clientPaymentMethodRepository.findByName(request.getPaymentType());
+        Optional<PaymentMethod> paymentMethodOptional = clientPaymentMethodRepository.findByName("Transfer");
         if (paymentMethodOptional.isEmpty()){
             throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
         }
@@ -148,7 +141,6 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
             }
             ReturnFormDetail returnFormDetail = ClientReturnFormDetailMapper.INSTANCE.clientReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
             returnFormDetail.setOrderDetail(orderDetail);
-            returnFormDetail.setUrlImage(cloudinaryUpload.upload(returnFormDetailRequest.getImage()));
             returnFormDetails.add(returnFormDetail);
         }
         order.setStatus(OrderStatus.RETURNED);
@@ -167,7 +159,9 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
         returnForm.setAddress(addressSave);
         returnForm.setType(ReturnFormType.ONLINE);
         returnForm.setPaymentInfo(request.getPaymentInfo());
-        returnForm.setPaymentType(request.getPaymentType());
+        returnForm.setPaymentType("Transfer");
+        returnForm.setRefundStatus(RefundStatus.PENDING);
+        returnForm.setReturnDeliveryStatus(ReturnDeliveryStatus.PENDING);
 
         ReturnForm returnFormSave = clientReturnFormRepository.save(returnForm);
 
@@ -184,8 +178,15 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
             return detail;
         }).collect(Collectors.toList());
 
-        adminReturnFormDetailRepository.saveAll(returnFormDetails);
+        List<ReturnFormDetail> saveReturnFormDetails = adminReturnFormDetailRepository.saveAll(returnFormDetails);
+        ReturnForm returnFormSuccess = clientReturnFormRepository.findById(returnFormSave.getId()).orElseThrow();
+        returnFormSuccess.setReturnFormDetails(saveReturnFormDetails);
+        if (returnFormSuccess.getType() == ReturnFormType.ONLINE) {
+            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+            String subject = "Thông tin phiếu trả hàng của bạn từ Step Up Sneaker";
+            emailSampleContent.sendMailAutoReturnOrder(returnFormSuccess, subject);
+        }
 
-        return ClientReturnFormMapper.INSTANCE.returnFormToClientReturnFormResponse(clientReturnFormRepository.findById(returnFormSave.getId()).orElseThrow());
+        return ClientReturnFormMapper.INSTANCE.returnFormToClientReturnFormResponse(returnFormSuccess);
     }
 }

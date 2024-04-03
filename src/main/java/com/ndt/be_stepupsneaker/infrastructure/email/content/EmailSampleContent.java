@@ -316,9 +316,7 @@ public class EmailSampleContent {
         emailBody += "<tr>";
         emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tên sản phẩm</th>";
         emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Số lượng</th>";
-        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Giá sản phẩm</th>";
-        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Tổng tiền trả</th>";
-        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Trạng thái</th>";
+        emailBody += "<th style='border: 1px solid #ddd; padding: 8px;'>Giá khi mua</th>";
         emailBody += "</tr>";
         emailBody += "</thead>";
         emailBody += "<tbody>";
@@ -333,8 +331,6 @@ public class EmailSampleContent {
                     emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + productDetail.getProduct().getName() + "</td>";
                     emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + returnFormDetail.getQuantity() + "</td>";
                     emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(orderDetail.getPrice()) + "</td>";
-                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + ConvertUtil.convertFloatToVnd(orderDetail.getTotalPrice()) + "</td>";
-                    emailBody += "<td style='border: 1px solid #ddd; padding: 8px;'>" + "Đồng ý/Từ chối" + "</td>";
                     emailBody += "</tr>";
                 }
             }
@@ -380,7 +376,6 @@ public class EmailSampleContent {
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
 //        emailBody += "<tr><td><strong>Hình thức trả hàng :</strong></td><td colspan='3' style='text-align: right;'><strong>" + type + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Trạng thái phiếu trả hàng       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + returnDeliveryStatus + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Tổng tiền phiếu trả  :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(returnForm.getAmountToBePaid()) + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Thời gian tạo phiếu   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(returnForm.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
