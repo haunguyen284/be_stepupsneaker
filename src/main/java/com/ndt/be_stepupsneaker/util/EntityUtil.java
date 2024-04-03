@@ -13,7 +13,7 @@ import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -67,8 +67,8 @@ public class EntityUtil {
                 customerVouchers.add(customerVoucher);
             }
             voucher.setCustomerVoucherList(customerVouchers);
-            SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-            sendMailAutoEntity.sendMailAutoVoucherToCustomer(customerVouchers);
+            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+            emailSampleContent.sendMailAutoVoucherToCustomer(customerVouchers);
             return adminCustomerVoucherRepository.saveAll(customerVouchers);
 
         }

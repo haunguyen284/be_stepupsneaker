@@ -12,7 +12,7 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePasswordRequest;
@@ -72,8 +72,8 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         employeeDTO.setPassword(passwordEncoder.encode(passWordRandom));
         employeeDTO.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWord(null, passWordRandom, employee);
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        emailSampleContent.sendMailAutoPassWord(null, passWordRandom, employee);
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }
 

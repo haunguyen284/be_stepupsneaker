@@ -33,7 +33,7 @@ import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.*;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -121,8 +121,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             String urlVnPay = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
-            SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-            sendMailAutoEntity.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
+            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+            emailSampleContent.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
             return urlVnPay;
         }
         orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
@@ -132,8 +132,8 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             clientOrderResponse.setPayments(clientPaymentResponse);
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        emailSampleContent.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
         notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
         return clientOrderResponse;
     }
@@ -226,8 +226,9 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             orderUtil.updatePayment(order);
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoUpdateOrder(order, orderRequest.getEmail());
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        String subject = "Đơn hàng của bạn vừa được cập nhật!";
+        emailSampleContent.sendMailAutoOrder(order, orderRequest.getEmail(), subject);
         notificationOrder(order, NotificationEmployeeType.ORDER_CHANGED);
         return clientOrderResponse;
     }

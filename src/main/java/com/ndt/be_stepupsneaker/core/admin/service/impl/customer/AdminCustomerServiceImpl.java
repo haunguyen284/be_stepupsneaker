@@ -16,7 +16,7 @@ import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.*;
@@ -98,8 +98,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             addressList.add(address);
         }
         customer.setAddressList(addressList);
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWord(customer, passWordRandom, null);
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        emailSampleContent.sendMailAutoPassWord(customer, passWordRandom, null);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
     }
 

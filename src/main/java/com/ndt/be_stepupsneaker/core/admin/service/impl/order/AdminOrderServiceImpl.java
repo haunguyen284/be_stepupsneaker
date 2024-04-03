@@ -2,7 +2,6 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminCartItemRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderReturnRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.payment.AdminPaymentRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.employee.AdminEmployeeResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderHistoryResponse;
@@ -17,12 +16,6 @@ import com.ndt.be_stepupsneaker.core.admin.repository.order.AdminOrderDetailRepo
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentMethodRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.payment.AdminPaymentRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminProductDetailRepository;
-import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderDetailResponse;
-import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
-import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
-import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientAddressMapper;
-import com.ndt.be_stepupsneaker.core.client.mapper.order.ClientOrderMapper;
 import com.ndt.be_stepupsneaker.core.common.base.Statistic;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
@@ -35,7 +28,6 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherReposi
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
@@ -46,14 +38,13 @@ import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.*;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.util.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -203,9 +194,10 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderUtil.updatePayment(order);
         }
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         if (adminOrderResponse.getAddress() != null) {
-            sendMailAutoEntity.sendMailAutoUpdateOrder(order, orderRequest.getEmail());
+            String subject = "Đơn hàng của bạn vừa được cập nhật!";
+            emailSampleContent.sendMailAutoOrder(order, orderRequest.getEmail(), subject);
         }
         return adminOrderResponse;
     }
@@ -296,8 +288,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoUpdateOrder(newOrder, adminOrderResponse.getEmail());
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        String subject = "Đơn hàng của bạn vừa thay đổi trạng thái!";
+        emailSampleContent.sendMailAutoOrder(newOrder, adminOrderResponse.getEmail(),subject);
         return adminOrderResponse;
     }
 
@@ -382,7 +375,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
             }
         }
-
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";
+        emailSampleContent.sendMailAutoOrder(newOrder, orderRequest.getEmail(), subject);
         AdminOrderResponse adminOrderResponse = AdminOrderMapper
                 .INSTANCE
                 .orderToAdminOrderResponse(adminOrderRepository.save(newOrder));

@@ -2,7 +2,6 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
-import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminCustomerVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
@@ -10,29 +9,21 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherReposi
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
-import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
-import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
-import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
-import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
 import com.ndt.be_stepupsneaker.util.EntityUtil;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

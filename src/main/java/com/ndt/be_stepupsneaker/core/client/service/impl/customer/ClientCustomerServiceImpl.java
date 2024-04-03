@@ -8,7 +8,7 @@ import com.ndt.be_stepupsneaker.core.client.service.customer.ClientCustomerServi
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
@@ -68,8 +68,8 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
         customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
         customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(customerDTO));
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWord(customer,passWordRandom,null);
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        emailSampleContent.sendMailAutoPassWord(customer,passWordRandom,null);
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);
     }
 

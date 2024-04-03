@@ -19,9 +19,8 @@ import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
-import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.VNPayUtil;
@@ -184,8 +183,8 @@ public class VNPayServiceImpl implements VNPayService {
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
             orderUtil.createOrderHistory(order, OrderStatus.WAIT_FOR_DELIVERY, "Wai for delivery");
-            SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-            sendMailAutoEntity.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
+            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+            emailSampleContent.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
             return clientOrderRepository.save(order);
         } else if (result == 11 || result == 15) {
             revertForeignKeyConstraint(orderOptional.get());

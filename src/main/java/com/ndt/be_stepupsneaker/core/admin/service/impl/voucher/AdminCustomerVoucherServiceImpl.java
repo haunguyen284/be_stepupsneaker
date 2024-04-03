@@ -8,11 +8,9 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVouch
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.EntityUtil;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
