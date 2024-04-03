@@ -36,6 +36,8 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnInspectionStatus;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -103,6 +105,9 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     @Autowired
     private OrderUtil orderUtil;
 
+    @Autowired
+    private EmailService emailService;
+
     @Override
     public PageableObject<AdminReturnFormResponse> findAllEntity(AdminReturnFormRequest request) {
         Pageable pageable = paginationUtil.pageable(request);
@@ -125,7 +130,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
 
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findByName(request.getPaymentType());
-        if (paymentMethodOptional.isEmpty()){
+        if (paymentMethodOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
         }
 
@@ -160,7 +165,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
                 int remainQuantity = orderDetail.getQuantity() - returnFormDetailRequest.getQuantity();
                 if (remainQuantity < 0) {
                     throw new ApiException("Bad request");
-                } else if (remainQuantity == 0){
+                } else if (remainQuantity == 0) {
                     orderDetail.setStatus(OrderStatus.RETURNED);
                     adminOrderDetailRepository.save(orderDetail);
                     totalMoneyReturn += orderDetail.getTotalPrice();
@@ -248,12 +253,18 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         // save list ReturnFormDetail
         returnFormDetails.stream().map(detail -> {
             detail.setReturnForm(returnFormSave);
-                return detail;
-            }).collect(Collectors.toList());
+            return detail;
+        }).collect(Collectors.toList());
 
-        adminReturnFormDetailRepository.saveAll(returnFormDetails);
-
-        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(adminReturnFormRepository.findById(returnFormSave.getId()).orElseThrow());
+        List<ReturnFormDetail> saveReturnFormDetails = adminReturnFormDetailRepository.saveAll(returnFormDetails);
+        ReturnForm returnFormSuccess = adminReturnFormRepository.findById(returnFormSave.getId()).orElseThrow();
+        returnFormSuccess.setReturnFormDetails(saveReturnFormDetails);
+        if (returnFormSuccess.getType() == ReturnFormType.ONLINE) {
+            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+            String subject = "Thông tin phiếu trả hàng của bạn từ Step Up Sneaker";
+            emailSampleContent.sendMailAutoReturnOrder(returnFormSuccess, subject);
+        }
+        return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(returnFormSuccess);
     }
 
     @Override
@@ -270,7 +281,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
 
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findByName(request.getPaymentType());
-        if (paymentMethodOptional.isEmpty()){
+        if (paymentMethodOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
         }
         Order order = orderOptional.get();
@@ -295,7 +306,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
             ReturnFormDetail returnFormDetail = AdminReturnFormDetailMapper.INSTANCE.adminReturnFormDetailRequestToReturnFormDetail(returnFormDetailRequest);
 
-            if (!returnFormDetailRequest.getId().contains("splited")){
+            if (!returnFormDetailRequest.getId().contains("splited")) {
                 ReturnFormDetail returnFormDetailDB = adminReturnFormDetailRepository.findById(returnFormDetailRequest.getId()).orElseThrow(
                         () -> new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"))
                 );
@@ -318,7 +329,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
             int remainQuantity = orderDetail.getQuantity() - returnFormDetailRequest.getQuantity();
             if (remainQuantity < 0) {
                 throw new ApiException("Bad request");
-            } else if (remainQuantity == 0){
+            } else if (remainQuantity == 0) {
                 orderDetail.setStatus(OrderStatus.RETURNED);
                 adminOrderDetailRepository.save(orderDetail);
                 totalMoneyReturn += orderDetail.getTotalPrice();
@@ -396,7 +407,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     @Override
     public AdminReturnFormResponse findById(String id) {
         Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(id);
-        if (optionalReturnForm.isEmpty()){
+        if (optionalReturnForm.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
         }
         return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(optionalReturnForm.get());
@@ -406,7 +417,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     @Override
     public Boolean delete(String id) {
         Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(id);
-        if (optionalReturnForm.isEmpty()){
+        if (optionalReturnForm.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
         }
         ReturnForm returnForm = optionalReturnForm.get();
@@ -418,7 +429,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     @Override
     public AdminReturnFormResponse updateReturnDeliveryStatus(AdminReturnFormRequest request) {
         Optional<ReturnForm> optionalReturnForm = adminReturnFormRepository.findById(request.getId());
-        if (optionalReturnForm.isEmpty()){
+        if (optionalReturnForm.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("return_form.notfound"));
         }
         ReturnForm returnForm = optionalReturnForm.get();
