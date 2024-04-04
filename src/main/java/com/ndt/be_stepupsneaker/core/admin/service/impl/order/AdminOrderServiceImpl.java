@@ -350,9 +350,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         orderUpdate.setExpectedDeliveryDate(orderUpdate.getCreatedAt() + EntityProperties.DELIVERY_TIME_IN_MILLIS);
         Order newOrder = adminOrderRepository.save(orderUpdate);
+        newOrder.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
         orderUtil.createVoucherHistory(newOrder);
         if (orderRequest.isCOD() == true) {
-            newOrder.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
             PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Cash")
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
             Payment payment = new Payment();
@@ -364,16 +364,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             payment.setPaymentStatus(PaymentStatus.PENDING);
             adminPaymentRepository.save(payment);
         } else {
-            newOrder.setStatus(OrderStatus.WAIT_FOR_CONFIRMATION);
             createPayment(newOrder, orderRequest);
         }
         Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
-            if (orderRequest.isCOD() == true) {
                 orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
-            } else {
-                orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
-            }
         }
         EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";
@@ -412,24 +407,11 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     @Override
     public AdminOrderResponse applyShippingToOrder(AdminOrderRequest orderRequest) {
         Order order = getOrderById(orderRequest);
-        float shippingFee = 0.0f;
+        float shippingFee = orderRequest.getShippingMoney();
         if (order.getOrderDetails().isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
         float totalMoney = orderUtil.totalMoneyOrderDetails(order.getOrderDetails());
-        if (totalMoney >= EntityProperties.IS_FREE_SHIPPING) {
-            shippingFee = 0;
-        }
-        if (order.getShippingMoney() != 0
-                && orderRequest.getShippingMoney() == 0
-                && totalMoney < EntityProperties.IS_FREE_SHIPPING) {
-            shippingFee = orderRequest.getShippingMoney();
-        } else if (order.getShippingMoney() == 0
-                && orderRequest.getShippingMoney() != 0
-                && totalMoney < EntityProperties.IS_FREE_SHIPPING) {
-            shippingFee = orderRequest.getShippingMoney();
-        }
-
         order.setShippingMoney(shippingFee);
         order.setOriginMoney(totalMoney);
         if (order.getVoucher() == null) {
