@@ -48,7 +48,7 @@ public class AdminAddressServiceImpl implements AdminAddressService {
         if (customerOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
-        List<Address> addressList = adminAddressRepository.findByCustomer(customerOptional.get());
+        List<Address> addressList = adminAddressRepository.findByCustomerAndDeleted(customerOptional.get(),false);
         if (addressList.size() >= 3) {
             throw new ApiException(messageUtil.getMessage("customer.max_address"));
         }
@@ -78,7 +78,6 @@ public class AdminAddressServiceImpl implements AdminAddressService {
         addressSave.setDistrictName(addressDTO.getDistrictName());
         addressSave.setWardName(addressDTO.getWardName());
         addressSave.setProvinceName(addressDTO.getProvinceName());
-
         addressSave.setMore(addressDTO.getMore());
         addressSave.setPhoneNumber(addressDTO.getPhoneNumber());
 

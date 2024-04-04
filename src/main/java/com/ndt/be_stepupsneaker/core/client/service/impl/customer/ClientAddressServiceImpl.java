@@ -56,7 +56,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
         if (!customerOptional.isPresent()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
-        List<Address> addressList = clientAddressRepository.findByCustomerAndDeleted(customerOptional.get(),false);
+        List<Address> addressList = clientAddressRepository.findByCustomerAndDeleted(customerOptional.get(), false);
         if (addressList.size() >= 3) {
             throw new ResourceNotFoundException(messageUtil.getMessage("customer.max_address"));
         }
@@ -80,13 +80,13 @@ public class ClientAddressServiceImpl implements ClientAddressService {
             throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }
         Address addressSave = addressOptional.get();
-        if(addressDTO.getProvinceName()!=null){
+        if (addressDTO.getProvinceName() != null) {
             addressSave.setProvinceName(addressDTO.getProvinceName());
         }
-        if(addressDTO.getDistrictName()!=null){
+        if (addressDTO.getDistrictName() != null) {
             addressSave.setDistrictName(addressDTO.getDistrictName());
         }
-        if(addressDTO.getWardName()!=null){
+        if (addressDTO.getWardName() != null) {
             addressSave.setWardName(addressDTO.getWardName());
         }
 
@@ -110,7 +110,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Override
     public Boolean delete(String id) {
-        Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id,currentCustomer());
+        Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id, currentCustomer());
         if (addressOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }

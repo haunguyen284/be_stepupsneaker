@@ -23,7 +23,6 @@ public interface AdminAddressRepository extends AddressRepository {
             """)
     Optional<Address> findByPhoneNumber(@Param("id") String id, @Param("phoneNumber") String phoneNumber);
 
-    Address findByIsDefault(Boolean isDefault);
 
     @Query("""
             SELECT x FROM Address x 
@@ -46,13 +45,5 @@ public interface AdminAddressRepository extends AddressRepository {
              """)
     Page<Address> findAllAddress(@Param("customerId") String customerId, @Param("request") AdminAddressRequest request, Pageable pageable);
 
-    @Query("SELECT CASE WHEN COUNT(x) > 0 THEN TRUE ELSE FALSE END FROM Address x WHERE x.customer = :customer")
-    boolean existsByCustomer(@Param("customer") Customer customer);
-
-    @Query("SELECT x FROM Address x WHERE x.customer.id = :customerId AND x.isDefault = TRUE")
-    Address findDefaultAddressByCustomer(@Param("customerId") String customerId);
-
-
-    List<Address> findByCustomer(Customer customer);
 
 }
