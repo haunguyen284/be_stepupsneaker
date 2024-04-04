@@ -283,6 +283,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
             Payment payment = orderSave.getPayments().get(0);
             payment.setPaymentStatus(PaymentStatus.COMPLETED);
+            if(payment.getPaymentMethod().getName().equals("Cash")){
+                payment.setTransactionCode("Đã thanh toán");
+            }
             adminPaymentRepository.save(payment);
         }
         Order newOrder = adminOrderRepository.save(orderSave);
