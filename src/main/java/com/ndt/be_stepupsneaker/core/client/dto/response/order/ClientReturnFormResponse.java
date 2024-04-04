@@ -36,6 +36,8 @@ public class ClientReturnFormResponse {
 
     private String paymentType;
 
+    private String email;
+
     private String paymentInfo;
 
     private RefundStatus refundStatus;
@@ -45,5 +47,8 @@ public class ClientReturnFormResponse {
     private ReturnDeliveryStatus returnDeliveryStatus;
 
     private List<ClientReturnFormDetailResponse> returnFormDetails;
+
+    private List<ClientReturnFormHistoryResponse> returnFormHistories;
+
 
 }

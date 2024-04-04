@@ -25,6 +25,8 @@ public class AdminReturnFormRequest extends PageableRequest {
 
     private String order;
 
+    private String email;
+
     private float amountToBePaid;
 
     private String paymentType;

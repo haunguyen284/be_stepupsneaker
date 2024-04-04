@@ -235,6 +235,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         returnForm.setEmployee(employee);
         returnForm.setAddress(addressSave);
         returnForm.setAmountToBePaid(totalMoneyReturn);
+        returnForm.setEmail(request.getEmail());
         returnForm.setType(request.getType());
         returnForm.setPaymentInfo(request.getPaymentInfo());
         returnForm.setPaymentType(request.getPaymentType());
@@ -391,6 +392,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         returnForm.setPaymentInfo(request.getPaymentInfo());
         returnForm.setPaymentType(request.getPaymentType());
         returnForm.setRefundStatus(RefundStatus.COMPLETED);
+        returnForm.setEmail(request.getEmail());
         ReturnForm returnFormSave = adminReturnFormRepository.save(returnForm);
 
         // save list ReturnFormDetail

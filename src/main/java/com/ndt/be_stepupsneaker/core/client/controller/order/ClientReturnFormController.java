@@ -45,7 +45,7 @@ public class ClientReturnFormController {
         return ResponseHelper.getResponse(response, HttpStatus.OK);
     }
 
-    @GetMapping("/code/{code}")
+    @GetMapping("/tracking/{code}")
     public Object findByCode(@PathVariable("code") String code) {
         ClientReturnFormResponse response = clientReturnFormService.findByCode(code);
 

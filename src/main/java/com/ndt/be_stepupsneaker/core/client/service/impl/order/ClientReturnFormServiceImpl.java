@@ -160,6 +160,7 @@ public class ClientReturnFormServiceImpl implements ClientReturnFormService {
         returnForm.setType(ReturnFormType.ONLINE);
         returnForm.setPaymentInfo(request.getPaymentInfo());
         returnForm.setPaymentType("Transfer");
+        returnForm.setEmail(request.getEmail());
         returnForm.setRefundStatus(RefundStatus.PENDING);
         returnForm.setReturnDeliveryStatus(ReturnDeliveryStatus.PENDING);
 

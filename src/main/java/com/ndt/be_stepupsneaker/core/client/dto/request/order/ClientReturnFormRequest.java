@@ -24,6 +24,8 @@ public class ClientReturnFormRequest extends PageableRequest {
 
     private ClientAddressRequest address;
 
+    private String email;
+
     private String order;
 
     private String paymentType;

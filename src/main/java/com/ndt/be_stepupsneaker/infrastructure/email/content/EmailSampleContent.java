@@ -379,8 +379,8 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Thời gian tạo phiếu   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(returnForm.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (returnForm.getOrder().getCustomer() == null) {
-            toEmail[0] = returnForm.getOrder().getEmail();
+        if (returnForm.getEmail() != null) {
+            toEmail[0] = returnForm.getEmail();
         } else {
             toEmail[0] = returnForm.getOrder().getCustomer().getEmail();
         }

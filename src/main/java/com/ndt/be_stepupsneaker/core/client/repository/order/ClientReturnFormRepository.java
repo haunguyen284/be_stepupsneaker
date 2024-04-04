@@ -24,7 +24,7 @@ public interface ClientReturnFormRepository extends ReturnFormRepository {
     Optional<ReturnForm> findByEntityById(@Param("id") String id, @Param("customerId") String customerId);
 
     @Query("""
-    SELECT rf FROM ReturnForm rf WHERE rf.code = :code AND rf.order.customer IS NULL
+    SELECT rf FROM ReturnForm rf WHERE rf.code = :code AND rf.deleted=false
     """)
     Optional<ReturnForm> findEntityByCode(@Param("code") String code);
 }

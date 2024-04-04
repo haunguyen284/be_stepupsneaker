@@ -43,6 +43,9 @@ public class ReturnForm extends PrimaryEntity {
     @Column(name = "code", length = EntityProperties.LENGTH_CODE)
     private String code;
 
+    @Column(name = "email", length = EntityProperties.LENGTH_EMAIL)
+    private String email;
+
     @Column(name = "amount_to_be_paid")
     private float amountToBePaid;
 
