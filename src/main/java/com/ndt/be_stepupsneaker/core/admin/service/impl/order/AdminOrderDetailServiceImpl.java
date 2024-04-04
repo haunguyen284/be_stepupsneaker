@@ -88,13 +88,6 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
 
         adminProductDetailRepository.save(productDetail);
         adminOrderDetailRepository.save(orderDetail);
-        Order order = adminOrderRepository.findById(orderDetailRequest.getOrder()).orElseThrow(() -> new ResourceNotFoundException("order.notfound"));
-        List<OrderDetail> orderDetails = order.getOrderDetails();
-        float totalMoney = orderUtil.totalMoneyOrderDetails(orderDetails);
-        if (totalMoney >= EntityProperties.IS_FREE_SHIPPING) {
-            order.setShippingMoney(0);
-        }
-        adminOrderRepository.save(order);
         return AdminOrderDetailMapper.INSTANCE.orderDetailToAdminOrderDetailResponse(orderDetail);
     }
 
