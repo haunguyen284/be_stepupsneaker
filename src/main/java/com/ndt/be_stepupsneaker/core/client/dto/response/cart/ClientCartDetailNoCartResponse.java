@@ -17,4 +17,6 @@ public class ClientCartDetailNoCartResponse {
     private ClientProductDetailResponse productDetail;
 
     private int quantity;
+
+    private Long createdAt;
 }

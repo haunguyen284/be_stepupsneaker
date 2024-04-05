@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Brand;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminBrandResponse> findAllEntity(AdminBrandRequest brandRequest) {
 
@@ -38,7 +42,7 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     public Object create(AdminBrandRequest BrandDTO) {
         Optional<Brand> brandOptional = adminBrandRepository.findByName(BrandDTO.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.brand.name.exist"));
         }
         Brand Brand = adminBrandRepository.save(AdminBrandMapper.INSTANCE.adminBrandRequestToBrand(BrandDTO));
 
@@ -49,12 +53,12 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     public AdminBrandResponse update(AdminBrandRequest brandRequest) {
         Optional<Brand> brandOptional = adminBrandRepository.findByName(brandRequest.getId(), brandRequest.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.brand.name.exist"));
         }
 
         brandOptional = adminBrandRepository.findById(brandRequest.getId());
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("Brand IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.brand.notfound"));
         }
         Brand BrandSave = brandOptional.get();
         BrandSave.setName(brandRequest.getName());
@@ -66,7 +70,7 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     public AdminBrandResponse findById(String id) {
         Optional<Brand> BrandOptional = adminBrandRepository.findById(id);
         if (BrandOptional.isEmpty()){
-            throw new ResourceNotFoundException("BRAND IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.brand.notfound"));
         }
 
         return AdminBrandMapper.INSTANCE.BrandToAdminBrandResponse(BrandOptional.get());
@@ -76,7 +80,7 @@ public class AdminBrandServiceImpl implements AdminBrandService {
     public Boolean delete(String id) {
         Optional<Brand> brandOptional = adminBrandRepository.findById(id);
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("BRAND NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.brand.notfound"));
         }
         Brand brand = brandOptional.get();
         brand.setDeleted(true);

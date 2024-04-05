@@ -1,13 +1,14 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminCustomerVoucherRequest;
-import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.ListCustomerIdAndVoucherIdRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.CommonRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminCustomerVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,21 +17,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/admin/customerVoucher")
+@RequiredArgsConstructor
 public class AdminCustomerVoucherController {
 
-    private AdminCustomerVoucherService adminCustomerVoucherService;
-
-    @Autowired
-    public AdminCustomerVoucherController(AdminCustomerVoucherService adminCustomerVoucherService) {
-        this.adminCustomerVoucherService = adminCustomerVoucherService;
-    }
+    private final AdminCustomerVoucherService adminCustomerVoucherService;
+    private final MessageUtil messageUtil;
 
     // not use this function
     @GetMapping("")
@@ -47,21 +42,21 @@ public class AdminCustomerVoucherController {
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid ListCustomerIdAndVoucherIdRequest listCustomerIdAndVoucherIdRequest, BindingResult bindingResult) {
+    public Object create(@RequestBody @Valid CommonRequest commonRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(listCustomerIdAndVoucherIdRequest.getVoucher(), listCustomerIdAndVoucherIdRequest.getCustomer()), HttpStatus.OK);
+        return ResponseHelper.getResponse(adminCustomerVoucherService.createCustomerVoucher(commonRequest.getVoucher(), commonRequest.getCustomers()), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public Object deleteCustomersByVoucherAndCustomerIds(
             @PathVariable("id") String voucherId,
-            @RequestBody ListCustomerIdAndVoucherIdRequest customerIdRequest) {
-        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIdRequest.getCustomer());
+            @RequestBody CommonRequest customerIdRequest) {
+        Boolean deleted = adminCustomerVoucherService.deleteCustomersByVoucherIdAndCustomerIds(voucherId, customerIdRequest.getCustomers());
         if (deleted) {
-            return ResponseHelper.getResponse("CUSTOMERS DELETED SUCCESSFULLY.", HttpStatus.OK);
+            return ResponseHelper.getResponse("customer " + messageUtil.getMessage("deleted.success"), HttpStatus.OK);
         } else {
-            return ResponseHelper.getResponse("NO CUSTOMERS WERE DELETED", HttpStatus.NOT_FOUND);
+            return ResponseHelper.getResponse(messageUtil.getMessage("delete.failed"), HttpStatus.NOT_FOUND);
         }
     }
 }

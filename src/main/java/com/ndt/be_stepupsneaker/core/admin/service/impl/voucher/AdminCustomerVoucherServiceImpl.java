@@ -8,46 +8,35 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVouch
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminCustomerVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
-import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
-import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.EntityUtil;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherService {
 
-    private AdminCustomerVoucherRepository adminCustomerVoucherRepository;
-    private PaginationUtil paginationUtil;
-    private AdminCustomerRepository adminCustomerRepository;
-    private AdminVoucherRepository adminVoucherRepository;
-    private EmailService emailService;
+    private final AdminCustomerVoucherRepository adminCustomerVoucherRepository;
+    private final PaginationUtil paginationUtil;
+    private final AdminCustomerRepository adminCustomerRepository;
+    private final AdminVoucherRepository adminVoucherRepository;
+    private final EmailService emailService;
+    private final MessageUtil messageUtil;
+    private final EntityUtil entityUtil;
 
-    @Autowired
-    public AdminCustomerVoucherServiceImpl(AdminCustomerVoucherRepository adminCustomerVoucherRepository,
-                                           PaginationUtil paginationUtil,
-                                           AdminCustomerRepository adminCustomerRepository,
-                                           AdminVoucherRepository adminVoucherRepository,
-                                           EmailService emailService) {
-        this.adminCustomerVoucherRepository = adminCustomerVoucherRepository;
-        this.paginationUtil = paginationUtil;
-        this.adminCustomerRepository = adminCustomerRepository;
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.emailService = emailService;
-    }
 
     @Override
     public PageableObject<AdminCustomerVoucherResponse> findAllEntity(AdminCustomerVoucherRequest customerVoucherRequest) {
@@ -72,7 +61,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     public AdminCustomerVoucherResponse findById(String id) {
         Optional<CustomerVoucher> optionalCustomerVoucher = adminCustomerVoucherRepository.findById(id);
         if (optionalCustomerVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("CustomerVoucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.customer.notfound"));
         }
         return AdminCustomerVoucherMapper.INSTANCE.customerVoucherToAdminCustomerVoucherResponse(optionalCustomerVoucher.get());
     }
@@ -81,7 +70,7 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     public Boolean delete(String id) {
         Optional<CustomerVoucher> optionalCustomerVoucher = adminCustomerVoucherRepository.findById(id);
         if (optionalCustomerVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("CustomerVoucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.customer.notfound"));
         }
         CustomerVoucher newCustomerVoucher = optionalCustomerVoucher.get();
         newCustomerVoucher.setDeleted(true);
@@ -90,29 +79,16 @@ public class AdminCustomerVoucherServiceImpl implements AdminCustomerVoucherServ
     }
 
     @Override
-    public List<AdminCustomerVoucherResponse> createCustomerVoucher(List<String> voucherIds, List<String> customerIds) {
-        if (customerIds == null || customerIds.isEmpty()) {
-            List<Customer> customers = adminCustomerRepository.getAllByDeleted();
-            customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
-        }
+    public List<AdminCustomerVoucherResponse> createCustomerVoucher(String voucherId, List<String> customerIds) {
         List<CustomerVoucher> customerVouchers = new ArrayList<>();
-        for (String voucherId : voucherIds) {
-            for (String customerId : customerIds) {
-                Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(voucherId);
-                Optional<Customer> optionalCustomer = adminCustomerRepository.findById(customerId);
-                if (optionalVoucher.isEmpty() || optionalCustomer.isEmpty()) {
-                    throw new ResourceNotFoundException("VOUCHER OR CUSTOMER" + EntityProperties.NOT_FOUND);
-                }
-                CustomerVoucher newCustomerVoucher = new CustomerVoucher();
-                newCustomerVoucher.setVoucher(optionalVoucher.get());
-                newCustomerVoucher.setCustomer(optionalCustomer.get());
-                customerVouchers.add(newCustomerVoucher);
-            }
+        Voucher voucher = adminVoucherRepository.findById(voucherId)
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound")));
+        if (customerIds != null) {
+            customerVouchers = entityUtil.addCustomersToVoucher(voucher, customerIds);
+        } else {
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoVoucherToCustomer(customerVouchers);
-        return adminCustomerVoucherRepository
-                .saveAll(customerVouchers)
+        return customerVouchers
                 .stream()
                 .map(AdminCustomerVoucherMapper.INSTANCE::customerVoucherToAdminCustomerVoucherResponse)
                 .collect(Collectors.toList());

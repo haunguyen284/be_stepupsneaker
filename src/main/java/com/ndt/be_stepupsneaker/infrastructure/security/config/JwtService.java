@@ -6,15 +6,18 @@ import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepo
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
+import com.ndt.be_stepupsneaker.infrastructure.exception.AccessException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Key;
 import java.security.KeyPair;
@@ -31,6 +34,7 @@ import java.util.function.Function;
 public class JwtService {
     private final AdminCustomerRepository adminCustomerRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
+    private final MessageUtil messageUtil;
 
     public String generateToken(UserDetails userDetails) {
         Optional<Employee> optionalEmployee = adminEmployeeRepository.findByEmail(userDetails.getUsername());
@@ -47,7 +51,7 @@ public class JwtService {
             extraClaims.put("role", optionalEmployee.get().getRole().getName());
             extraClaims.put("fullName", optionalEmployee.get().getFullName());
         } else {
-            throw new ResourceNotFoundException("User Not Found!");
+            throw new ResourceNotFoundException(messageUtil.getMessage("user.notfound"));
         }
 
         return Jwts.builder()
@@ -65,12 +69,17 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException ex) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, messageUtil.getMessage("expired.token"));
+        }
     }
+
 
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -80,6 +89,7 @@ public class JwtService {
         byte[] key = Decoders.BASE64.decode(EntityProperties.SECRET);
         return Keys.hmacShaKeyFor(key);
     }
+
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUserName(token);

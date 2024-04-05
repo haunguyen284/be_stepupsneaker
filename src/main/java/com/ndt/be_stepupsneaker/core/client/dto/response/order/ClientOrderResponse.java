@@ -57,7 +57,11 @@ public class ClientOrderResponse {
 
     private String code;
 
+    private Integer versionUpdate;
+
     private OrderStatus status;
+
+    private int countReview;
 
     private List<ClientOrderDetailResponse> orderDetails;
 

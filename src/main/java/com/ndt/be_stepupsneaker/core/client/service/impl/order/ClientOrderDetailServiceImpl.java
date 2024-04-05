@@ -9,7 +9,9 @@ import com.ndt.be_stepupsneaker.core.client.service.order.ClientOrderDetailServi
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,25 +22,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
 
     private final ClientProductDetailRepository clientProductDetailRepository;
     private final ClientOrderRepository clientOrderRepository;
     private final ClientOrderDetailRepository clientOrderDetailRepository;
     private final PaginationUtil paginationUtil;
-
-    @Autowired
-    public ClientOrderDetailServiceImpl(
-            ClientProductDetailRepository clientProductDetailRepository,
-            ClientOrderRepository clientOrderRepository,
-            ClientOrderDetailRepository clientOrderDetailRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.clientOrderDetailRepository = clientOrderDetailRepository;
-        this.clientOrderRepository = clientOrderRepository;
-        this.clientProductDetailRepository = clientProductDetailRepository;
-        this.paginationUtil = paginationUtil;
-    }
+    private final MessageUtil messageUtil;
 
     @Override
     public PageableObject<ClientOrderDetailResponse> findAllEntity(ClientOrderDetailRequest orderDetailRequest) {
@@ -60,7 +51,7 @@ public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
     public ClientOrderDetailResponse update(ClientOrderDetailRequest orderDetailRequest) {
         Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(orderDetailRequest.getId());
         if(orderDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("ORDER DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
 
         OrderDetail orderDetail = orderDetailOptional.get();
@@ -92,7 +83,7 @@ public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
     public ClientOrderDetailResponse findById(String id) {
         Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(id);
         if(orderDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
 
         return ClientOrderDetailMapper.INSTANCE.orderDetailToClientOrderDetailResponse(orderDetailOptional.get());
@@ -102,7 +93,7 @@ public class ClientOrderDetailServiceImpl implements ClientOrderDetailService {
     public Boolean delete(String id) {
         Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(id);
         if(orderDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
 
         OrderDetail orderDetail = orderDetailOptional.get();

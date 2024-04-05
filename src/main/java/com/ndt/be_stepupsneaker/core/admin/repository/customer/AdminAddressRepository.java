@@ -23,12 +23,17 @@ public interface AdminAddressRepository extends AddressRepository {
             """)
     Optional<Address> findByPhoneNumber(@Param("id") String id, @Param("phoneNumber") String phoneNumber);
 
-    Address findByIsDefault(Boolean isDefault);
 
     @Query("""
             SELECT x FROM Address x 
             WHERE (:customerId IS NULL OR x.customer.id  = :customerId)
-            AND
+            AND 
+            (:#{#request.wardName} IS NULL OR :#{#request.wardName} ILIKE '' OR x.wardName ILIKE  CONCAT('%', :#{#request.wardName}, '%')) 
+            AND 
+            (:#{#request.provinceName} IS NULL OR :#{#request.provinceName} ILIKE '' OR x.provinceName ILIKE  CONCAT('%', :#{#request.provinceName}, '%')) 
+            AND 
+            (:#{#request.districtName} IS NULL OR :#{#request.districtName} ILIKE '' OR x.districtName ILIKE  CONCAT('%', :#{#request.districtName}, '%')) 
+            AND 
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
             OR x.wardName ILIKE  CONCAT('%', :#{#request.q}, '%')
             OR x.provinceName ILIKE  CONCAT('%', :#{#request.q}, '%')
@@ -40,13 +45,5 @@ public interface AdminAddressRepository extends AddressRepository {
              """)
     Page<Address> findAllAddress(@Param("customerId") String customerId, @Param("request") AdminAddressRequest request, Pageable pageable);
 
-    @Query("SELECT CASE WHEN COUNT(x) > 0 THEN TRUE ELSE FALSE END FROM Address x WHERE x.customer = :customer")
-    boolean existsByCustomer(@Param("customer") Customer customer);
-
-    @Query("SELECT x FROM Address x WHERE x.customer.id = :customerId AND x.isDefault = TRUE")
-    Address findDefaultAddressByCustomer(@Param("customerId") String customerId);
-
-
-    List<Address> findByCustomer(Customer customer);
 
 }

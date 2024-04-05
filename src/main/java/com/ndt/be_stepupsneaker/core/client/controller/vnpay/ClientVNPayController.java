@@ -29,7 +29,6 @@ public class ClientVNPayController {
 
 
     private final VNPayService vnPayService;
-    private final ClientOrderService clientOrderService;
 
     @PostMapping("/checkout")
     public Object submitOrder(@RequestParam("amount") int orderTotal,
@@ -45,7 +44,7 @@ public class ClientVNPayController {
         if (order != null) {
             return new RedirectView("http://localhost:5173/success/" + order.getId());
         }
-        return new RedirectView("http://google.com");
+        return new RedirectView("http://localhost:5173/pages/checkout");
     }
 
 }

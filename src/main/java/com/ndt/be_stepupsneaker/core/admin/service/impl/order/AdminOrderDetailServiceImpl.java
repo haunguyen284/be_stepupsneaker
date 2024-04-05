@@ -14,7 +14,10 @@ import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
+import com.ndt.be_stepupsneaker.util.OrderUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,25 +27,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
 
     private final AdminProductDetailRepository adminProductDetailRepository;
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final PaginationUtil paginationUtil;
+    private final MessageUtil messageUtil;
+    private final OrderUtil orderUtil;
 
-    @Autowired
-    public AdminOrderDetailServiceImpl(
-            AdminProductDetailRepository adminProductDetailRepository,
-            AdminOrderRepository adminOrderRepository,
-            AdminOrderDetailRepository adminOrderDetailRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.adminProductDetailRepository = adminProductDetailRepository;
-        this.adminOrderRepository = adminOrderRepository;
-        this.adminOrderDetailRepository = adminOrderDetailRepository;
-        this.paginationUtil = paginationUtil;
-    }
 
     @Override
     public PageableObject<AdminOrderDetailResponse> findAllEntity(AdminOrderDetailRequest orderDetailRequest) {
@@ -65,10 +59,10 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(orderDetailRequest.getId());
         Optional<Order> orderOptional = adminOrderRepository.findById(orderDetailRequest.getOrder());
         if (orderDetailOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
 
         OrderDetail orderDetail = orderDetailOptional.get();
@@ -77,7 +71,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
         orderDetail.setProductDetail(adminProductDetailRepository.findById(orderDetailRequest.getProductDetail()).orElse(null));
         ProductDetail productDetail = orderDetail.getProductDetail();
         if (productDetail.getQuantity() < orderDetail.getQuantity()) {
-            throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+            throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
         }
         if (orderDetailRequest.getQuantity() > orderDetail.getQuantity()) {
             totalQuantity = orderDetailRequest.getQuantity() - orderDetail.getQuantity();
@@ -86,9 +80,12 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
             totalQuantity = orderDetail.getQuantity() - orderDetailRequest.getQuantity();
             productDetail.setQuantity(productDetail.getQuantity() + totalQuantity);
         }
+        float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetail);
         orderDetail.setQuantity(orderDetailRequest.getQuantity());
-        orderDetail.setPrice(orderDetailRequest.getPrice());
+        orderDetail.setPrice(productDetail.getPrice() - promotionValue);
+        orderDetail.setTotalPrice(orderDetail.getQuantity() * orderDetail.getPrice());
         orderDetail.setStatus(orderDetailRequest.getStatus());
+
         adminProductDetailRepository.save(productDetail);
         adminOrderDetailRepository.save(orderDetail);
         return AdminOrderDetailMapper.INSTANCE.orderDetailToAdminOrderDetailResponse(orderDetail);
@@ -98,40 +95,49 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     public List<AdminOrderDetailResponse> create(List<AdminOrderDetailRequest> orderDetailRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         List<OrderDetail> addOrderDetails = new ArrayList<>();
-        for (AdminOrderDetailRequest orderDetailRequest : orderDetailRequests) {
+        List<OrderDetail> updateOrderDetails = new ArrayList<>();
+        for (int i = 0; i < orderDetailRequests.size(); i++) {
+            AdminOrderDetailRequest orderDetailRequest = orderDetailRequests.get(i);
             List<OrderDetail> orderDetails = adminOrderDetailRepository.findAllByOrder_Id(orderDetailRequest.getOrder());
             ProductDetail productDetail = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
-                    .orElseThrow(() -> new ResourceNotFoundException("ProductDetail" + EntityProperties.NOT_FOUND));
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.notfound")));
             if (orderDetailRequest.getQuantity() > productDetail.getQuantity()) {
-                throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
             }
+
+            boolean found = false;
             for (OrderDetail detail : orderDetails) {
                 if (detail.getProductDetail().getId() == productDetail.getId()) {
                     int totalQuantity = detail.getQuantity() + orderDetailRequest.getQuantity();
                     if (detail.getProductDetail().getQuantity() < totalQuantity) {
-                        throw new ApiException("The quantity of products you purchased exceeds the quantity in stock!");
+                        throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
                     }
+                    float promotionValue = orderUtil.getPromotionValueOfProductDetail(detail.getProductDetail());
                     detail.setQuantity(totalQuantity);
-                    detail.setTotalPrice(detail.getQuantity() * detail.getProductDetail().getPrice());
+                    detail.setTotalPrice(totalQuantity * (detail.getProductDetail().getPrice() - promotionValue));
                     productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
                     adminProductDetailRepository.save(productDetail);
-                    addOrderDetails.add(detail);
-                    orderDetailRequests.remove(orderDetailRequest);
-                    List<AdminOrderDetailResponse> adminOrderDetailResponse = adminOrderDetailRepository.saveAll(addOrderDetails)
-                            .stream()
-                            .map(AdminOrderDetailMapper.INSTANCE::orderDetailToAdminOrderDetailResponse)
-                            .collect(Collectors.toList());
-                    addOrderDetails.clear();
-                    return adminOrderDetailResponse;
+                    updateOrderDetails.add(detail);
+                    found = true;
+                    break;
                 }
 
             }
+            if (!found) {
+                productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
+                productDetails.add(productDetail);
+                OrderDetail newOrderDetail = AdminOrderDetailMapper.INSTANCE.adminOrderDetailRequestToOrderDetail(orderDetailRequest);
+                ProductDetail productDetail1 = adminProductDetailRepository.findById(orderDetailRequest.getProductDetail())
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
+                float promotionValue = orderUtil.getPromotionValueOfProductDetail(productDetail1);
 
-            productDetail.setQuantity(productDetail.getQuantity() - orderDetailRequest.getQuantity());
-            productDetails.add(productDetail);
-            OrderDetail newOrderDetail = AdminOrderDetailMapper.INSTANCE.adminOrderDetailRequestToOrderDetail(orderDetailRequest);
-            addOrderDetails.add(newOrderDetail);
+                newOrderDetail.setTotalPrice((productDetail1.getPrice() - promotionValue) * orderDetailRequest.getQuantity());
+                newOrderDetail.setPrice(productDetail1.getPrice() - promotionValue);
+                addOrderDetails.add(newOrderDetail);
+            }
+
         }
+        adminOrderDetailRepository.saveAll(updateOrderDetails);
         adminProductDetailRepository.saveAll(productDetails);
         return adminOrderDetailRepository.saveAll(addOrderDetails).stream().map(AdminOrderDetailMapper.INSTANCE::orderDetailToAdminOrderDetailResponse).collect(Collectors.toList());
     }
@@ -146,7 +152,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     public AdminOrderDetailResponse findById(String id) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(id);
         if (orderDetailOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
 
         return AdminOrderDetailMapper.INSTANCE.orderDetailToAdminOrderDetailResponse(orderDetailOptional.get());
@@ -156,7 +162,7 @@ public class AdminOrderDetailServiceImpl implements AdminOrderDetailService {
     public Boolean delete(String id) {
         Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(id);
         if (orderDetailOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
         }
         OrderDetail orderDetail = orderDetailOptional.get();
         ProductDetail productDetail = orderDetail.getProductDetail();

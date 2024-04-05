@@ -12,14 +12,15 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.employee.Role;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.ChangePasswordRequest;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import com.ndt.be_stepupsneaker.util.RandomStringUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +46,8 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     private final AdminCustomerRepository adminCustomerRepository;
 
+    private final MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminEmployeeResponse> findAllEntity(AdminEmployeeRequest employeeRequest) {
         Pageable pageable = paginationUtil.pageable(employeeRequest);
@@ -59,18 +62,18 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
         if (employeeOptional.isPresent() || customerOptional.isPresent()) {
-            throw new ApiException("Email is exist");
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         employeeOptional = adminEmployeeRepository.findByPhoneNumber(employeeDTO.getPhoneNumber());
         if (employeeOptional.isPresent()) {
-            throw new ApiException("PhoneNumber is exist");
+            throw new ApiException(messageUtil.getMessage("address.phone.exist"));
         }
         String passWordRandom = RandomStringUtil.generateRandomPassword(6);
         employeeDTO.setPassword(passwordEncoder.encode(passWordRandom));
         employeeDTO.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
-        sendMailAutoEntity.sendMailAutoPassWord(null, passWordRandom, employee);
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+        emailSampleContent.sendMailAutoPassWord(null, passWordRandom, employee);
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }
 
@@ -79,19 +82,18 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getId(), employeeDTO.getEmail());
         if (employeeOptional.isPresent() || customerOptional.isPresent()) {
-            throw new ApiException("Email is exist");
+            throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
         employeeOptional = adminEmployeeRepository.findById(employeeDTO.getId());
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee not exist");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
 
         Optional<Role> roleOptional = adminRoleRepository.findById(employeeDTO.getRole());
         if (roleOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Role not exist");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.role.notfound"));
         }
         Employee employee = employeeOptional.get();
-        employee.setPassword(employeeDTO.getPassword());
         employee.setGender(employeeDTO.getGender());
         employee.setEmail(employeeDTO.getEmail());
         employee.setStatus(employeeDTO.getStatus());
@@ -108,7 +110,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     public AdminEmployeeResponse findById(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee is not found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employeeOptional.get());
     }
@@ -117,11 +119,26 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
     public Boolean delete(String id) {
         Optional<Employee> employeeOptional = adminEmployeeRepository.findById(id);
         if (employeeOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Employee is not found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
         }
         Employee employee = employeeOptional.get();
         employee.setDeleted(true);
         adminEmployeeRepository.save(employee);
         return true;
     }
+
+    @Override
+    public AdminEmployeeResponse changePassword(ChangePasswordRequest request) {
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findById(request.getId());
+        if (employeeOptional.isEmpty()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("employee.notfound"));
+        }
+        Employee employee = employeeOptional.get();
+        if (!request.getEnterThePassword().equals(request.getNewPassword())) {
+            throw new ApiException(messageUtil.getMessage("re_entered.password.in.incorrect"));
+        }
+        employee.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(adminEmployeeRepository.save(employee));
+    }
+
 }

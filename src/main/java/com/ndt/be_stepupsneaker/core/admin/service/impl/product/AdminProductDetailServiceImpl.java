@@ -2,7 +2,9 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminProductDetailRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductDetailResponse;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminProductResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductDetailMapper;
+import com.ndt.be_stepupsneaker.core.admin.mapper.product.AdminProductMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminBrandRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminColorRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminMaterialRepository;
@@ -14,12 +16,17 @@ import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminStyleReposito
 import com.ndt.be_stepupsneaker.core.admin.repository.product.AdminTradeMarkRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.product.AdminProductDetailService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
+import com.ndt.be_stepupsneaker.entity.product.Product;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -65,6 +72,9 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminProductDetailResponse> findAllEntity(AdminProductDetailRequest brandRequest) {
 
@@ -103,10 +113,32 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public List<AdminProductDetailResponse> update(List<AdminProductDetailRequest> productDetailRequests) {
         List<ProductDetail> productDetails = new ArrayList<>();
         for (AdminProductDetailRequest adminProductDetailRequest: productDetailRequests) {
+            Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findById(adminProductDetailRequest.getId());
+            if (productDetailOptional.isEmpty()){
+                throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
+            }
+
+            ProductDetail productDetailSave = productDetailOptional.get();
             adminProductDetailRequest.setImage(cloudinaryUpload.upload(adminProductDetailRequest.getImage()));
+            adminProductDetailRequest.setId(productDetailSave.getId());
             productDetails.add(AdminProductDetailMapper.INSTANCE.adminProductDetailRequestToProductDetail(adminProductDetailRequest));
         }
         return adminProductDetailRepository.saveAll(productDetails).stream().map(AdminProductDetailMapper.INSTANCE::productDetailToAdminProductDetailResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public PageableObject<AdminProductDetailResponse> findByTrending(Long fromDate, Long toDate) {
+        List<AdminProductDetailResponse> adminProductDetailResponses = new ArrayList<>();
+        PageRequest pageRequest = PageRequest.of(0, 5);
+        List<Object[]> resp = adminProductDetailRepository.findProductDetailTrending(fromDate, toDate);
+        for (Object[] result : resp) {
+            ProductDetail productDetail = (ProductDetail) result[0];
+            AdminProductDetailResponse adminProductDetailResponse = AdminProductDetailMapper.INSTANCE.productDetailToAdminProductDetailResponse(productDetail);
+            adminProductDetailResponse.setSaleCount((Long) result[1]);
+            adminProductDetailResponses.add(adminProductDetailResponse);
+        }
+        Page<AdminProductDetailResponse> adminProductDetailResponsePage = new PageImpl<>(adminProductDetailResponses, pageRequest, adminProductDetailResponses.size());
+        return new PageableObject<>(adminProductDetailResponsePage);
     }
 
 
@@ -114,7 +146,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public AdminProductDetailResponse update(AdminProductDetailRequest productDetailRequest) {
         Optional<ProductDetail> productDetailOptional = adminProductDetailRepository.findById(productDetailRequest.getId());
         if (productDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("PRODUCT DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
         }
 
         ProductDetail productDetailSave = productDetailOptional.get();
@@ -138,7 +170,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public AdminProductDetailResponse findById(String id) {
         Optional<ProductDetail> ProductDetailOptional = adminProductDetailRepository.findById(id);
         if (ProductDetailOptional.isEmpty()){
-            throw new ResourceNotFoundException("PRODUCT DETAIL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
         }
 
         return AdminProductDetailMapper.INSTANCE.productDetailToAdminProductDetailResponse(ProductDetailOptional.get());
@@ -148,7 +180,7 @@ public class AdminProductDetailServiceImpl implements AdminProductDetailService 
     public Boolean delete(String id) {
         Optional<ProductDetail> brandOptional = adminProductDetailRepository.findById(id);
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("PRODUCT DETAIL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound"));
         }
         ProductDetail brand = brandOptional.get();
         brand.setDeleted(true);

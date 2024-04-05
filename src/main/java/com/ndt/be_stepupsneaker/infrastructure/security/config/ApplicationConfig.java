@@ -6,6 +6,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRe
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,7 @@ import java.util.Optional;
 public class ApplicationConfig {
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final ClientCustomerRepository clientCustomerRepository;
+    private final MessageUtil messageUtil;
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
@@ -41,7 +43,7 @@ public class ApplicationConfig {
             } else if (customer.isPresent()) {
                 return customer.get();
             } else {
-                throw new ResourceNotFoundException("User Not Found!");
+                throw new ResourceNotFoundException(messageUtil.getMessage("user.notfound"));
             }
         };
     }

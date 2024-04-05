@@ -82,36 +82,39 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
                     Object oldValue = field.get(oldResponse);
                     Object newValue = field.get(newResponse);
 
-                    if (oldValue != null && newValue != null) {
-                        if (EntityComparator.isBaseType(oldValue.getClass()) && EntityComparator.isBaseType(newValue.getClass())) {
-                            if (!Objects.equals(oldValue, newValue)) {
-                                ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
-                                changeDetail.setOldValue(oldValue);
-                                changeDetail.setNewValue(newValue);
-                                changes.put(field.getName(), changeDetail);
-                            }
-                        } else {
-                            Javers javers = JaversBuilder.javers().build();
-                            Diff diff = null;
-
-                            if (oldValue instanceof List && newValue instanceof List) {
-                                @SuppressWarnings("unchecked")
-                                List<AdminOrderDetailResponse> oldList = (List<AdminOrderDetailResponse>) oldValue;
-                                @SuppressWarnings("unchecked")
-                                List<AdminOrderDetailResponse> newList = (List<AdminOrderDetailResponse>) newValue;
-
-                                diff = javers.compareCollections(oldList, newList, AdminOrderDetailResponse.class);
+                    if (oldValue != null) {
+                        if (newValue != null) {
+                            if (EntityComparator.isBaseType(oldValue.getClass()) && EntityComparator.isBaseType(newValue.getClass())) {
+                                if (!Objects.equals(oldValue, newValue)) {
+                                    ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
+                                    changeDetail.setOldValue(oldValue);
+                                    changeDetail.setNewValue(newValue);
+                                    changes.put(field.getName(), changeDetail);
+                                }
                             } else {
-                                diff = javers.compare(oldValue, newValue);
-                            }
+                                Javers javers = JaversBuilder.javers().build();
+                                Diff diff = null;
 
-                            if (diff.hasChanges()) {
-                                ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
-                                changeDetail.setOldValue(oldValue);
-                                changeDetail.setNewValue(newValue);
-                                changes.put(field.getName(), changeDetail);
+                                if (oldValue instanceof List && newValue instanceof List) {
+                                    @SuppressWarnings("unchecked")
+                                    List<AdminOrderDetailResponse> oldList = (List<AdminOrderDetailResponse>) oldValue;
+                                    @SuppressWarnings("unchecked")
+                                    List<AdminOrderDetailResponse> newList = (List<AdminOrderDetailResponse>) newValue;
+
+                                    diff = javers.compareCollections(oldList, newList, AdminOrderDetailResponse.class);
+                                } else {
+                                    diff = javers.compare(oldValue, newValue);
+                                }
+
+                                if (diff.hasChanges()) {
+                                    ChangeDetailResponse<Object> changeDetail = new ChangeDetailResponse<>();
+                                    changeDetail.setOldValue(oldValue);
+                                    changeDetail.setNewValue(newValue);
+                                    changes.put(field.getName(), changeDetail);
+                                }
                             }
                         }
+
                     }
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
@@ -121,9 +124,6 @@ public class AdminOrderAuditServiceImpl implements AdminOrderAuditService {
 
         return changes;
     }
-
-
-
 
 
 }

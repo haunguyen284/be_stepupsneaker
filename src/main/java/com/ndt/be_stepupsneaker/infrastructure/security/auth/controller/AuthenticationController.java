@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.PasswordRes
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.AuthenticationService;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.service.PasswordResetTokenService;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +26,21 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final PasswordResetTokenService passwordResetTokenService;
+    private final MySessionInfo mySessionInfo;
+    private final MessageUtil messageUtil;
+
+
+    @GetMapping("/admin/me")
+    public Object getMe() {
+        return ResponseHelper.getResponse(mySessionInfo.getCurrentEmployee(), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/client/me")
+    public Object getMeCustomer() {
+        return ResponseHelper.getResponse(mySessionInfo.getCurrentCustomer(), HttpStatus.OK);
+    }
+
 
     @PostMapping("/register-employees")
     public ResponseEntity<AuthenticationResponse> registerEmployee(
@@ -59,9 +75,9 @@ public class AuthenticationController {
     public Object forgotPassword(@RequestParam("email") String email) {
         boolean emailSent = passwordResetTokenService.sendPasswordResetEmail(email);
         if (emailSent) {
-            return ResponseHelper.getResponse("Password reset email sent successfully", HttpStatus.OK);
+            return ResponseHelper.getResponse(messageUtil.getMessage("password.reset.email.sent"), HttpStatus.OK);
         } else {
-            return ResponseHelper.getErrorResponse("User with this email not found", HttpStatus.NOT_FOUND);
+            return ResponseHelper.getErrorResponse(messageUtil.getMessage("user.notfound"), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -70,9 +86,9 @@ public class AuthenticationController {
                                 @RequestBody PasswordResetRequest resetRequest) {
         boolean passwordReset = passwordResetTokenService.resetPassword(token, resetRequest);
         if (passwordReset) {
-            return ResponseHelper.getResponse("Password reset successfully", HttpStatus.OK);
+            return ResponseHelper.getResponse(messageUtil.getMessage("password.reset.successfully"), HttpStatus.OK);
         } else {
-            return ResponseHelper.getErrorResponse("Invalid or expired token! Please try sending the email again to continue!", HttpStatus.BAD_REQUEST);
+            return ResponseHelper.getErrorResponse(messageUtil.getMessage("invalid.or.expired.token"), HttpStatus.BAD_REQUEST);
         }
     }
 

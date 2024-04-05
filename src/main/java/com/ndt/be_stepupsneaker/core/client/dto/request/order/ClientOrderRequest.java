@@ -1,9 +1,11 @@
 package com.ndt.be_stepupsneaker.core.client.dto.request.order;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -33,20 +35,25 @@ public class ClientOrderRequest extends PageableRequest {
     private String phoneNumber;
 
     @NotBlank(message = "Email must be not null")
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String fullName;
 
     @NotBlank(message = "Email must be not null")
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String email;
 
     @NotNull(message = "Email must be not null")
     private float shippingMoney;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String note;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String orderHistoryNote;
 
     private TransactionInfo transactionInfo;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String paymentMethod;
 
     private OrderStatus status;

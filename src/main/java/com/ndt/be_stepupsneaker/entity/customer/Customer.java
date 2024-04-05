@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.entity.customer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.cart.Cart;
+import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.CustomerStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
@@ -52,6 +53,9 @@ public class Customer extends PrimaryEntity implements UserDetails {
 
     @OneToMany(mappedBy = "customer")
     List<Address> addressList;
+
+    @OneToMany(mappedBy = "customer")
+    List<Order> orders;
 
     @OneToMany(mappedBy = "customer")
     List<CustomerVoucher> customerVoucherList;

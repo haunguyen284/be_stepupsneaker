@@ -35,7 +35,6 @@ public class ClientCartDetailController {
     @GetMapping("")
     public Object findAllCartDetail() {
         return ResponseHelper.getResponse(clientCartDetailService.findAll(), HttpStatus.OK);
-
     }
 
     @GetMapping("/{id}")
@@ -93,6 +92,11 @@ public class ClientCartDetailController {
 
     @DeleteMapping("")
     public Object deleteCartDetails() {
+        return ResponseHelper.getResponse(clientCartDetailService.deleteAllFromCart(), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/order/{orderId}")
+    public Object deleteCartDetailsByOrder(@PathVariable("orderId") String orderId) {
         return ResponseHelper.getResponse(clientCartDetailService.deleteAllFromCart(), HttpStatus.OK);
     }
 }

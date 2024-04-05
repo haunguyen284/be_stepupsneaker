@@ -15,9 +15,13 @@ public class ClientCartDetailResponse {
 
     private String id;
 
-    private ClientCartResponse cart;
+    private String cart;
+
+    private String order;
 
     private ClientProductDetailResponse productDetail;
 
     private int quantity;
+
+    private Long createdAt;
 }

@@ -13,7 +13,9 @@ import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,25 +26,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminPaymentServiceImpl implements AdminPaymentService {
 
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final AdminOrderRepository adminOrderRepository;
     private final PaginationUtil paginationUtil;
+    private final MessageUtil messageUtil;
 
-    @Autowired
-    public AdminPaymentServiceImpl(
-            AdminPaymentRepository adminPaymentRepository,
-            AdminPaymentMethodRepository adminPaymentMethodRepository,
-            AdminOrderRepository adminOrderRepository,
-            PaginationUtil paginationUtil
-    ) {
-        this.adminPaymentRepository = adminPaymentRepository;
-        this.adminPaymentMethodRepository = adminPaymentMethodRepository;
-        this.adminOrderRepository = adminOrderRepository;
-        this.paginationUtil = paginationUtil;
-    }
 
     @Override
     public PageableObject<AdminPaymentResponse> findAllEntity(AdminPaymentRequest paymentRequest) {
@@ -56,7 +48,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     public Object create(AdminPaymentRequest paymentRequest) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findByTransactionCode(paymentRequest.getTransactionCode());
         if (paymentOptional.isPresent()) {
-            throw new ApiException("TRANSACTION CODE IS EXIST");
+            throw new ApiException(messageUtil.getMessage("payment.transaction_code.exist"));
         }
 
         Payment payment = adminPaymentRepository.save(AdminPaymentMapper.INSTANCE.adminPaymentRequestToPayment(paymentRequest));
@@ -67,22 +59,22 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     public AdminPaymentResponse update(AdminPaymentRequest paymentRequest) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findByTransactionCode(paymentRequest.getId(), paymentRequest.getTransactionCode());
         if (paymentOptional.isPresent()) {
-            throw new ApiException("TRANSACTION CODE IS EXIST");
+            throw new ApiException(messageUtil.getMessage("payment.transaction_code.exist"));
         }
 
         paymentOptional = adminPaymentRepository.findById(paymentRequest.getId());
         if (paymentOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.notfound"));
         }
 
         Optional<PaymentMethod> paymentMethodOptional = adminPaymentMethodRepository.findById(paymentRequest.getPaymentMethod());
         if (paymentMethodOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PAYMENT METHOD IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound"));
         }
 
         Optional<Order> orderOptional = adminOrderRepository.findById(paymentRequest.getOrder());
         if (orderOptional.isEmpty()) {
-            throw new ResourceNotFoundException("ORDER IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
 
         Payment paymentSave = paymentOptional.get();
@@ -98,7 +90,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     public AdminPaymentResponse findById(String id) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findById(id);
         if (paymentOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.notfound"));
         }
         return AdminPaymentMapper.INSTANCE.paymentToAdminPaymentResponse(paymentOptional.get());
     }
@@ -107,7 +99,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     public Boolean delete(String id) {
         Optional<Payment> paymentOptional = adminPaymentRepository.findById(id);
         if (paymentOptional.isEmpty()) {
-            throw new ResourceNotFoundException("PAYMENT IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("payment.notfound"));
         }
         Payment payment = paymentOptional.get();
         payment.setDeleted(true);

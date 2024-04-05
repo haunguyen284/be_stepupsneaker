@@ -14,10 +14,6 @@ public class ClientOrderHistoryResponse {
 
     private String id;
 
-    private ClientOrderNoOrderDetailResponse order;
-
-    private String actionDescription;
-
     private OrderStatus actionStatus;
 
     private String note;

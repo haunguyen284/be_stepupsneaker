@@ -15,6 +15,7 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,6 +40,9 @@ public class ClientAddressServiceImpl implements ClientAddressService {
     @Autowired
     private MySessionInfo mySessionInfo;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     // Not user funciton
     @Override
     public PageableObject<ClientAddressResponse> findAllEntity(ClientAddressRequest addressRequest) {
@@ -48,17 +52,13 @@ public class ClientAddressServiceImpl implements ClientAddressService {
     // Tạo address bắt buộc phải cho id customer
     @Override
     public Object create(ClientAddressRequest addressDTO) {
-        Optional<Address> addressOptional = clientAddressRepository.findByPhoneNumber(addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()) {
-            throw new ResourceNotFoundException("PHONE IS EXISTS !");
-        }
         Optional<Customer> customerOptional = clientCustomerRepository.findById(addressDTO.getCustomer());
         if (!customerOptional.isPresent()) {
-            throw new ResourceNotFoundException("CUSTOMER NOT FOUND !");
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.notfound"));
         }
-        List<Address> addressList = clientAddressRepository.findByCustomerAndDeleted(customerOptional.get(),false);
+        List<Address> addressList = clientAddressRepository.findByCustomerAndDeleted(customerOptional.get(), false);
         if (addressList.size() >= 3) {
-            throw new ResourceNotFoundException("Customers can only create a maximum of 3 addresses !");
+            throw new ResourceNotFoundException(messageUtil.getMessage("customer.max_address"));
         }
         boolean hasAddress = clientAddressRepository.existsByCustomer(customerOptional.get());
         Address address = ClientAddressMapper.INSTANCE.clientAddressRequestToAddress(addressDTO);
@@ -75,22 +75,18 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Override
     public ClientAddressResponse update(ClientAddressRequest addressDTO) {
-        Optional<Address> addressOptional = clientAddressRepository.findByPhoneNumber(addressDTO.getId(), addressDTO.getPhoneNumber());
-        if (addressOptional.isPresent()) {
-            throw new ApiException(("Phone is exit"));
-        }
-        addressOptional = clientAddressRepository.findById(addressDTO.getId());
+        Optional<Address> addressOptional = clientAddressRepository.findById(addressDTO.getId());
         if (addressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address is not exit");
+            throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }
         Address addressSave = addressOptional.get();
-        if(addressDTO.getProvinceName()!=null){
+        if (addressDTO.getProvinceName() != null) {
             addressSave.setProvinceName(addressDTO.getProvinceName());
         }
-        if(addressDTO.getDistrictName()!=null){
+        if (addressDTO.getDistrictName() != null) {
             addressSave.setDistrictName(addressDTO.getDistrictName());
         }
-        if(addressDTO.getWardName()!=null){
+        if (addressDTO.getWardName() != null) {
             addressSave.setWardName(addressDTO.getWardName());
         }
 
@@ -106,7 +102,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
     public ClientAddressResponse findById(String id) {
         Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id, currentCustomer());
         if (addressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address Not Found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }
 
         return ClientAddressMapper.INSTANCE.addressToClientAddressResponse(addressOptional.get());
@@ -114,9 +110,9 @@ public class ClientAddressServiceImpl implements ClientAddressService {
 
     @Override
     public Boolean delete(String id) {
-        Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id,currentCustomer());
+        Optional<Address> addressOptional = clientAddressRepository.findByIdAndCustomer(id, currentCustomer());
         if (addressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address Not Found");
+            throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }
         Address address = addressOptional.get();
         address.setDeleted(true);
@@ -136,7 +132,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
     public Boolean updateDefaultAddressByCustomer(String addressId) {
         Optional<Address> newDefaultAddressOptional = clientAddressRepository.findById(addressId);
         if (newDefaultAddressOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Address Not Found ! TAO QUÁ MỆT MỎI !");
+            throw new ResourceNotFoundException(messageUtil.getMessage("address.notfound"));
         }
         Address existingDefaultAddress = clientAddressRepository.findDefaultAddressByCustomer(newDefaultAddressOptional.get().getCustomer().getId());
         if (existingDefaultAddress != null) {
@@ -152,7 +148,7 @@ public class ClientAddressServiceImpl implements ClientAddressService {
     private Customer currentCustomer() {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         Customer customer = clientCustomerRepository.findById(customerResponse.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Customer" + EntityProperties.NOT_FOUND));
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
         return customer;
     }
 }

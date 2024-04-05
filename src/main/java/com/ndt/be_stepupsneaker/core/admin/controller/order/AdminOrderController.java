@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.controller.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderReturnRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.product.AdminBrandRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentMethodResponse;
@@ -78,5 +79,53 @@ public class AdminOrderController {
         return ResponseHelper.getResponse(adminOrderService.confirmationOrder(adminOrderRequest), HttpStatus.OK);
     }
 
+    @PutMapping("/direct/check-out/{id}")
+    public Object checkOut(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult) {
+        adminOrderRequest.setId(id);
 
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+
+        return ResponseHelper.getResponse(adminOrderService.checkOutAdmin(adminOrderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/delivery/check-out/{id}")
+    public Object checkoutSellDelivery(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult) {
+        adminOrderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.checkoutSellDelivery(adminOrderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/apply-customer/{id}")
+    public Object applyCustomerToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyCustomerToOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/apply-voucher/{id}")
+    public Object applyVoucherToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyVoucherToOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/apply-shipping/{id}")
+    public Object applyShippingToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyShippingToOrder(orderRequest), HttpStatus.OK);
+    }
+
+    @PutMapping("/apply-note/{id}")
+    public Object applyNoteToOrder(@PathVariable("id") String id, @RequestBody @Valid AdminOrderRequest orderRequest, BindingResult bindingResult) {
+        orderRequest.setId(id);
+        if (bindingResult.hasErrors())
+            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
+        return ResponseHelper.getResponse(adminOrderService.applyNoteToOrder(orderRequest), HttpStatus.OK);
+    }
 }

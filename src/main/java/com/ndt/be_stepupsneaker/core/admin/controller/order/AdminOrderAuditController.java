@@ -22,13 +22,6 @@ public class AdminOrderAuditController {
     @GetMapping("/{id}")
     public Object findById(@PathVariable("id") String id) {
         List<AdminOrderAuditResponse> adminOrderResponseList = adminOrderAuditService.getOrderRevisions(id);
-
-
-//        AdminOrderResponse entity1 = adminOrderResponseList.get(0);
-//        AdminOrderResponse entity2 = adminOrderResponseList.get(1);
-
-//        System.out.println(entity1.findChanges(entity2));
-
         return ResponseHelper.getResponse(adminOrderResponseList, HttpStatus.OK);
     }
 

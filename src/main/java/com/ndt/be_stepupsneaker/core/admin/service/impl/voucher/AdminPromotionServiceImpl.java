@@ -8,6 +8,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionProd
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminPromotionRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminPromotionService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
@@ -15,41 +16,28 @@ import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
-import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import com.ndt.be_stepupsneaker.util.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminPromotionServiceImpl implements AdminPromotionService {
-    private CloudinaryUpload cloudinaryUpload;
-    private ScheduledService scheduledService;
-    private AdminPromotionRepository adminPromotionRepository;
-    private PaginationUtil paginationUtil;
-    private AdminProductDetailRepository adminProductDetailRepository;
-    private AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
-
-    @Autowired
-    public AdminPromotionServiceImpl(CloudinaryUpload cloudinaryUpload,
-                                     ScheduledService scheduledService,
-                                     AdminPromotionRepository adminPromotionRepository,
-                                     PaginationUtil paginationUtil,
-                                     AdminProductDetailRepository adminProductDetailRepository,
-                                     AdminPromotionProductDetailRepository adminPromotionProductDetailRepository) {
-        this.cloudinaryUpload = cloudinaryUpload;
-        this.scheduledService = scheduledService;
-        this.adminPromotionRepository = adminPromotionRepository;
-        this.paginationUtil = paginationUtil;
-        this.adminProductDetailRepository = adminProductDetailRepository;
-        this.adminPromotionProductDetailRepository = adminPromotionProductDetailRepository;
-    }
+    private final CloudinaryUpload cloudinaryUpload;
+    private final ScheduledService scheduledService;
+    private final AdminPromotionRepository adminPromotionRepository;
+    private final PaginationUtil paginationUtil;
+    private final AdminProductDetailRepository adminProductDetailRepository;
+    private final AdminPromotionProductDetailRepository adminPromotionProductDetailRepository;
+    private final MessageUtil messageUtil;
+    private final EntityUtil entityUtil;
 
     @Override
     public PageableObject<AdminPromotionResponse> findAllEntity(AdminPromotionRequest request) {
@@ -69,12 +57,14 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public Object create(AdminPromotionRequest request) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findByCode(request.getCode());
         if (promotionOptional.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("promotion.code.exist"));
         }
         request.setImage(cloudinaryUpload.upload(request.getImage()));
         Promotion promotion = adminPromotionRepository.save(AdminPromotionMapper.INSTANCE.adminPromotionRequestToPromotion(request));
         adminPromotionRepository.updateStatusBasedOnTime(promotion.getId(), promotion.getStartDate(), promotion.getEndDate());
-        productDetailsInPromotion(promotion, request.getProductDetailIds());
+        if (promotion != null && request.getProductDetailIds() != null) {
+            entityUtil.addProductDetailsToPromotion(promotion,request.getProductDetailIds());
+        }
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotion);
     }
 
@@ -82,12 +72,12 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse update(AdminPromotionRequest request) {
         Optional<Promotion> optionalPromotion = adminPromotionRepository.findByCode(request.getId(), request.getCode());
         if (optionalPromotion.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("promotion.code.exist"));
         }
 
         optionalPromotion = adminPromotionRepository.findById(request.getId());
         if (optionalPromotion.isEmpty()) {
-            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
         Promotion newPromotion = optionalPromotion.get();
         newPromotion.setName(request.getName());
@@ -97,7 +87,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         newPromotion.setEndDate(request.getEndDate());
         newPromotion.setStartDate(request.getStartDate());
         newPromotion.setValue(request.getValue());
-        productDetailsInPromotion(newPromotion, request.getProductDetailIds());
+        ;
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(newPromotion));
     }
 
@@ -105,7 +95,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse findById(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
 
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(promotionOptional.get());
@@ -115,7 +105,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public Boolean delete(String id) {
         Optional<Promotion> promotionOptional = adminPromotionRepository.findById(id);
         if (promotionOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Promotion" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("promotion.notfound"));
         }
         Promotion newPromotion = promotionOptional.get();
         newPromotion.setDeleted(true);
@@ -123,25 +113,20 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         return true;
     }
 
-    public void productDetailsInPromotion(Promotion model, List<String> productDetailIds) {
-        Promotion promotion = adminPromotionRepository.findById(model.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("PROMOTION" + EntityProperties.NOT_FOUND));
-        if (promotion.getPromotionProductDetailList() == null) {
-            promotion.setPromotionProductDetailList(new ArrayList<>());
+
+    public boolean isValid(PromotionProductDetail ppd) {
+        Promotion promotion = ppd.getPromotion();
+        if (promotion != null && promotion.getEndDate() != null) {
+            LocalDateTime currentDate = LocalDateTime.now();
+            LocalDateTime endDate = ConvertUtil.convertLongToLocalDateTime(promotion.getEndDate());
+            return !currentDate.isAfter(endDate);
         }
-        if (productDetailIds != null) {
-            List<ProductDetail> productDetails = adminProductDetailRepository.findAllById(productDetailIds);
-            List<PromotionProductDetail> promotionProductDetails = productDetails
-                    .stream()
-                    .map(productDetail -> {
-                        PromotionProductDetail promotionProductDetail = new PromotionProductDetail();
-                        promotionProductDetail.setPromotion(promotion);
-                        promotionProductDetail.setProductDetail(productDetail);
-                        return promotionProductDetail;
-                    })
-                    .collect(Collectors.toList());
-            adminPromotionProductDetailRepository.saveAll(promotionProductDetails);
-            promotion.getPromotionProductDetailList().addAll(promotionProductDetails);
-        }
+        return false;
+    }
+
+    // Phương thức tính toán giá trị moneyPromotion
+    public Float calculateMoneyPromotion(PromotionProductDetail ppd) {
+        Float promotionMoney = (ppd.getProductDetail().getPrice() * ppd.getPromotion().getValue()) / 100;
+        return promotionMoney;
     }
 }

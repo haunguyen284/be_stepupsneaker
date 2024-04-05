@@ -10,20 +10,20 @@ import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherHistorySe
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
-@Service
-public class AdminVoucherHistoryServiceImpl implements AdminVoucherHistoryService {
-    @Autowired
-    private AdminVoucherHistoryRepository adminVoucherHistoryRepository;
 
-    @Autowired
-    private PaginationUtil paginationUtil;
-    @Override
+@Service
+@RequiredArgsConstructor
+public class AdminVoucherHistoryServiceImpl implements AdminVoucherHistoryService {
+    private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
+    private final PaginationUtil paginationUtil;
+
     public PageableObject<AdminVoucherHistoryResponse> findAllEntity(AdminVoucherHistoryRequest request) {
         Pageable pageable = paginationUtil.pageable(request);
         Page<VoucherHistory> resp = adminVoucherHistoryRepository.findAllVoucherHistory(request, pageable);

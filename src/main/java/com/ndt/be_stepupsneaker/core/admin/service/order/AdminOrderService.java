@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.admin.service.order;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderReturnRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
@@ -21,5 +22,16 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     AdminOrderResponse confirmationOrder(AdminOrderRequest adminOrderRequest);
 
+    AdminOrderResponse checkOutAdmin(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse checkoutSellDelivery(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyCustomerToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyVoucherToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyShippingToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse applyNoteToOrder(AdminOrderRequest orderRequest);
 
 }

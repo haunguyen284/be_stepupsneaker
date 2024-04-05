@@ -15,7 +15,7 @@ public class ResponseHelper {
         map.put("content", obj);
         map.put("hasErrors", false);
         map.put("errors", "");
-        map.put("timestamp", LocalDateTime.now());
+        map.put("timestamp", LocalDateTime.now().toString());
         map.put("status", status.value());
 
         return new ResponseEntity<Object>(map, status);
@@ -27,7 +27,7 @@ public class ResponseHelper {
         map.put("content", null);
         map.put("hasErrors", true);
         map.put("errors", ErrorHelper.getAllError(errors));
-        map.put("timestamp", LocalDateTime.now());
+        map.put("timestamp", LocalDateTime.now().toString());
         map.put("status", status.value());
 
         return new ResponseEntity<Object>(map, status);
@@ -39,7 +39,7 @@ public class ResponseHelper {
         map.put("content", null);
         map.put("hasErrors", true);
         map.put("errors", error);
-        map.put("timestamp", LocalDateTime.now());
+        map.put("timestamp", LocalDateTime.now().toString());
         map.put("status", status.value());
 
         return new ResponseEntity<Object>(map, status);

@@ -9,7 +9,6 @@ import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 import java.util.List;
 
 public interface ClientCartDetailService extends BaseService<ClientCartDetailResponse, String, ClientCartDetailRequest> {
-    Boolean deleteCartDetails(ClientCartDetailRequest cartDetailRequest);
 
     List<ClientCartDetailResponse> merge(List<ClientCartDetailRequest> cartDetailRequests);
 
@@ -22,4 +21,6 @@ public interface ClientCartDetailService extends BaseService<ClientCartDetailRes
     Object deleteFromCart(String id);
 
     Object deleteAllFromCart();
+
+    Object deleteAllFromCartByOrder(String orderId);
 }

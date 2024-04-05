@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Color;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,9 @@ public class AdminColorServiceImpl implements AdminColorService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminColorResponse> findAllEntity(AdminColorRequest colorRequest) {
 
@@ -38,12 +42,12 @@ public class AdminColorServiceImpl implements AdminColorService {
     public Object create(AdminColorRequest colorDTO) {
         Optional<Color> colorOptional = adminColorRepository.findByName(colorDTO.getName());
         if (colorOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.color.name.exist"));
         }
 
         colorOptional = adminColorRepository.findByCode(colorDTO.getCode());
         if (colorOptional.isPresent()){
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.color.code.exist"));
         }
         Color color = adminColorRepository.save(AdminColorMapper.INSTANCE.adminColorRequestToColor(colorDTO));
 
@@ -54,16 +58,16 @@ public class AdminColorServiceImpl implements AdminColorService {
     public AdminColorResponse update(AdminColorRequest colorDTO) {
         Optional<Color> colorOptional = adminColorRepository.findByName(colorDTO.getId(), colorDTO.getName());
         if (colorOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.color.name.exist"));
         }
         colorOptional = adminColorRepository.findByCode(colorDTO.getId(), colorDTO.getCode());
         if (colorOptional.isPresent()){
-            throw new ApiException("CODE IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.color.code.exist"));
         }
 
         colorOptional = adminColorRepository.findById(colorDTO.getId());
         if (colorOptional.isEmpty()){
-            throw new ResourceNotFoundException("COLOR IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.color.notfound"));
         }
         Color colorSave = colorOptional.get();
         colorSave.setName(colorDTO.getName());
@@ -76,7 +80,7 @@ public class AdminColorServiceImpl implements AdminColorService {
     public AdminColorResponse findById(String id) {
         Optional<Color> colorOptional = adminColorRepository.findById(id);
         if (colorOptional.isEmpty()){
-            throw new RuntimeException("LOOI");
+            throw new RuntimeException(messageUtil.getMessage("product.color.notfound"));
         }
 
         return AdminColorMapper.INSTANCE.colorToAdminColorResponse(colorOptional.get());
@@ -86,7 +90,7 @@ public class AdminColorServiceImpl implements AdminColorService {
     public Boolean delete(String id) {
         Optional<Color> colorOptional = adminColorRepository.findById(id);
         if (colorOptional.isEmpty()){
-            throw new ResourceNotFoundException("COLOR NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.color.notfound"));
         }
         Color color = colorOptional.get();
         color.setDeleted(true);

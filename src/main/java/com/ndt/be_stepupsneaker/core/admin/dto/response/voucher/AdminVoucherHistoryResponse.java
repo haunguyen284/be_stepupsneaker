@@ -13,6 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminVoucherHistoryResponse {
+
     private AdminOrderNoOrderDetailResponse order;
 
     private AdminVoucherResponse voucher;
@@ -24,4 +25,6 @@ public class AdminVoucherHistoryResponse {
     private float moneyReduction;
 
     private Long createdAt;
+
+    private Long updatedAt;
 }

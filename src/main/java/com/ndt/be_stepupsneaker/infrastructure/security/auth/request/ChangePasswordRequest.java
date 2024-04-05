@@ -9,7 +9,10 @@ import lombok.*;
 @Getter
 @Setter
 public class ChangePasswordRequest {
-    @NotBlank(message = "Please enter your current password!")
+
+    private String id;
+
+//    @NotBlank(message = "Please enter your current password!")
     private String currentPassword;
 
     @NotBlank(message = "Please enter your new password!")

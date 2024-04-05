@@ -7,5 +7,6 @@ import lombok.Setter;
 @Setter
 public class ClientCartItemRequest {
     private String id;
+    private String productDetail;
     private int quantity;
 }

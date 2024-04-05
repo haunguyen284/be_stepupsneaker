@@ -9,6 +9,7 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.product.Material;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,9 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     @Autowired
     private PaginationUtil paginationUtil;
 
+    @Autowired
+    private MessageUtil messageUtil;
+
     @Override
     public PageableObject<AdminMaterialResponse> findAllEntity(AdminMaterialRequest brandRequest) {
 
@@ -39,7 +43,7 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     public Object create(AdminMaterialRequest MaterialDTO) {
         Optional<Material> brandOptional = adminMaterialRepository.findByName(MaterialDTO.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.material.name.exist"));
         }
         Material Material = adminMaterialRepository.save(AdminMaterialMapper.INSTANCE.adminMaterialRequestToMaterial(MaterialDTO));
 
@@ -50,12 +54,12 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     public AdminMaterialResponse update(AdminMaterialRequest brandRequest) {
         Optional<Material> brandOptional = adminMaterialRepository.findByName(brandRequest.getId(), brandRequest.getName());
         if (brandOptional.isPresent()){
-            throw new ApiException("NAME IS EXIST");
+            throw new ApiException(messageUtil.getMessage("product.material.name.exist"));
         }
 
         brandOptional = adminMaterialRepository.findById(brandRequest.getId());
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("Material IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.material.notfound"));
         }
         Material MaterialSave = brandOptional.get();
         MaterialSave.setName(brandRequest.getName());
@@ -67,7 +71,7 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     public AdminMaterialResponse findById(String id) {
         Optional<Material> MaterialOptional = adminMaterialRepository.findById(id);
         if (MaterialOptional.isEmpty()){
-            throw new ResourceNotFoundException("MATERIAL IS NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.material.notfound"));
         }
 
         return AdminMaterialMapper.INSTANCE.colorToAdminMaterialResponse(MaterialOptional.get());
@@ -77,7 +81,7 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
     public Boolean delete(String id) {
         Optional<Material> brandOptional = adminMaterialRepository.findById(id);
         if (brandOptional.isEmpty()){
-            throw new ResourceNotFoundException("MATERIAL NOT FOUND");
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.material.notfound"));
         }
         Material brand = brandOptional.get();
         brand.setDeleted(true);

@@ -8,9 +8,9 @@ import lombok.Setter;
 @Setter
 public class AdminCartItemRequest {
 
-    @NotNull(message = "Id must be not null")
+    @NotNull(message = "{cart_item.id.not_null}")
     private String id;
 
-    @NotNull(message = "Quantity must be not null")
+    @NotNull(message = "{cart_item.quantity.not_null}")
     private int quantity;
 }

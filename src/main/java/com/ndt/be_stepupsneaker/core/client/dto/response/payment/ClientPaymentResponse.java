@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.client.dto.response.payment;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderNoOrderDetailResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderNoOrderDetailResponse;
+import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,8 @@ public class ClientPaymentResponse {
     private String transactionCode;
 
     private float totalMoney;
+
+    private PaymentStatus paymentStatus;
 
     private String description;
 

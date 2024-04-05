@@ -26,8 +26,8 @@ public class MailConstant {
             "                              <td>\n" +
             "                                <table border=\"0\" cellpadding=\"10\" cellspacing=\"0\" width=\"100%\" class=\"wrapper\" bgcolor=\"#f5f5f5\">\n" +
             "                                  <tr>\n" +
-            "                                    <td style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-left:10px;\"><a href=\"\" style=\"color:#a4acae; text-decoration:none;\">A sale so good, we couldn’t wait for Black Friday.</a></td>\n" +
-            "                                    <td class=\"hidden\" align=\"right\" style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-right:10px;\"><a href=\"#\" style=\"color:#a4acae; text-decoration:underline;\">View in web browser </a></td>\n" +
+            "                                    <td style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-left:10px;\"><a href=\"\" style=\"color:#a4acae; text-decoration:none;\">Mua đơn hàng trên 5 triệu để nhận miễn phí ship.</a></td>\n" +
+            "                                    <td class=\"hidden\" align=\"right\" style=\"font-family:Helvetica, Arial, sans-serif; color:#a4acae; font-size:12px; padding-top:15px; padding-bottom:15px; padding-right:10px;\"><a href=\"#\" style=\"color:#a4acae; text-decoration:underline;\">Xem trong trình duyệt web </a></td>\n" +
             "                                  </tr>\n" +
             "                                </table>\n" +
             "                              </td>\n" +
@@ -49,102 +49,6 @@ public class MailConstant {
             "                    </table>\n" +
             "                    <!-- END Header -->\n" +
             "                    <!-- Start Content -->\n" +
-//            "                    <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
-//            "                      <tr>\n" +
-//            "                        <td style=\"\" bgcolor=\"#4D7268\" class=\"p35-15\">\n" +
-//            "                          <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
-//            "                            <!-- headline -->\n" +
-//            "                            <tr>\n" +
-//            "                              <td bgcolor=\"#4D7268\" class=\"headline\" style=\"padding: 50px 135px 0px 135px;color:#FFFFFF; font-family: 'Proxima Nova Bold', Arial,sans-serif; font-size:36px; line-height:56px; font-weight: Bold; text-align:center; letter-spacing: .01em\">Every Step Tells a Story</td>\n" +
-//            "                            </tr>\n" +
-//            "                            <tr>\n" +
-//            "                              <td bgcolor=\"#4D7268\" align=\"center\" class=\"fallback-font btn-pb\" style=\"padding-bottom: 45px\">\n" +
-//            "                                <div class=\"btn\" style=\"text-align:center;\">\n" +
-//            "                                  <!--[if mso]>\n" +
-//            "                                  <v:roundrect xmlns:v=\"urn:schemas-microsoft-com:vml\" xmlns:w=\"urn:schemas-microsoft-com:office:word\" href=\"https://www.fitbit.com/campaign/shop/versa?color=black&utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=HeroCTALink\" style=\"font-family: Arial, Helvetica, sans-serif;height:36px;v-text-anchor:middle;width:150px;\" arcsize=\"152%\" stroke=\"f\" fillcolor=\"#002A3A\">\n" +
-//            "                                  <w:anchorlock/>\n" +
-//            "                                  <center>\n" +
-//            "                                  <![endif]-->\n" +
-//            "                                  <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=HeroCTALink&utm_medium=EM&utm_source=ET\" class=\"mob-btn\" target=\"_blank\" style=\"background-color:#002A3A;border-radius:50px;color:#ffffff;display:inline-block;font-family:'Proxima Nova Bold', Arial, sans-serif;font-size:15px; letter-spacing: .01em; font-weight:bold;line-height:35px;text-align:center;text-decoration:none;width:150px;-webkit-text-size-adjust:none; padding-top: 1px\">SHOP NOW</a>\n" +
-//            "                                </div>\n" +
-//            "                              </td>\n" +
-//            "                            </tr>\n" +
-//            "                        </td>\n" +
-//            "                      </tr>\n" +
-//            "                    </table>\n" +
-//            "                    <!-- HERO Images-->\n" +
-//            "                    <table bgcolor=\"#4D7268\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
-//            "                      <tr>\n" +
-//            "                        <td width=\"100%\" bgcolor=\"#4D7268\" style=\"width:100%;\">\n" +
-//            "                          <div class=\"no-mobile\">\n" +
-//            "                            <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=BlackV2Link&utm_medium=EM&utm_source=ET\">\n" +
-//            "                              <img src=\"https://minhphusport.com.vn/wp-content/uploads/2019/10/giay-the-thao-nam-525-1.jpg\" border=\"0\" width=\"600\" height=\"auto\" style=\"display: block; width: 600px; height:560px;border: none;\" align=\"top\" alt=\"\" />\n" +
-//            "                            </a>\n" +
-//            "                          </div>\n" +
-//            "                        </td>\n" +
-//            "                      </tr>\n" +
-//            "                      <!-- END HERO Images-->\n" +
-//            "                    </table>\n" +
-//            "                  </td>\n" +
-//            "                </tr>\n" +
-//            "              </table>\n" +
-//            "              <!-- END Content -->\n" +
-//            "              <!--Features-->\n" +
-//            "              <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
-//            "                <tr>\n" +
-//            "                  <td>\n" +
-//            "                    <!--Start Content-->\n" +
-//            "                    <!--Desktop RTBs-->\n" +
-//            "                    <table class=\"no-mobile\" width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" bgcolor=\"#4D7268\">\n" +
-//            "                      <tr>\n" +
-//            "                        <td width=\"120\" style=\"padding:50px 0px 15px 25px;color:#ffffff; text-align:center;\">\n" +
-//            "                          <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=FeaturesBannerLink&utm_medium=EM&utm_source=ET\" target=\"_blank\">\n" +
-//            "                            <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/722f0d87-edae-40cf-9773-b55d011d4e0c.png\" width=\"25\" height=\"25\" style=\"width: 25px;height: 25px;\" border=\"0\" alt=\"\" />\n" +
-//            "                          </a>\n" +
-//            "                        </td>\n" +
-//            "                        <td width=\"120\" style=\"padding:50px 0px 15px 0px;color:#ffffff; text-align:center;\">\n" +
-//            "                          <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=FeaturesBannerLink&utm_medium=EM&utm_source=ET\" target=\"_blank\">\n" +
-//            "                            <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/c2b303ba-e2ab-49c7-885b-41faf4e4804f.png\" width=\"25\" height=\"25\" style=\"width: 25px;height: 25px;\" border=\"0\" alt=\"\" />\n" +
-//            "                          </a>\n" +
-//            "                        </td>\n" +
-//            "                        <td width=\"120\" style=\"padding:50px 0px 15px 0px;color:#ffffff; text-align:center;\">\n" +
-//            "                          <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=FeaturesBannerLink&utm_medium=EM&utm_source=ET\" target=\"_blank\">\n" +
-//            "                            <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/4f17d1c3-c825-4527-ac1e-3b4e96efe83a.png\" width=\"25\" height=\"25\" style=\"width: 25px;height: 25px;\" border=\"0\" alt=\"\" />\n" +
-//            "                          </a>\n" +
-//            "                        </td>\n" +
-//            "                        <td width=\"120\" style=\"padding:50px 0px 15px 0px;color:#ffffff; text-align:center;\">\n" +
-//            "                          <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=FeaturesBannerLink&utm_medium=EM&utm_source=ET\" target=\"_blank\">\n" +
-//            "                            <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/b9504e26-6023-434a-a073-54e173fd6044.png\" width=\"25\" height=\"25\" style=\"width: 25px;height: 25px;\" border=\"0\" alt=\"\" />\n" +
-//            "                          </a>\n" +
-//            "                        </td>\n" +
-//            "                        <td width=\"120\" style=\"padding:50px 20px 15px 0px;color:#ffffff; text-align:center;\">\n" +
-//            "                          <a href=\"https://www.fitbit.com/shop/versa?color=black&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA&utm_content=FeaturesBannerLink&utm_medium=EM&utm_source=ET\" target=\"_blank\">\n" +
-//            "                            <img src=\"http://image.e.fitbit.com/lib/fe87137275620d7472/m/6/0edf8d76-87c6-470d-8713-06d3db75f50c.png\" width=\"25\" height=\"25\" style=\"width: 25px;height: 25px;\" border=\"0\" alt=\"\" />\n" +
-//            "                          </a>\n" +
-//            "                        </td>\n" +
-//            "                      </tr>\n" +
-//            "\n" +
-//            "                      <tr>\n" +
-//            "                        <td valign=\"top\" style=\"padding:0px 1px 0px 20px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px;  text-align:center; line-height: 20px;\">\n" +
-//            "                          Connect famous brands\n" +
-//            "                        </td>\n" +
-//            "                        <td valign=\"top\" style=\"padding:0px 5px 0px 5px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px; text-align:center; line-height: 20px; text-decoration: none;\">\n" +
-//            "                          365+ day <br>Full of energy every day<sup style=\"font-size: 8px;\">◆</sup>\n" +
-//            "                        </td>\n" +
-//            "                        <td valign=\"top\" style=\"padding:0px 6px 0px 6px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px;  text-align:center; line-height: 20px;\">\n" +
-//            "                          SuS<br>Give each other love\n" +
-//            "                        </td>\n" +
-//            "                        <td valign=\"top\" style=\"padding:0px 4px 0px 6px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif;font-weight: 300; font-size: 16px;  text-align:center; line-height: 20px;\">\n" +
-//            "                          Sleep with shoes on\n" +
-//            "                        </td>\n" +
-//            "                        <td valign=\"top\" style=\"padding:0px 25px 0px 7px;color:#ffffff; font-family:'Proxima Nova Light', Arial,sans-serif; font-weight: 300; font-size: 16px; text-align:center; line-height: 20px;\">\n" +
-//            "                          Always-on <br>display<br> mode<sup style=\"font-size: 8px;\">◆</sup>\n" +
-//            "                        </td>\n" +
-//            "                      </tr>\n" +
-//            "                      <tr>\n" +
-//            "                        <td bgcolor=\"#4D7268\" height=\"50\" style=\"font-size:50px;line-height:50px;\">&nbsp;</td>\n" +
-//            "                      </tr>\n" +
-//            "                    </table>\n" +
             "                    <div class=\"mobile-only\" style=\"text-indent: -99999em; display: none; height: 0; width: 0; overflow: hidden; max-height: 0;\">\n" +
             "                      <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" bgcolor=\"#4D7268\">\n" +
             "                        <tr>\n" +
@@ -256,10 +160,10 @@ public class MailConstant {
             + "                            <tr>\n"
             + "                              <td class=\"mobileContainer mobileFooter nowrap\" align=\"center\" style=\"font-family:Helvetica, Arial, sans-serif; font-size:11px; line-height:18px; color:#939c9e; padding-left:30px; padding-right:30px; padding-bottom:40px; background-color:#ffffff;  width:100%;\">\n"
             + "\n"
-            + "                                <a href=\"#\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Unsubscribe</a> | <a href=\"https://blog.fitbit.com?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Blog</a> | <a href=\"https://www.fitbit.com/careers?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">We're Hiring</a>\n"
+            + "                                <a href=\"#\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Đăng kí thành viên</a> | <a href=\"https://blog.fitbit.com?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Bài viết</a> | <a href=\"https://www.fitbit.com/careers?utm_source=ET&utm_medium=EM&utm_campaign=20191117_PreBFV2_US_FM_M_SU_SW_32_NA\" target=\"_blank\" style=\"text-decoration:underline; color:#939c9e;font-size:11px\">Liên hệ</a>\n"
             + "                                <br>\n"
             + "\n"
-            + "                                <a href=\"https://www.fitbit.com/legal/trademark-list\" style=\"text-decoration:none; color:#939c9e;font-size:11px\"><span class=\"nowrap\">Step Up Sneaker and the Sneaker logo are trademarks or registered trademarks of Fitbit, Inc. in the VN and other Sneaker. Additional Sneaker trademarks can be found at www.fitbit.com/legal/trademark-list. Third-party trademarks mentioned are the property of their respective owners. </span></a>\n"
+            + "                                <a href=\"https://www.fitbit.com/legal/trademark-list\" style=\"text-decoration:none; color:#939c9e;font-size:11px\"><span class=\"nowrap\">Step Up Sneaker - nơi bạn tìm thấy sự kết hợp hoàn hảo giữa phong cách và thoải mái. Chúng tôi cam kết mang đến cho bạn những bước đi tự tin và phong cách mỗi ngày. </span></a>\n"
             + "                                <br>\n"
             + "                                <a href=\"\" style=\"text-decoration:none; color:#939c9e;font-size:11px\"><span class=\"nowrap\">Step Up Sneaker, 199 Trịnh Văn Bô, 14th Floor,&nbsp;Nam Từ Liêm,&nbsp;Hà Nội&nbsp;_ 2023</span></a>\n"
             + "                              </td>\n"

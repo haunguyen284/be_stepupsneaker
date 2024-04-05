@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.dto.request.product;
 
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,28 +21,28 @@ import java.util.UUID;
 public class AdminProductDetailRequest extends PageableRequest {
     private String id;
 
-    @NotNull(message = "Trade mark must be not null")
+    @NotNull(message = "{product_detail.trade_mark.not_blank}")
     private String tradeMark;
 
-    @NotNull(message = "style must be not null")
+    @NotNull(message = "{product_detail.style.not_blank}")
     private String style;
 
-    @NotNull(message = "Size must be not null")
+    @NotNull(message = "{product_detail.size.not_blank}")
     private String size;
 
-    @NotNull(message = "Product must be not null")
+    @NotNull(message = "{product_detail.product.not_blank}")
     private String product;
 
-    @NotNull(message = "Material must be not null")
+    @NotNull(message = "{product_detail.material.not_blank}")
     private String material;
 
-    @NotNull(message = "Color must be not null")
+    @NotNull(message = "{product_detail.color.not_blank}")
     private String color;
 
-    @NotNull(message = "Brand must be not null")
+    @NotNull(message = "{product_detail.brand.not_blank}")
     private String brand;
 
-    @NotNull(message = "Sole must be not null")
+    @NotNull(message = "{product_detail.sole.not_blank}")
     private String sole;
 
     private String promotion;
@@ -50,12 +51,14 @@ public class AdminProductDetailRequest extends PageableRequest {
 
     private String image;
 
+    @Min(value = 1, message = "{product_detail.price.min}")
     private float price;
 
     private float priceMin;
 
     private float priceMax;
 
+    @Min(value = 1, message = "{product_detail.quantity.min}")
     private int quantity;
 
     private ProductStatus status;

@@ -1,7 +1,9 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.product;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductPropertiesStatus;
+import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,10 +21,12 @@ import java.util.UUID;
 public class AdminColorRequest extends PageableRequest {
     private String id;
 
-    @NotBlank(message = "Code must be not null")
+    @NotBlank(message = "{color.code.not_blank}")
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String code;
 
-    @NotBlank(message = "Name must be not null")
+    @NotBlank(message = "{color.name.not_blank}")
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 
     @NotNull(message = "Status must be not null")

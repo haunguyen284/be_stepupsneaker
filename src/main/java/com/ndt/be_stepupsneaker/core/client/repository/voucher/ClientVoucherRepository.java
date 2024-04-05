@@ -49,13 +49,11 @@ public interface ClientVoucherRepository extends VoucherRepository, BaseUtilRepo
                                  @Param("type") VoucherType voucherType,
                                  @Param("customer") String customer);
 
-    @Query("""
-            SELECT x FROM Voucher x 
-            WHERE x.code = :code AND :code IN (SELECT y.code FROM Voucher y WHERE y.id != :id)
-            """)
-    Optional<Voucher> findByCode(@Param("id") String id, @Param("code") String code);
-
-    Optional<Voucher> findByCode(String code);
+    @Query("SELECT cv.voucher FROM CustomerVoucher cv " +
+            "WHERE cv.customer.id = :customerId " +
+            "AND cv.voucher.code = :code " +
+            "AND cv.voucher.quantity > 0")
+    Optional<Voucher> findByCode(@Param("code") String code, @Param("customerId") String customerId);
 
 
     @Query("""

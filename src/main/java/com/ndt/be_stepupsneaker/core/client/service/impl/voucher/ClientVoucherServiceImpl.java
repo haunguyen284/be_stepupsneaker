@@ -1,5 +1,6 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.voucher;
 import com.ndt.be_stepupsneaker.core.client.dto.request.voucher.ClientVoucherRequest;
+import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.voucher.ClientVoucherMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherRepository;
@@ -9,9 +10,12 @@ import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
+import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
 import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -22,28 +26,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ClientVoucherServiceImpl implements ClientVoucherService {
-
-
     @Qualifier("clientVoucherRepository")
-    private ClientVoucherRepository ClientVoucherRepository;
-    private PaginationUtil paginationUtil;
-    private CustomerVoucherRepository customerVoucherRepository;
-    private ScheduledService scheduledService;
-    private CloudinaryUpload cloudinaryUpload;
+    private final ClientVoucherRepository ClientVoucherRepository;
+    private final PaginationUtil paginationUtil;
+    private final CustomerVoucherRepository customerVoucherRepository;
+    private final ScheduledService scheduledService;
+    private final CloudinaryUpload cloudinaryUpload;
+    private final MessageUtil messageUtil;
+    private final MySessionInfo mySessionInfo;
 
-    @Autowired
-    public ClientVoucherServiceImpl(ClientVoucherRepository ClientVoucherRepository,
-                                    PaginationUtil paginationUtil,
-                                    CustomerVoucherRepository customerVoucherRepository,
-                                    ScheduledService scheduledService,
-                                    CloudinaryUpload cloudinaryUpload) {
-        this.ClientVoucherRepository = ClientVoucherRepository;
-        this.paginationUtil = paginationUtil;
-        this.customerVoucherRepository = customerVoucherRepository;
-        this.scheduledService = scheduledService;
-        this.cloudinaryUpload = cloudinaryUpload;
-    }
 
     @Override
     public PageableObject<ClientVoucherResponse> findAllEntity(ClientVoucherRequest voucherRequest) {
@@ -64,7 +57,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     public ClientVoucherResponse findById(String id) {
         Optional<Voucher> optionalVoucher = ClientVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER IS NOT EXIST :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
 
         return ClientVoucherMapper.INSTANCE.voucherToClientVoucherResponse(optionalVoucher.get());
@@ -74,7 +67,7 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
     public Boolean delete(String id) {
         Optional<Voucher> optionalVoucher = ClientVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER NOT FOUND :" + id);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setDeleted(true);
@@ -103,9 +96,10 @@ public class ClientVoucherServiceImpl implements ClientVoucherService {
 
     @Override
     public ClientVoucherResponse findByCode(String code) {
-        Optional<Voucher> optionalVoucher = ClientVoucherRepository.findByCode(code);
+        ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
+        Optional<Voucher> optionalVoucher = ClientVoucherRepository.findByCode(code, customerResponse.getId());
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("VOUCHER CODE DOES NOT EXIST");
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
 
         return ClientVoucherMapper.INSTANCE.voucherToClientVoucherResponse(optionalVoucher.get());

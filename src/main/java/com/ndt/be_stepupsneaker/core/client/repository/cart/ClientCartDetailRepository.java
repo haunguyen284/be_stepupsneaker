@@ -57,4 +57,8 @@ public interface ClientCartDetailRepository extends CartDetailRepository {
     @Modifying
     @Transactional
     void deleteAllByCart(Cart cart);
+
+    @Modifying
+    @Transactional
+    void deleteAllByCartAndOrderId(Cart cart, String orderId);
 }

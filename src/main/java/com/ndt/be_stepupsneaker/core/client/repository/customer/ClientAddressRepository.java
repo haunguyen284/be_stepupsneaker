@@ -24,8 +24,6 @@ public interface ClientAddressRepository extends AddressRepository {
             """)
     Optional<Address> findByPhoneNumber(@Param("id") String id, @Param("phoneNumber") String phoneNumber);
 
-    Address findByIsDefault(Boolean isDefault);
-
     @Query("""
             SELECT x FROM Address x 
             WHERE (:customerId IS NULL OR x.customer.id  = :customerId)
@@ -41,19 +39,9 @@ public interface ClientAddressRepository extends AddressRepository {
              """)
     Page<Address> findAllAddress(@Param("customerId") String customerId, @Param("request") ClientAddressRequest request, Pageable pageable);
 
-    @Query("SELECT CASE WHEN COUNT(x) > 0 THEN TRUE ELSE FALSE END FROM Address x WHERE x.customer = :customer")
-    boolean existsByCustomer(@Param("customer") Customer customer);
-
-    @Query("SELECT x FROM Address x WHERE x.customer.id = :customerId AND x.isDefault = TRUE")
-    Address findDefaultAddressByCustomer(@Param("customerId") String customerId);
-
-
-    List<Address> findByCustomerAndDeleted(Customer customer,Boolean deleted);
-
     @Modifying
     @Transactional
     @Query("DELETE FROM Address x WHERE x.id IN (SELECT y.address.id FROM Order y WHERE y.id IN :orderIds)")
     void deleteAddressByOrder(List<String> orderIds);
 
-    Optional<Address> findByIdAndCustomer(String id, Customer customer);
 }

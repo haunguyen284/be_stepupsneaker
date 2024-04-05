@@ -7,13 +7,15 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
-import com.ndt.be_stepupsneaker.infrastructure.email.util.SendMailAutoEntity;
+import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.PasswordResetRequest;
 import com.ndt.be_stepupsneaker.repository.auth.PasswordResetTokenRepository;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
@@ -29,17 +31,18 @@ public class PasswordResetTokenService {
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private final MessageUtil messageUtil;
     private boolean isEmailSending = false;
     private long timeRemaining = 0;
 
     public boolean sendPasswordResetEmail(String email) {
         if (isEmailSending) {
-            throw new ApiException("Please try again later. Time remaining: " + timeRemaining + "s");
+            throw new ApiException(messageUtil.getMessage("please.try.again.later") + timeRemaining + "s");
         }
         Customer customer = clientCustomerRepository.findByEmail(email).orElse(null);
         Employee employee = adminEmployeeRepository.findByEmail(email).orElse(null);
         if (customer == null && employee == null) {
-            throw new ApiException("User" + EntityProperties.NOT_FOUND);
+            throw new ApiException(messageUtil.getMessage("user.notfound"));
         }
         String token = UUID.randomUUID().toString();
         if (sendMailUrl(customer, employee, token)) {
@@ -57,7 +60,7 @@ public class PasswordResetTokenService {
             Customer customer = resetToken.getCustomer();
             Employee employee = resetToken.getEmployee();
             if (!resetRequest.getConfirmPassword().equals(resetRequest.getNewPassword())) {
-                throw new ApiException("Re-entered password is incorrect!");
+                throw new ApiException(messageUtil.getMessage("re_entered.password.in.incorrect"));
             }
             if (customer != null) {
                 customer.setPassword(passwordEncoder.encode(resetRequest.getNewPassword()));
@@ -74,14 +77,14 @@ public class PasswordResetTokenService {
     }
 
     public boolean sendMailUrl(Customer customer, Employee employee, String token) {
-        SendMailAutoEntity sendMailAutoEntity = new SendMailAutoEntity(emailService);
+        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         PasswordResetToken resetToken = createPasswordResetToken(customer, employee, token);
         String resetLink = EntityProperties.URL_RESET + resetToken.getToken();
         if (customer != null) {
-            sendMailAutoEntity.sendMailAutoResetPassword(customer.getEmail(), resetLink);
+            emailSampleContent.sendMailAutoResetPassword(customer.getEmail(), resetLink);
             return true;
         }
-        sendMailAutoEntity.sendMailAutoResetPassword(employee.getEmail(), resetLink);
+        emailSampleContent.sendMailAutoResetPassword(employee.getEmail(), resetLink);
         return true;
     }
 

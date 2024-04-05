@@ -6,6 +6,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.employee.AdminEmployeeRepo
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.customer.ClientCustomerMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
+import com.ndt.be_stepupsneaker.entity.customer.Address;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
@@ -40,15 +41,17 @@ public class MySessionInfo {
                 List<CustomerVoucher> validCustomerVouchers = customer.getCustomerVoucherList().stream()
                         .filter(customerVoucher -> {
                             Voucher voucher = customerVoucher.getVoucher();
-                            return !voucher.getStatus().equals(VoucherStatus.CANCELLED)
-                                    && !voucher.getStatus().equals(VoucherStatus.EXPIRED)
-                                    && !voucher.getStatus().equals(VoucherStatus.UP_COMING)
-                                    && !voucher.getStatus().equals(VoucherStatus.IN_ACTIVE)
-                                    && voucher.getQuantity() > 0
-                                    && !voucher.getDeleted();
+                            return
+                                    voucher.getStatus().equals(VoucherStatus.ACTIVE)
+                                            && voucher.getQuantity() > 0
+                                            && !voucher.getDeleted();
                         })
                         .collect(Collectors.toList());
+                List<Address> addresses = customer.getAddressList().stream()
+                        .filter(address -> !address.getDeleted())
+                        .collect(Collectors.toList());
                 customer.setCustomerVoucherList(validCustomerVouchers);
+                customer.setAddressList(addresses);
             }
         }
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);

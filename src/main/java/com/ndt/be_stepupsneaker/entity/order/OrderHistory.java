@@ -23,15 +23,10 @@ public class OrderHistory extends PrimaryEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Order order;
 
-    @Column(name = "action_description", length = EntityProperties.LENGTH_NAME)
-    @Nationalized
-    private String actionDescription;
-
-    @Column(name = "action_status", length = EntityProperties.LENGTH_NAME)
-    @Nationalized
+    @Column(name = "action_status")
     private OrderStatus actionStatus;
 
-    @Column(name = "note", length = EntityProperties.LENGTH_NAME)
+    @Column(name = "note", length = EntityProperties.LENGTH_DESCRIPTION)
     @Nationalized
     private String note;
 

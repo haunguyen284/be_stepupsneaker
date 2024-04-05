@@ -13,10 +13,12 @@ import com.ndt.be_stepupsneaker.core.client.repository.voucher.ClientVoucherHist
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ScheduledServiceImpl implements ScheduledService {
     private final AdminVoucherRepository adminVoucherRepository;
     private final AdminOrderRepository adminOrderRepository;
@@ -40,41 +43,11 @@ public class ScheduledServiceImpl implements ScheduledService {
     private final AdminProductDetailRepository adminProductDetailRepository;
 
 
-    @Autowired
-    public ScheduledServiceImpl(
-            AdminVoucherRepository adminVoucherRepository,
-            AdminOrderRepository adminOrderRepository,
-            AdminOrderHistoryRepository adminOrderHistoryRepository,
-            AdminOrderDetailRepository adminOrderDetailRepository,
-            AdminPromotionRepository adminPromotionRepository,
-            ClientCartDetailRepository clientCartDetailRepository,
-            ClientAddressRepository clientAddressRepository,
-            ClientPaymentRepository clientPaymentRepository,
-            ClientVoucherHistoryRepository clientVoucherHistoryRepository,
-            AdminProductDetailRepository adminProductDetailRepository) {
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.adminOrderRepository = adminOrderRepository;
-        this.adminOrderHistoryRepository = adminOrderHistoryRepository;
-        this.adminOrderDetailRepository = adminOrderDetailRepository;
-        this.adminPromotionRepository = adminPromotionRepository;
-        this.clientCartDetailRepository = clientCartDetailRepository;
-        this.clientAddressRepository = clientAddressRepository;
-        this.clientPaymentRepository = clientPaymentRepository;
-        this.clientVoucherHistoryRepository = clientVoucherHistoryRepository;
-        this.adminProductDetailRepository = adminProductDetailRepository;
-    }
-
     @Override
     public void updateVoucherStatusAutomatically() {
         LocalDateTime currentDateTime = LocalDateTime.now();
         Long currentLongTime = ConvertUtil.convertLocalDateTimeToLong(currentDateTime);
         adminVoucherRepository.updateStatusAutomatically(currentLongTime);
-    }
-
-    @Override
-    public void updatePromotionStatusAutomatically() {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        Long currentLongTime = ConvertUtil.convertLocalDateTimeToLong(currentDateTime);
         adminPromotionRepository.updateStatusAutomatically(currentLongTime);
     }
 
@@ -85,26 +58,6 @@ public class ScheduledServiceImpl implements ScheduledService {
         clientCartDetailRepository.deleteByUpdatedAtBefore(thirtyDaysAgoTimestamp);
     }
 
-    @Transactional
-    @Override
-    public void deleteOrderAutomaticallyByTypeAndStatus() {
-        long currentMillis = Instant.now().toEpochMilli();
-        long thirtyMinutesAgo = currentMillis - (30 * 60 * 1000);
-        List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBeforeAndType(OrderStatus.PENDING, thirtyMinutesAgo, OrderType.ONLINE);
-        if (!expiredOrders.isEmpty()) {
-            List<String> expiredOrderIds = expiredOrders.stream()
-                    .map(Order::getId)
-                    .collect(Collectors.toList());
-
-            clientVoucherHistoryRepository.deleteVoucherHistoryByOrder(expiredOrderIds);
-            clientPaymentRepository.deleteAddressByOrder1(expiredOrderIds);
-            clientPaymentRepository.deletePaymentByOrder(expiredOrderIds);
-            adminOrderHistoryRepository.deleteAllByOrder(expiredOrderIds);
-            adminOrderDetailRepository.deleteAllByOrder(expiredOrderIds);
-            adminOrderRepository.deleteAllInBatch(expiredOrders);
-            clientAddressRepository.deleteAddressByOrder(expiredOrderIds);
-        }
-    }
 
     @Transactional
     @Override
@@ -116,6 +69,7 @@ public class ScheduledServiceImpl implements ScheduledService {
         List<Order> expiredOrders = adminOrderRepository.findAllByStatusAndCreatedAtBefore(OrderStatus.PENDING, thirtyMinutesAgo);
 
         if (!expiredOrders.isEmpty()) {
+            List<Voucher> vouchers = new ArrayList<>();
             List<String> expiredOrderIds = expiredOrders.stream()
                     .map(Order::getId)
                     .collect(Collectors.toList());
@@ -126,10 +80,18 @@ public class ScheduledServiceImpl implements ScheduledService {
                     productDetail.setQuantity(productDetail.getQuantity() + orderDetail.getQuantity());
                     productDetails.add(productDetail);
                 }
+                if (order.getVoucher() != null) {
+                    Voucher voucher = order.getVoucher();
+                    voucher.setQuantity(order.getVoucher().getQuantity() + 1);
+                    vouchers.add(order.getVoucher());
+                }
             }
+            adminVoucherRepository.saveAll(vouchers);
+            clientPaymentRepository.deletePaymentByOrder(expiredOrderIds);
+            clientVoucherHistoryRepository.deleteVoucherHistoryByOrder(expiredOrderIds);
             adminProductDetailRepository.saveAll(productDetails);
-            adminOrderHistoryRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderDetailRepository.deleteAllByOrder(expiredOrderIds);
+            adminOrderHistoryRepository.deleteAllByOrder(expiredOrderIds);
             adminOrderRepository.deleteAllInBatch(expiredOrders);
         }
     }

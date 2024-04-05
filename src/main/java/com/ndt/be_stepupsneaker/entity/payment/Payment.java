@@ -3,6 +3,7 @@ package com.ndt.be_stepupsneaker.entity.payment;
 import com.ndt.be_stepupsneaker.entity.base.PrimaryEntity;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
+import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -37,4 +38,7 @@ public class Payment extends PrimaryEntity {
     @Column(name = "description", length = EntityProperties.LENGTH_DESCRIPTION)
     @Nationalized
     private String description;
+
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus;
 }

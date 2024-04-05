@@ -3,49 +3,45 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
+import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
+import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherRepository;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
-import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
-import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
+import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
-import com.ndt.be_stepupsneaker.repository.voucher.CustomerVoucherRepository;
 import com.ndt.be_stepupsneaker.util.CloudinaryUpload;
+import com.ndt.be_stepupsneaker.util.EntityUtil;
+import com.ndt.be_stepupsneaker.util.MessageUtil;
 import com.ndt.be_stepupsneaker.util.PaginationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AdminVoucherServiceImpl implements AdminVoucherService {
 
 
     @Qualifier("adminVoucherRepository")
-    private AdminVoucherRepository adminVoucherRepository;
-    private PaginationUtil paginationUtil;
-    private CustomerVoucherRepository customerVoucherRepository;
-    private ScheduledService scheduledService;
-    private CloudinaryUpload cloudinaryUpload;
-
-    @Autowired
-    public AdminVoucherServiceImpl(AdminVoucherRepository adminVoucherRepository,
-                                   PaginationUtil paginationUtil,
-                                   CustomerVoucherRepository customerVoucherRepository,
-                                   ScheduledService scheduledService,
-                                   CloudinaryUpload cloudinaryUpload) {
-        this.adminVoucherRepository = adminVoucherRepository;
-        this.paginationUtil = paginationUtil;
-        this.customerVoucherRepository = customerVoucherRepository;
-        this.scheduledService = scheduledService;
-        this.cloudinaryUpload = cloudinaryUpload;
-    }
+    private final AdminVoucherRepository adminVoucherRepository;
+    private final PaginationUtil paginationUtil;
+    private final CloudinaryUpload cloudinaryUpload;
+    private final MessageUtil messageUtil;
+    private final AdminCustomerRepository adminCustomerRepository;
+    private final AdminCustomerVoucherRepository adminCustomerVoucherRepository;
+    private final EmailService emailService;
+    private final EntityUtil entityUtil;
 
     @Override
     public PageableObject<AdminVoucherResponse> findAllEntity(AdminVoucherRequest voucherRequest) {
@@ -56,16 +52,24 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public Object create(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("voucher.code.exist"));
         }
         if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
-            if (voucherRequest.getValue() > 70){
-                throw new ApiException("Value exceeds the allowable percentage!");
+            if (voucherRequest.getValue() > 70) {
+                throw new ApiException(messageUtil.getMessage("voucher.value.max"));
             }
         }
         voucherRequest.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         Voucher voucher = adminVoucherRepository.save(AdminVoucherMapper.INSTANCE.adminVoucherRequestToVoucher(voucherRequest));
         adminVoucherRepository.updateStatusBasedOnTime(voucher.getId(), voucher.getStartDate(), voucher.getEndDate());
+        if (voucher != null) {
+            List<String> customerIds = voucherRequest.getCustomers();
+            if (voucherRequest.getCustomers() == null || voucherRequest.getCustomers().isEmpty()) {
+                List<Customer> customers = adminCustomerRepository.getAllByDeleted();
+                customerIds = customers.stream().map(Customer::getId).collect(Collectors.toList());
+            }
+            entityUtil.addCustomersToVoucher(voucher, customerIds);
+        }
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(voucher);
     }
 
@@ -73,12 +77,12 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public AdminVoucherResponse update(AdminVoucherRequest voucherRequest) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findByCode(voucherRequest.getId(), voucherRequest.getCode());
         if (optionalVoucher.isPresent()) {
-            throw new ApiException("Code" + EntityProperties.IS_EXIST);
+            throw new ApiException(messageUtil.getMessage("voucher.code.exist"));
         }
 
         optionalVoucher = adminVoucherRepository.findById(voucherRequest.getId());
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setName(voucherRequest.getName());
@@ -91,8 +95,8 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         newVoucher.setStartDate(voucherRequest.getStartDate());
         newVoucher.setType(voucherRequest.getType());
         if (voucherRequest.getType() == VoucherType.PERCENTAGE) {
-            if (voucherRequest.getValue() > 50){
-                throw new ApiException("Value exceeds the allowable percentage!");
+            if (voucherRequest.getValue() > 70) {
+                throw new ApiException(messageUtil.getMessage("voucher.value.max"));
             }
         }
         newVoucher.setValue(voucherRequest.getValue());
@@ -103,7 +107,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public AdminVoucherResponse findById(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
 
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(optionalVoucher.get());
@@ -113,7 +117,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     public Boolean delete(String id) {
         Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
         if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException("Voucher" + EntityProperties.NOT_FOUND);
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
         }
         Voucher newVoucher = optionalVoucher.get();
         newVoucher.setDeleted(true);
@@ -129,6 +133,5 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);
         return new PageableObject<>(adminVoucherResponsePage);
     }
-
 
 }

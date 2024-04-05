@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ClientCustomerController {
     private final ClientCustomerService clientCustomerService;
-    private final MySessionInfo mySessionInfo;
     private final AuthenticationService authenticationService;
 
 
@@ -29,11 +28,6 @@ public class ClientCustomerController {
     public Object findAllCustomerById(@PathVariable("id") String id) {
         ClientCustomerResponse response = clientCustomerService.findById(id);
         return ResponseHelper.getResponse(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/me")
-    public Object getMe() {
-        return ResponseHelper.getResponse(mySessionInfo.getCurrentCustomer(), HttpStatus.OK);
     }
 
 

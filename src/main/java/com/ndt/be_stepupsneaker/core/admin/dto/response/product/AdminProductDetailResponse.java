@@ -40,6 +40,10 @@ public class AdminProductDetailResponse {
 
     private int quantity;
 
+    private float moneyPromotion;
+
+    private long saleCount;
+
     private ProductStatus status;
 
     List<AdminPromotionNoProductDetailResponse> promotionProductDetails;

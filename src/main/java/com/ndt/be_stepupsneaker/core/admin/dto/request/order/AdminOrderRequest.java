@@ -1,12 +1,15 @@
 package com.ndt.be_stepupsneaker.core.admin.dto.request.order;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.customer.AdminAddressRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.payment.AdminPaymentRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.customer.ClientAddressRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.order.ClientCartItemRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.vnpay.TransactionInfo;
 import com.ndt.be_stepupsneaker.core.common.base.PageableRequest;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
+import com.ndt.be_stepupsneaker.util.CustomStringDeserializer;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -23,13 +26,12 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String id;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String code;
 
     private String customer;
 
-
-//    private String employee;
-
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String email;
 
     private AdminAddressRequest addressShipping;
@@ -40,8 +42,10 @@ public class AdminOrderRequest extends PageableRequest {
 
     private String address;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String phoneNumber;
 
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String fullName;
 
     private float totalMoney;
@@ -66,10 +70,16 @@ public class AdminOrderRequest extends PageableRequest {
 
     private OrderType type;
 
+    private boolean isCOD;
+
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String note;
 
+    private List<AdminPaymentRequest> payments;
+
+    @JsonDeserialize(using = CustomStringDeserializer.class)
     private String orderHistoryNote;
-    
+
     private OrderStatus status;
 
     private TransactionInfo transactionInfo;

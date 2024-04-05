@@ -6,9 +6,6 @@ public interface ScheduledService {
 
     void updateOrderAutomatically();
 
-    void updatePromotionStatusAutomatically();
-
     void deleteCartDetailsByDate();
 
-    void deleteOrderAutomaticallyByTypeAndStatus();
 }
