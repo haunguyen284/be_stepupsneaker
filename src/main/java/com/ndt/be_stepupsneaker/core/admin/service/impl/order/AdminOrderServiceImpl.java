@@ -78,8 +78,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
+        Employee employee = adminEmployeeRepository
+                .findById(mySessionInfo.getCurrentEmployee().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
+        String employeeId = "";
+        if (!employee.getRole().getName().contains(EntityProperties.ADMIN)) {
+            employeeId = employee.getId();
+        }
         Pageable pageable = paginationUtil.pageable(orderRequest);
-        Page<Order> resp = adminOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), orderRequest.getType(), pageable);
+        Page<Order> resp = adminOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), orderRequest.getType(), employeeId, pageable);
         Page<AdminOrderResponse> adminPaymentResponses = resp.map(AdminOrderMapper.INSTANCE::orderToAdminOrderResponse);
         return new PageableObject<>(adminPaymentResponses);
     }
@@ -283,7 +290,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
             Payment payment = orderSave.getPayments().get(0);
             payment.setPaymentStatus(PaymentStatus.COMPLETED);
-            if(payment.getPaymentMethod().getName().equals("Cash")){
+            if (payment.getPaymentMethod().getName().equals("Cash")) {
                 payment.setTransactionCode("Đã thanh toán");
             }
             adminPaymentRepository.save(payment);
@@ -293,7 +300,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
         EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Đơn hàng của bạn vừa thay đổi trạng thái!";
-        emailSampleContent.sendMailAutoOrder(newOrder, adminOrderResponse.getEmail(),subject);
+        emailSampleContent.sendMailAutoOrder(newOrder, adminOrderResponse.getEmail(), subject);
         return adminOrderResponse;
     }
 
@@ -371,7 +378,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
-                orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
+            orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
         }
         EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";
