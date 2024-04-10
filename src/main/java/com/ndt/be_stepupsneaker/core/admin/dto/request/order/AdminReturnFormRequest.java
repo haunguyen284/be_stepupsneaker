@@ -21,9 +21,9 @@ public class AdminReturnFormRequest extends PageableRequest {
 
     private String id;
 
-    private AdminAddressRequest address;
-
     private String order;
+
+    private String email;
 
     private float amountToBePaid;
 
@@ -32,12 +32,6 @@ public class AdminReturnFormRequest extends PageableRequest {
     private String paymentInfo;
 
     private Set<AdminReturnFormDetailRequest> returnFormDetails;
-
-    private RefundStatus refundStatus;
-
-    private ReturnDeliveryStatus returnDeliveryStatus;
-
-    private ReturnFormType type;
 
     private String note;
 

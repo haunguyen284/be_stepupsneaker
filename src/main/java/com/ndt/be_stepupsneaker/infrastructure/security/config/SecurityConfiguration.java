@@ -41,6 +41,8 @@ public class SecurityConfiguration {
                                         "/admin/notifications", "/client/transaction/**", "/client/orders/**",
                                         "/client/return-forms/code/**")
                                 .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/client/return-forms/**")
+                                .permitAll()
                                 .requestMatchers("/admin/customers/**"
                                         , "/admin/orders/**"
                                         , "/admin/order-details/**", "/admin/statistic/**"
