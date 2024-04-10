@@ -60,7 +60,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
-    private final AdminCustomerRepository adminCustomerRepository;
     private final AdminAddressRepository adminAddressRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final AdminVoucherRepository adminVoucherRepository;
@@ -437,6 +436,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order order = getOrderById(orderRequest);
         order.setNote(orderRequest.getNote());
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
+    }
+
+    @Override
+    public AdminOrderResponse findByCode(String code) {
+        Order order = adminOrderRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
     }
 
 

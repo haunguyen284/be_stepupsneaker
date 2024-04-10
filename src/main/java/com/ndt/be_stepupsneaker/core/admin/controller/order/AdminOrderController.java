@@ -7,6 +7,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse
 import com.ndt.be_stepupsneaker.core.admin.dto.response.payment.AdminPaymentMethodResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.product.AdminBrandResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.util.ResponseHelper;
 import jakarta.validation.Valid;
@@ -48,6 +49,13 @@ public class AdminOrderController {
 
         return ResponseHelper.getResponse(adminOrderResponse, HttpStatus.OK);
     }
+
+    @GetMapping("/tracking/{code}")
+    public Object findByCode(@PathVariable("code") String code) {
+        AdminOrderResponse adminOrderResponse = adminOrderService.findByCode(code);
+        return ResponseHelper.getResponse(adminOrderResponse, HttpStatus.OK);
+    }
+
 
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminOrderRequest adminOrderRequest, BindingResult bindingResult) {
