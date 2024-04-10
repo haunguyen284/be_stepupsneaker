@@ -45,8 +45,10 @@ public class SecurityConfiguration {
                                 .permitAll()
                                 .requestMatchers("/admin/customers/**"
                                         , "/admin/orders/**"
-                                        , "/admin/order-details/**", "/admin/statistic/**"
-                                        ,"/admin/return-forms/**")
+                                        , "/admin/order-details/**"
+                                        , "/admin/statistic/**"
+                                        ,"/admin/return-forms/**",
+                                        "/admin/addresses/**")
                                 .hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
                                 .requestMatchers(HttpMethod.GET
                                         , "/admin/order-histories/**", "/admin/voucher-histories/**"
