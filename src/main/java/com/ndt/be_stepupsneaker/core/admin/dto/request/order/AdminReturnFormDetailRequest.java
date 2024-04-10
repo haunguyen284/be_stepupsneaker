@@ -22,12 +22,6 @@ public class AdminReturnFormDetailRequest extends PageableRequest {
 
     private String feedback;
 
-    private ReturnInspectionStatus returnInspectionStatus;
-
-    private String returnInspectionReason;
-
     private String image;
-
-    private boolean resellable;
 
 }
