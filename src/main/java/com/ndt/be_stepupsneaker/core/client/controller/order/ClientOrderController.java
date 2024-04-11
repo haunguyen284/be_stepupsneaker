@@ -33,7 +33,6 @@ public class ClientOrderController {
     @GetMapping("")
     public Object findAllOrder(ClientOrderRequest orderRequest) {
         PageableObject<ClientOrderResponse> listOrder = clientOrderService.findAllEntity(orderRequest);
-
         return ResponseHelper.getResponse(listOrder, HttpStatus.OK);
     }
 
