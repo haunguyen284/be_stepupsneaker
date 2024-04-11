@@ -144,7 +144,7 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Ngày tạo    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (clientOrderResponse.getCustomer() == null) {
+        if (emailReq != null) {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = clientOrderResponse.getCustomer().getEmail();
@@ -227,7 +227,7 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Ngày tạo   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (clientOrderResponse.getCustomer() == null) {
+        if (emailReq != null) {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = clientOrderResponse.getCustomer().getEmail();
@@ -291,7 +291,7 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Ngày thay đổi   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(order.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (order.getCustomer() == null) {
+        if (emailReq != null) {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = order.getCustomer().getEmail();
@@ -346,41 +346,26 @@ public class EmailSampleContent {
         if (returnForm.getOrder().getCustomer() == null) {
             phone = returnForm.getOrder().getPhoneNumber();
         } else {
-            phone = returnForm.getAddress().getPhoneNumber();
-        }
-        String address = returnForm.getAddress().getMore() + ", "
-                + returnForm.getAddress().getWardName() + ", "
-                + returnForm.getAddress().getDistrictName() + ", "
-                + returnForm.getAddress().getProvinceName();
-
-        String returnDeliveryStatus = "";
-        if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.PENDING) {
-            returnDeliveryStatus = "Chờ giải quyết";
-        } else if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.RETURNING) {
-            returnDeliveryStatus = "Đang được giao đi";
-        } else if (returnForm.getReturnDeliveryStatus() == ReturnDeliveryStatus.RECEIVED) {
-            returnDeliveryStatus = "Đã nhận được";
-        } else {
-            returnDeliveryStatus = "Đã hoàn thành";
+            phone = "";
         }
 
+
+        String returnDeliveryStatus = "Đã hoàn thành";
 
         emailBody += "</tbody>";
         emailBody += "</table>";
         emailBody += "</td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Họ và tên:</strong> " + clientInfo + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><strong>Địa chỉ trả hàng     :</strong> " + address + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + phone + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi phiếu trả hàng của bạn :</span><a href='" + EntityProperties.URL_FE_RETURN + returnForm.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+        emailBody += "<tr><td colspan='4'><strong>Số tiền nhận lại:</strong> " + ConvertUtil.convertFloatToVnd(returnForm.getAmountToBePaid()) + "</td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
-//        emailBody += "<tr><td><strong>Hình thức trả hàng :</strong></td><td colspan='3' style='text-align: right;'><strong>" + type + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Trạng thái phiếu trả hàng       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + returnDeliveryStatus + "</strong></td></tr>";
-        emailBody += "<tr><td><strong>Thời gian tạo phiếu   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(returnForm.getCreatedAt()) + "</td></tr>";
+        emailBody += "<tr><td><strong>Trạng thái phiếu trả hàng: </strong></td><td colspan='3' style='text-align: right;'><strong>" + returnDeliveryStatus + "</strong></td></tr>";
+        emailBody += "<tr><td><strong>Thời gian tạo phiếu:</strong></td><td colspan='3' style='text-align: right;'>" + ConvertUtil.convertLongToLocalDateTime(returnForm.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (returnForm.getOrder().getCustomer() == null) {
-            toEmail[0] = returnForm.getOrder().getEmail();
+        if (returnForm.getEmail() != null) {
+            toEmail[0] = returnForm.getEmail();
         } else {
             toEmail[0] = returnForm.getOrder().getCustomer().getEmail();
         }

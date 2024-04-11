@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderReturnReq
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyGrowthResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.statistic.AdminDailyStatisticResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.common.base.BaseService;
 
 import java.util.List;
@@ -33,5 +34,7 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
     AdminOrderResponse applyShippingToOrder(AdminOrderRequest orderRequest);
 
     AdminOrderResponse applyNoteToOrder(AdminOrderRequest orderRequest);
+
+    AdminOrderResponse findByCode(String code);
 
 }

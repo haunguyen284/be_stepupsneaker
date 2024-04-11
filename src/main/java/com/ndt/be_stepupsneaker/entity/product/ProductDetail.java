@@ -66,6 +66,9 @@ public class ProductDetail extends PrimaryEntity {
     @Column(name = "quantity")
     private int quantity;
 
+    @Column(name = "return_quantity", columnDefinition = "integer default 0")
+    private int returnQuantity;
+
     @Column(name = "status")
     private ProductStatus status;
 

@@ -38,6 +38,8 @@ public class AdminProductDetailResponse {
 
     private float price;
 
+    private int returnQuantity;
+
     private int quantity;
 
     private float moneyPromotion;

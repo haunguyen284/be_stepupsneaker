@@ -394,7 +394,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         Long reviewCount = orderWithReviewCount.getCountReview();
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
         clientOrderResponse.setCountReview(reviewCount.intValue());
-
         return clientOrderResponse;
     }
 
