@@ -7,5 +7,8 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-alpine
 # Sao chép file JAR đã build từ Stage 1
 COPY --from=build /app/target/*.jar app.jar
+
+# Thiết lập biến môi trường SPRING_PROFILES_ACTIVE thành production
+ENV SPRING_PROFILES_ACTIVE=production
 # CMD sẽ chạy ứng dụng Spring Boot khi container được khởi động
 CMD ["java", "-jar","-Dspring.profiles.active=production", "app.jar"]
