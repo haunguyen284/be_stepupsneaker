@@ -24,3 +24,7 @@ services:
       - POSTGRES_DB=datn_step_up_sneaker
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=100301
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:
