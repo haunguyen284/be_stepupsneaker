@@ -8,4 +8,4 @@ FROM openjdk:17-jdk-alpine
 # Sao chép file JAR đã build từ Stage 1
 COPY --from=build /app/target/*.jar app.jar
 # CMD sẽ chạy ứng dụng Spring Boot khi container được khởi động
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar","-Dspring.profiles.active=production", "app.jar"]
