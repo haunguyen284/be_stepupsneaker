@@ -74,6 +74,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final EntityUtil entityUtil;
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
+    private final EmailSampleContent emailSampleContent;
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
@@ -213,7 +214,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderUtil.updatePayment(order);
         }
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         if (adminOrderResponse.getAddress() != null) {
             String subject = "Đơn hàng của bạn vừa được cập nhật!";
             emailSampleContent.sendMailAutoOrder(order, orderRequest.getEmail(), subject);
@@ -310,7 +311,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Đơn hàng của bạn vừa thay đổi trạng thái!";
         emailSampleContent.sendMailAutoOrder(newOrder, adminOrderResponse.getEmail(), subject);
         return adminOrderResponse;
@@ -392,7 +393,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (existingOrderHistoryOptional.isEmpty()) {
             orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
         }
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";
         emailSampleContent.sendMailAutoOrder(newOrder, orderRequest.getEmail(), subject);
         AdminOrderResponse adminOrderResponse = AdminOrderMapper

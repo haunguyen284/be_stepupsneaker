@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRe
 import com.ndt.be_stepupsneaker.entity.auth.PasswordResetToken;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.infrastructure.config.DeployConfig;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
@@ -13,6 +14,8 @@ import com.ndt.be_stepupsneaker.infrastructure.security.auth.request.PasswordRes
 import com.ndt.be_stepupsneaker.repository.auth.PasswordResetTokenRepository;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +35,9 @@ public class PasswordResetTokenService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final MessageUtil messageUtil;
+    private final EmailSampleContent emailSampleContent;
+//    private final Environment env;
+    private final DeployConfig deployConfig;
     private boolean isEmailSending = false;
     private long timeRemaining = 0;
 
@@ -77,9 +83,8 @@ public class PasswordResetTokenService {
     }
 
     public boolean sendMailUrl(Customer customer, Employee employee, String token) {
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         PasswordResetToken resetToken = createPasswordResetToken(customer, employee, token);
-        String resetLink = EntityProperties.URL_RESET + resetToken.getToken();
+        String resetLink = deployConfig.getResetUrl()+ resetToken.getToken();
         if (customer != null) {
             emailSampleContent.sendMailAutoResetPassword(customer.getEmail(), resetLink);
             return true;

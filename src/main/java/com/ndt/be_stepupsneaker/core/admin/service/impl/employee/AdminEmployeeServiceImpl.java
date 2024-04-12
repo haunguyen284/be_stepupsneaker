@@ -46,6 +46,8 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     private final AdminCustomerRepository adminCustomerRepository;
 
+    private final EmailSampleContent emailSampleContent;
+
     private final MessageUtil messageUtil;
 
     @Override
@@ -72,7 +74,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         employeeDTO.setPassword(passwordEncoder.encode(passWordRandom));
         employeeDTO.setImage(cloudinaryUpload.upload(employeeDTO.getImage()));
         Employee employee = adminEmployeeRepository.save(AdminEmployeeMapper.INSTANCE.adminEmployeeResquestToEmPolyee(employeeDTO));
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         emailSampleContent.sendMailAutoPassWord(null, passWordRandom, employee);
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }

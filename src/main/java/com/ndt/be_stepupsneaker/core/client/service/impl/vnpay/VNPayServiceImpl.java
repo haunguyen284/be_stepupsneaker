@@ -48,7 +48,7 @@ public class VNPayServiceImpl implements VNPayService {
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
-    private final EmailService emailService;
+    private final EmailSampleContent emailSampleContent;
     private final MessageUtil messageUtil;
     private final OrderUtil orderUtil;
 
@@ -183,7 +183,6 @@ public class VNPayServiceImpl implements VNPayService {
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
             orderUtil.createOrderHistory(order, OrderStatus.WAIT_FOR_DELIVERY, "Wai for delivery");
-            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
             emailSampleContent.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
             return clientOrderRepository.save(order);
         } else if (result == 11 || result == 15) {

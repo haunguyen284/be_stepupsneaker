@@ -109,6 +109,8 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
     @Autowired
     private EmailService emailService;
+@Autowired
+    private  EmailSampleContent emailSampleContent;
 
     @Override
     public PageableObject<AdminReturnFormResponse> findAllEntity(AdminReturnFormRequest request) {
@@ -246,7 +248,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         ReturnForm returnFormSuccess = adminReturnFormRepository.findById(returnFormSave.getId()).orElseThrow();
         returnFormSuccess.setReturnFormDetails(saveReturnFormDetails);
 
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin phiếu trả hàng của bạn từ Step Up Sneaker";
         emailSampleContent.sendMailAutoReturnOrder(returnFormSuccess, subject);
 
