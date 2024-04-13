@@ -1,3 +1,4 @@
+ENV is.vps=true
 # Stage 1: Build ứng dụng Spring Boot
 FROM maven:3.8.1-openjdk-17 AS build
 COPY pom.xml /app/

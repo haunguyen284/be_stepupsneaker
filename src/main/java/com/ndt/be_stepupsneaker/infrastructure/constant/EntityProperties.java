@@ -37,5 +37,8 @@ public final class EntityProperties {
     public static final String STAFF = "STAFF";
     public static final String CUSTOMER = "CUSTOMER";
     public static final String GHN_API_FEE_URL = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
+    public static final String TRACKING_URL = "tracking/";
+    public static final String RESET_URL = "reset-password?token=";
+    public static final String RETURN_URL = "return-tracking/";
 
 }
