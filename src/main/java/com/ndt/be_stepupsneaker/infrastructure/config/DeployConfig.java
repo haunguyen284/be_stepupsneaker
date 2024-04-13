@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@RequiredArgsConstructor
 public class DeployConfig {
 
     @Value("${url.fe.base}")
