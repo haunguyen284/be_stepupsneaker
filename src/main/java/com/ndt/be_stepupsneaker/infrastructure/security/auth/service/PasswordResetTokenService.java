@@ -84,7 +84,7 @@ public class PasswordResetTokenService {
 
     public boolean sendMailUrl(Customer customer, Employee employee, String token) {
         PasswordResetToken resetToken = createPasswordResetToken(customer, employee, token);
-        String resetLink = deployConfig.feBaseUrl()+EntityProperties.RESET_URL+ resetToken.getToken();
+        String resetLink = EntityProperties.RESET_URL+ resetToken.getToken();
         if (customer != null) {
             emailSampleContent.sendMailAutoResetPassword(customer.getEmail(), resetLink);
             return true;
