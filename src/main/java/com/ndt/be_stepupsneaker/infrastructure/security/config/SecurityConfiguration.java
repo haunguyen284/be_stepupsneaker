@@ -47,8 +47,9 @@ public class SecurityConfiguration {
                                         , "/admin/orders/**"
                                         , "/admin/order-details/**"
                                         , "/admin/statistic/**"
-                                        ,"/admin/return-forms/**",
-                                        "/admin/addresses/**")
+                                        ,"/admin/return-forms/**"
+                                        ,"/admin/notifications/**"
+                                        ,"/admin/addresses/**")
                                 .hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
                                 .requestMatchers(HttpMethod.GET
                                         , "/admin/order-histories/**", "/admin/voucher-histories/**"

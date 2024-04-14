@@ -375,7 +375,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order newOrder = adminOrderRepository.save(orderUpdate);
         newOrder.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
         orderUtil.createVoucherHistory(newOrder);
-        if (orderRequest.isCOD() == true) {
+        if (orderRequest.getIsCOD() == true) {
             PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Cash")
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
             Payment payment = new Payment();
@@ -391,7 +391,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
-            orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
+            orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, messageUtil.getMessage("order.was.created"));
         }
 //        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";

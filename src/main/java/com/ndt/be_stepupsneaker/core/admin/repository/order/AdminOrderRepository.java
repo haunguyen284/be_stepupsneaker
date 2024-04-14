@@ -36,7 +36,7 @@ public interface AdminOrderRepository extends OrderRepository {
             AND
             (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} = 0 OR o.totalMoney <= :#{#request.priceMax})
             AND
-            (:employee IS NULL OR :employee ILIKE '' OR o.employee.id = :employee)
+            (:employee IS NULL OR :employee ILIKE '' OR o.employee.id = :employee OR o.employee IS NULL)
             AND
             o.deleted=false 
             """)
