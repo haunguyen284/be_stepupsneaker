@@ -31,7 +31,7 @@ public class Employee extends PrimaryEntity implements UserDetails {
     @ManyToOne(fetch = FetchType.EAGER)
     private Role role;
 
-    @Column(name = "full_name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
+    @Column(name = "full_name", length = EntityProperties.LENGTH_NAME, nullable = false)
     @Nationalized
     private String fullName;
 

@@ -208,7 +208,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
         order.setStatus(OrderStatus.RETURNED);
         Order orderSave = adminOrderRepository.save(order);
-        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, OrderStatus.RETURNED.action_description);
+        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, messageUtil.getMessage("order.status.return"));
 
         // save Payment neu trang thai hoan tien thanh cong
         Payment payment = new Payment();
