@@ -67,7 +67,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final MySessionInfo mySessionInfo;
     private final AdminOrderDetailRepository adminOrderDetailRepository;
     private final AdminProductDetailRepository adminProductDetailRepository;
-    private final EmailService emailService;
     private final MessageUtil messageUtil;
     private final AdminPaymentMethodRepository adminPaymentMethodRepository;
     private final OrderUtil orderUtil;
@@ -214,7 +213,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderUtil.updatePayment(order);
         }
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
-//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         if (adminOrderResponse.getAddress() != null) {
             String subject = "Đơn hàng của bạn vừa được cập nhật!";
             emailSampleContent.sendMailAutoOrder(order, orderRequest.getEmail(), subject);
@@ -393,7 +391,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         if (existingOrderHistoryOptional.isEmpty()) {
             orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, messageUtil.getMessage("order.was.created"));
         }
-//        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";
         emailSampleContent.sendMailAutoOrder(newOrder, orderRequest.getEmail(), subject);
         AdminOrderResponse adminOrderResponse = AdminOrderMapper
