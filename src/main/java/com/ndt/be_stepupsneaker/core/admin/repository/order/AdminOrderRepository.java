@@ -36,12 +36,15 @@ public interface AdminOrderRepository extends OrderRepository {
             AND
             (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} = 0 OR o.totalMoney <= :#{#request.priceMax})
             AND
+            (:employee IS NULL OR :employee ILIKE '' OR o.employee.id = :employee OR o.employee IS NULL)
+            AND
             o.deleted=false 
             """)
     Page<Order> findAllOrder(
             @Param("request") AdminOrderRequest request,
             @Param("status") OrderStatus status,
             @Param("type") OrderType type,
+            @Param("employee") String  employee,
             Pageable pageable
     );
 

@@ -144,7 +144,7 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Ngày tạo    :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (clientOrderResponse.getCustomer() == null) {
+        if (emailReq != null) {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = clientOrderResponse.getCustomer().getEmail();
@@ -227,7 +227,7 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Ngày tạo   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(clientOrderResponse.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (clientOrderResponse.getCustomer() == null) {
+        if (emailReq != null) {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = clientOrderResponse.getCustomer().getEmail();
@@ -291,7 +291,7 @@ public class EmailSampleContent {
         emailBody += "<tr><td><strong>Ngày thay đổi   :</strong></td><td colspan='3'>" + ConvertUtil.convertLongToLocalDateTime(order.getCreatedAt()) + "</td></tr>";
         emailBody += "</table>";
         email.setBody(emailBody);
-        if (order.getCustomer() == null) {
+        if (emailReq != null) {
             toEmail[0] = emailReq;
         } else {
             toEmail[0] = order.getCustomer().getEmail();

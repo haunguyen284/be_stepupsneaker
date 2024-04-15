@@ -125,7 +125,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             emailSampleContent.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
             return urlVnPay;
         }
-        orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, "Order was created");
+        orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, messageUtil.getMessage("order.was.created"));
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(newOrder);
         if (newOrder.getPayments() == null) {
             List<ClientPaymentResponse> clientPaymentResponse = createPayment(newOrder, clientOrderRequest);
@@ -394,7 +394,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         Long reviewCount = orderWithReviewCount.getCountReview();
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
         clientOrderResponse.setCountReview(reviewCount.intValue());
-
         return clientOrderResponse;
     }
 
