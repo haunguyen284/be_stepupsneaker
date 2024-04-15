@@ -94,8 +94,6 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
     @Autowired
     private AdminPaymentRepository adminPaymentRepository;
-
-    @Autowired
     AdminReturnFormHistoryRepository adminReturnFormHistoryRepository;
 
     @Autowired
@@ -197,7 +195,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
         // nếu đơn hàng đã dùng voucher trước đó thì dùng công thức tính lại số tiền cần trả
         float remainingMoney = order.getOriginMoney() - totalMoneyReturn;
-        float newReduceMoney = orderUtil.getMoneyReduceForTotalMoney(remainingMoney, order.getCustomer().getId());
+        float newReduceMoney = orderUtil.getMoneyReduceForTotalMoney(remainingMoney, order.getCustomer() != null ? order.getCustomer().getId() : "");
         if (order.getReduceMoney() > 0) {
             totalMoneyReturn = totalMoneyReturn - order.getReduceMoney() + newReduceMoney;
         }
@@ -210,7 +208,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         }
         order.setStatus(OrderStatus.RETURNED);
         Order orderSave = adminOrderRepository.save(order);
-        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, OrderStatus.RETURNED.action_description);
+        orderUtil.createOrderHistory(orderSave, OrderStatus.RETURNED, messageUtil.getMessage("order.status.return"));
 
         // save Payment neu trang thai hoan tien thanh cong
         Payment payment = new Payment();
