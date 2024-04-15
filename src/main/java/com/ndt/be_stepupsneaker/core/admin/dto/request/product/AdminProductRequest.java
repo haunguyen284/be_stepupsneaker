@@ -40,7 +40,6 @@ public class AdminProductRequest extends PageableRequest {
 
     private String maxQuantity;
 
-    @NotNull(message = "Status must be not null")
     private ProductStatus status;
 
     private String tradeMark;
