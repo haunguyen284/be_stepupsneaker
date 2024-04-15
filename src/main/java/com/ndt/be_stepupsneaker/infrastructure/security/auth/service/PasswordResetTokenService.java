@@ -5,6 +5,7 @@ import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRe
 import com.ndt.be_stepupsneaker.entity.auth.PasswordResetToken;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
+import com.ndt.be_stepupsneaker.infrastructure.config.DeployConfig;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
@@ -29,7 +30,7 @@ public class PasswordResetTokenService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
-    private final EmailService emailService;
+    private final DeployConfig deployConfig;
     private final PasswordEncoder passwordEncoder;
     private final MessageUtil messageUtil;
     private final EmailSampleContent emailSampleContent;
@@ -79,7 +80,7 @@ public class PasswordResetTokenService {
 
     public boolean sendMailUrl(Customer customer, Employee employee, String token) {
         PasswordResetToken resetToken = createPasswordResetToken(customer, employee, token);
-        String resetLink = EntityProperties.RESET_URL+ resetToken.getToken();
+        String resetLink = deployConfig.getPortDeployFe() + EntityProperties.RESET_URL + resetToken.getToken();
         if (customer != null) {
             emailSampleContent.sendMailAutoResetPassword(customer.getEmail(), resetLink);
             return true;
