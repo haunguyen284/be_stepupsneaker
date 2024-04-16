@@ -30,6 +30,7 @@ import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
+import com.ndt.be_stepupsneaker.entity.review.Review;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.*;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
@@ -44,13 +45,12 @@ import com.ndt.be_stepupsneaker.util.PaginationUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -155,14 +155,29 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
         for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
             Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(cartItemRequest.getId());
-            if (orderDetailOptional.isEmpty()) {
+            if (orderDetailOptional.isEmpty() && !cartItemRequest.getId().equals("")) {
                 throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
+            }
+            if ((cartItemRequest.getId() == null || cartItemRequest.getId().equals(""))
+                    && cartItemRequest.getProductDetailId() != null) {
+                ProductDetail productDetail = clientProductDetailRepository.findById(cartItemRequest.getProductDetailId())
+                        .orElseThrow(() -> new ResourceNotFoundException("product.product_detail.notfound"));
+                if (cartItemRequest.getQuantity() > productDetail.getQuantity()) {
+                    throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
+                }
+                OrderDetail orderDetail = orderUtil.createOrderDetail(productDetail, orderUpdate, cartItemRequest.getQuantity(), productDetail.getPrice());
+                orderDetailsUpdate.add(orderDetail);
+                productDetail.setQuantity(productDetail.getQuantity() - cartItemRequest.getQuantity());
+                productDetailsUpdate.add(productDetail);
+                continue;
             }
 
             OrderDetail orderDetailUpdate = orderDetailOptional.get();
             ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
+            float quantityProductDetail = productDetailUpdate.getQuantity();
             if (productDetailUpdate != null) {
-                if (productDetailUpdate.getQuantity() < cartItemRequest.getQuantity()) {
+                if (quantityProductDetail < cartItemRequest.getQuantity()
+                        && cartItemRequest.getQuantity() != orderDetailUpdate.getQuantity()) {
                     throw new ApiException(messageUtil.getMessage("order.product.exceed"));
                 }
             }
@@ -373,13 +388,33 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             }
             return ClientOrderMapper.INSTANCE.orderToClientOrderResponse(orderOptional.get());
         }
-        OrderWithReviewCountResponse orderWithReviewCount = clientOrderRepository.findByIdAndReviewCount(orderId, customerId)
+        //
+        Order order = clientOrderRepository.findByIdAndCustomer_Id(orderId, customerId)
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
-
-        Order order = orderWithReviewCount.getOrder();
-        Long reviewCount = orderWithReviewCount.getCountReview();
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
-        clientOrderResponse.setCountReview(reviewCount.intValue());
+        List<Review> reviews = order.getReviews();
+        List<OrderDetail> orderDetails = order.getOrderDetails();
+        Set<OrderDetail> responses = new HashSet<>();
+        if (!reviews.isEmpty()) {
+            for (OrderDetail orderDetail : orderDetails) {
+                boolean isReviewed = false;
+                for (Review review : reviews) {
+                    if (review.getProductDetail().getId().equals(orderDetail.getProductDetail().getId())) {
+                        isReviewed = true;
+                        break;
+                    }
+                }
+                if (!isReviewed) {
+                    responses.add(orderDetail);
+                }
+            }
+        } else {
+            responses.addAll(orderDetails);
+        }
+        Set<ClientOrderDetailResponse> orderDetailResponse = responses.stream()
+                .map(ClientOrderDetailMapper.INSTANCE::orderDetailToClientOrderDetailResponse)
+                .collect(Collectors.toSet());
+        clientOrderResponse.setOrderDetailToReview(orderDetailResponse);
         return clientOrderResponse;
     }
 

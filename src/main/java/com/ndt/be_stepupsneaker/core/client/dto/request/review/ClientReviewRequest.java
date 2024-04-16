@@ -12,6 +12,8 @@ public class ClientReviewRequest extends PageableRequest {
 
     private String productDetail;
 
+    private String order;
+
     private String comment;
 
     private double rating;

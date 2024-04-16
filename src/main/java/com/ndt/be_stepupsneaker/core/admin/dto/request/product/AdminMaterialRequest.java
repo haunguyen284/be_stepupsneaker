@@ -25,6 +25,5 @@ public class AdminMaterialRequest extends PageableRequest {
     @JsonDeserialize(using = CustomStringDeserializer.class)
     private String name;
 
-    @NotNull(message = "Status must be not null")
     private ProductPropertiesStatus status;
 }

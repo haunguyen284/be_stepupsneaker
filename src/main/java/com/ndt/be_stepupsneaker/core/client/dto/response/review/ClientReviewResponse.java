@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.dto.response.review;
 
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.order.ClientOrderResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.product.ClientProductDetailResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReviewStatus;
 import lombok.AllArgsConstructor;

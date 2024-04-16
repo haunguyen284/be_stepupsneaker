@@ -1,6 +1,7 @@
 package com.ndt.be_stepupsneaker.core.client.dto.response.product;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminPromotionNoProductDetailResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientPromotionNoProductDetailResponse;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ProductStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +43,6 @@ public class ClientProductDetailResponse {
 
     private ProductStatus status;
 
-    List<AdminPromotionNoProductDetailResponse> promotionProductDetails;
+    List<ClientPromotionNoProductDetailResponse> promotionProductDetails;
 
 }
