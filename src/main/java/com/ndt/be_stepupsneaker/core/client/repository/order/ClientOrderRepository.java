@@ -99,15 +99,5 @@ public interface ClientOrderRepository extends OrderRepository {
             """)
     Optional<OrderWithReviewCountResponse> findByCodeAndReviewCount(String code);
 
-    @Query("""
-                SELECT 
-                x AS order,
-                COUNT(r) AS countReview
-                FROM Order x 
-                LEFT JOIN x.orderDetails o 
-                LEFT JOIN Review r ON r.productDetail = o.productDetail
-                WHERE x.id = :id AND x.customer.id = :customer
-                GROUP BY x
-            """)
-    Optional<OrderWithReviewCountResponse> findByIdAndReviewCount(String id,String customer);
+
 }
