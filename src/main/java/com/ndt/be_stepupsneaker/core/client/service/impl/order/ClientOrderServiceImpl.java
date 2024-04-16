@@ -156,7 +156,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
         for (ClientCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
             Optional<OrderDetail> orderDetailOptional = clientOrderDetailRepository.findById(cartItemRequest.getId());
-            if (orderDetailOptional.isEmpty()&& !cartItemRequest.getId().equals("")) {
+            if (orderDetailOptional.isEmpty() && !cartItemRequest.getId().equals("")) {
                 throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
             }
             if ((cartItemRequest.getId() == null || cartItemRequest.getId().equals(""))
@@ -175,8 +175,10 @@ public class ClientOrderServiceImpl implements ClientOrderService {
 
             OrderDetail orderDetailUpdate = orderDetailOptional.get();
             ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
+            float quantityProductDetail = productDetailUpdate.getQuantity();
             if (productDetailUpdate != null) {
-                if (productDetailUpdate.getQuantity() < cartItemRequest.getQuantity()) {
+                if (quantityProductDetail < cartItemRequest.getQuantity()
+                        && cartItemRequest.getQuantity() != orderDetailUpdate.getQuantity()) {
                     throw new ApiException(messageUtil.getMessage("order.product.exceed"));
                 }
             }
