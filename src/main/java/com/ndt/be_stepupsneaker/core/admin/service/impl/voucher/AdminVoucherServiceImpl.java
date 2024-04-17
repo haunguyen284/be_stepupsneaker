@@ -89,7 +89,6 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         newVoucher.setCode(voucherRequest.getCode());
         newVoucher.setConstraint(voucherRequest.getConstraint());
         newVoucher.setQuantity(voucherRequest.getQuantity());
-        newVoucher.setStatus(voucherRequest.getStatus());
         newVoucher.setImage(cloudinaryUpload.upload(voucherRequest.getImage()));
         newVoucher.setEndDate(voucherRequest.getEndDate());
         newVoucher.setStartDate(voucherRequest.getStartDate());

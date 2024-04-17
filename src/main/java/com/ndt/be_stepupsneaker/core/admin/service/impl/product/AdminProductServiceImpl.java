@@ -100,7 +100,6 @@ public class AdminProductServiceImpl implements AdminProductService {
         Product productSave = productOptional.get();
 
         productSave.setName(productDTO.getName());
-        productSave.setStatus(productDTO.getStatus());
         productSave.setCode(productDTO.getCode());
         productSave.setDescription(productDTO.getDescription());
         productSave.setImage(productDTO.getImage());
@@ -128,5 +127,14 @@ public class AdminProductServiceImpl implements AdminProductService {
         product.setDeleted(true);
         adminProductRepository.save(product);
         return true;
+    }
+
+    @Override
+    public AdminProductResponse findByCode(String code) {
+        Optional<Product> productOptional = adminProductRepository.findByCode(code);
+        if (productOptional.isEmpty()){
+            throw new RuntimeException(messageUtil.getMessage("product.notfound"));
+        }
+        return AdminProductMapper.INSTANCE.productToAdminProductResponse(productOptional.get());
     }
 }

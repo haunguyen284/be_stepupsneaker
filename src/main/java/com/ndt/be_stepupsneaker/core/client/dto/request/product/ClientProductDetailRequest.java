@@ -47,6 +47,10 @@ public class ClientProductDetailRequest extends PageableRequest {
 
     private String priceMax;
 
+    private String minQuantity;
+
+    private String maxQuantity;
+
     private int quantity;
 
     private ProductStatus status;

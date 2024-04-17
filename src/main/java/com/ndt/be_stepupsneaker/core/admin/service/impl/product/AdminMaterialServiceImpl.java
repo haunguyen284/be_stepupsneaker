@@ -63,7 +63,6 @@ public class AdminMaterialServiceImpl implements AdminMaterialService {
         }
         Material MaterialSave = brandOptional.get();
         MaterialSave.setName(brandRequest.getName());
-        MaterialSave.setStatus(brandRequest.getStatus());
         return AdminMaterialMapper.INSTANCE.colorToAdminMaterialResponse(adminMaterialRepository.save(MaterialSave));
     }
 

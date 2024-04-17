@@ -61,8 +61,8 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     @Override
     public Object create(AdminEmployeeRequest employeeDTO) {
-        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getEmail());
-        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmailAndDeleted(employeeDTO.getEmail(),false);
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmailAndDeleted(employeeDTO.getEmail(),false);
         if (employeeOptional.isPresent() || customerOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
@@ -81,7 +81,7 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
 
     @Override
     public AdminEmployeeResponse update(AdminEmployeeRequest employeeDTO) {
-        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(employeeDTO.getEmail());
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmailAndDeleted(employeeDTO.getEmail(),false);
         Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(employeeDTO.getId(), employeeDTO.getEmail());
         if (employeeOptional.isPresent() || customerOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
@@ -98,7 +98,6 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         Employee employee = employeeOptional.get();
         employee.setGender(employeeDTO.getGender());
         employee.setEmail(employeeDTO.getEmail());
-        employee.setStatus(employeeDTO.getStatus());
         employee.setAddress(employeeDTO.getAddress());
         employee.setPhoneNumber(employeeDTO.getPhoneNumber());
         employee.setFullName(employeeDTO.getFullName());

@@ -63,7 +63,6 @@ public class AdminStyleServiceImpl implements AdminStyleService {
         }
         Style soleSave = brandOptional.get();
         soleSave.setName(soleRequest.getName());
-        soleSave.setStatus(soleRequest.getStatus());
         return AdminStyleMapper.INSTANCE.colorToAdminStyleResponse(adminStyleRepository.save(soleSave));
     }
 

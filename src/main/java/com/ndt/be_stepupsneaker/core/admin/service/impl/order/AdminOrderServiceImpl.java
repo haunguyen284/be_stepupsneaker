@@ -507,7 +507,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             Payment payment = new Payment();
             payment.setOrder(order);
             payment.setPaymentMethod(paymentMethod);
-            payment.setTotalMoney(paymentRequest.getTotalMoney());
+            payment.setTotalMoney(order.getTotalMoney());
             if (paymentMethod.getName().equals("Cash")) {
                 payment.setTransactionCode("Cash");
             } else {

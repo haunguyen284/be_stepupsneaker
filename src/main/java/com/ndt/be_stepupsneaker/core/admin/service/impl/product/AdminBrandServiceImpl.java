@@ -62,7 +62,6 @@ public class AdminBrandServiceImpl implements AdminBrandService {
         }
         Brand BrandSave = brandOptional.get();
         BrandSave.setName(brandRequest.getName());
-        BrandSave.setStatus(brandRequest.getStatus());
         return AdminBrandMapper.INSTANCE.BrandToAdminBrandResponse(adminBrandRepository.save(BrandSave));
     }
 

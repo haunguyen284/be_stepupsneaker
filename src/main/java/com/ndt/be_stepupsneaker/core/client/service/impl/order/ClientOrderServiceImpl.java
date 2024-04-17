@@ -59,7 +59,6 @@ import java.util.stream.Collectors;
 public class ClientOrderServiceImpl implements ClientOrderService {
 
     private final ClientOrderRepository clientOrderRepository;
-    private final ClientOrderHistoryRepository clientOrderHistoryRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final ClientAddressRepository clientAddressRepository;
     private final ClientVoucherRepository clientVoucherRepository;
@@ -123,6 +122,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             String urlVnPay = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             emailSampleContent.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
+            notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
             return urlVnPay;
         }
         orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, messageUtil.getMessage("order.was.created"));
@@ -288,7 +288,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     // Thông tin người dùng và nhân viên set vào order
     private Customer setOrderInfo(ClientOrderRequest orderRequest) {
         if (orderRequest.getCustomer() == null) {
-            Customer customer = clientCustomerRepository.findByEmail(orderRequest.getEmail()).orElse(null);
+            Customer customer = clientCustomerRepository.findByEmailAndDeleted(orderRequest.getEmail(),false).orElse(null);
             return customer;
         }
         ClientCustomerResponse clientCustomerResponse = mySessionInfo.getCurrentCustomer();

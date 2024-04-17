@@ -46,7 +46,7 @@ public class AuthenticationService {
     private final MessageUtil messageUtil;
 
     public AuthenticationResponse registerEmployee(AdminEmployeeRequest request) {
-        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmailAndDeleted(request.getEmail(),false);
         if (employeeOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
@@ -66,8 +66,8 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse registerCustomer(ClientCustomerRequest request) {
-        Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(request.getEmail());
-        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(request.getEmail());
+        Optional<Customer> customerOptional = clientCustomerRepository.findByEmailAndDeleted(request.getEmail(),false);
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmailAndDeleted(request.getEmail(),false);
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
@@ -83,8 +83,8 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        Employee employee = adminEmployeeRepository.findByEmail(request.getEmail()).orElse(null);
-        Customer customer = clientCustomerRepository.findByEmail(request.getEmail()).orElse(null);
+        Employee employee = adminEmployeeRepository.findByEmailAndDeleted(request.getEmail(),false).orElse(null);
+        Customer customer = clientCustomerRepository.findByEmailAndDeleted(request.getEmail(),false).orElse(null);
         String jwtToken;
         try {
             authenticationManager.authenticate(
