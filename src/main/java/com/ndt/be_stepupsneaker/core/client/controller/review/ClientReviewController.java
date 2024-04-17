@@ -40,7 +40,7 @@ public class ClientReviewController {
         return ResponseHelper.getResponse(clientReviewResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/add")
+    @PostMapping("")
     public Object create(@RequestBody List<@Valid ClientReviewRequest> reviewRequests, BindingResult bindingResult){
 
         if (bindingResult.hasErrors())
@@ -49,13 +49,6 @@ public class ClientReviewController {
         return ResponseHelper.getResponse(clientReviewService.create(reviewRequests), HttpStatus.OK);
     }
 
-    @PostMapping("")
-    public Object create(@RequestBody @Valid ClientReviewRequest clientReviewRequest, BindingResult bindingResult){
-        if (bindingResult.hasErrors())
-            return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
-
-        return ResponseHelper.getResponse(clientReviewService.create(clientReviewRequest), HttpStatus.OK);
-    }
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid ClientReviewRequest clientReviewRequest, BindingResult bindingResult){
