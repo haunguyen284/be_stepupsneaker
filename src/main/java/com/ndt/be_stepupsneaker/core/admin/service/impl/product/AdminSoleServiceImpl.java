@@ -62,7 +62,6 @@ public class AdminSoleServiceImpl implements AdminSoleService {
         }
         Sole soleSave = brandOptional.get();
         soleSave.setName(soleRequest.getName());
-        soleSave.setStatus(soleRequest.getStatus());
         return AdminSoleMapper.INSTANCE.colorToAdminSoleResponse(adminSoleRepository.save(soleSave));
     }
 

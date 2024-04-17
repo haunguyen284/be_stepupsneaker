@@ -71,7 +71,6 @@ public class AdminColorServiceImpl implements AdminColorService {
         }
         Color colorSave = colorOptional.get();
         colorSave.setName(colorDTO.getName());
-        colorSave.setStatus(colorDTO.getStatus());
         colorSave.setCode(colorDTO.getCode());
         return AdminColorMapper.INSTANCE.colorToAdminColorResponse(adminColorRepository.save(colorSave));
     }

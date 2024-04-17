@@ -122,6 +122,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             String urlVnPay = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
             EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
             emailSampleContent.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
+            notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
             return urlVnPay;
         }
         orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_CONFIRMATION, messageUtil.getMessage("order.was.created"));

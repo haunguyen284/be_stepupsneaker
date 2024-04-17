@@ -63,7 +63,6 @@ public class AdminTradeMarkServiceImpl implements AdminTradeMarkService {
         }
         TradeMark tradeMarkSave = brandOptional.get();
         tradeMarkSave.setName(tradeMarkRequest.getName());
-        tradeMarkSave.setStatus(tradeMarkRequest.getStatus());
         return AdminTradeMarkMapper.INSTANCE.colorToAdminTradeMarkResponse(adminTradeMarkRepository.save(tradeMarkSave));
     }
 
