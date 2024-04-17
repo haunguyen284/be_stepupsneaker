@@ -96,7 +96,6 @@ public class AdminEmployeeServiceImpl implements AdminEmployeeService {
         Employee employee = employeeOptional.get();
         employee.setGender(employeeDTO.getGender());
         employee.setEmail(employeeDTO.getEmail());
-        employee.setStatus(employeeDTO.getStatus());
         employee.setAddress(employeeDTO.getAddress());
         employee.setPhoneNumber(employeeDTO.getPhoneNumber());
         employee.setFullName(employeeDTO.getFullName());

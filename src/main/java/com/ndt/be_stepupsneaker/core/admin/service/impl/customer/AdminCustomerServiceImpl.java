@@ -117,7 +117,6 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         }
         Customer customer = customerOptional.get();
         customer.setFullName(customerDTO.getFullName());
-        customer.setStatus(customerDTO.getStatus());
         customer.setGender(customerDTO.getGender());
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
         customer.setEmail(customerDTO.getEmail());

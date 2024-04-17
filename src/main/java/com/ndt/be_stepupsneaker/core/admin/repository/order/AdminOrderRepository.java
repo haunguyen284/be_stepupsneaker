@@ -97,4 +97,6 @@ public interface AdminOrderRepository extends OrderRepository {
     )
     List<Statistic> getDailyOrderBetween(@Param("start") Long start, @Param("end") Long end);
 
+    Optional<Order> findByCodeAndStatus(String code, OrderStatus status);
+
 }

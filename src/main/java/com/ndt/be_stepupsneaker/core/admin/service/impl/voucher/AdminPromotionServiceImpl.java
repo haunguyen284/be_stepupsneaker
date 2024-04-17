@@ -82,7 +82,6 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         Promotion newPromotion = optionalPromotion.get();
         newPromotion.setName(request.getName());
         newPromotion.setCode(request.getCode());
-        newPromotion.setStatus(request.getStatus());
         newPromotion.setImage(cloudinaryUpload.upload(request.getImage()));
         newPromotion.setEndDate(request.getEndDate());
         newPromotion.setStartDate(request.getStartDate());

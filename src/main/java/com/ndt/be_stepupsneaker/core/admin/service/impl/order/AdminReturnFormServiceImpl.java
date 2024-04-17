@@ -4,8 +4,10 @@ import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminCartItemReques
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderDetailRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormDetailRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminReturnFormRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminOrderResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.order.AdminReturnFormResponse;
 import com.ndt.be_stepupsneaker.core.admin.mapper.customer.AdminAddressMapper;
+import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminReturnFormDetailMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminReturnFormMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminAddressRepository;
@@ -282,5 +284,14 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
     @Override
     public AdminReturnFormResponse updateReturnDeliveryStatus(AdminReturnFormRequest request) {
         throw new ResourceNotFoundException("API không hỗ trợ");
+    }
+
+    @Override
+    public AdminOrderResponse findByCode(String code) {
+        Optional<Order> orderOptional = adminOrderRepository.findByCodeAndStatus(code, OrderStatus.COMPLETED);
+        if (orderOptional.isEmpty()) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
+        }
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderOptional.get());
     }
 }
