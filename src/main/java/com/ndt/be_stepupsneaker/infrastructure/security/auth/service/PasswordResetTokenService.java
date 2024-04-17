@@ -39,8 +39,8 @@ public class PasswordResetTokenService {
         if (isEmailSending) {
             throw new ApiException(messageUtil.getMessage("please.try.again.later") + timeRemaining + "s");
         }
-        Customer customer = clientCustomerRepository.findByEmail(email).orElse(null);
-        Employee employee = adminEmployeeRepository.findByEmail(email).orElse(null);
+        Customer customer = clientCustomerRepository.findByEmailAndDeleted(email,false).orElse(null);
+        Employee employee = adminEmployeeRepository.findByEmailAndDeleted(email,false).orElse(null);
         if (customer == null && employee == null) {
             throw new ApiException(messageUtil.getMessage("user.notfound"));
         }

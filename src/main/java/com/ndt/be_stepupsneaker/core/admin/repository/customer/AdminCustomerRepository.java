@@ -48,10 +48,12 @@ public interface AdminCustomerRepository extends CustomerRepository {
                                    @Param("noVoucher") String noVoucher,
                                    @Param("status") CustomerStatus status, Pageable pageable);
 
-    Optional<Customer> findByEmail(String email);
+    Optional<Customer> findByEmailAndDeleted(String email, Boolean deleted);
 
     @Query("""
-            SELECT x FROM Customer x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id'))
+            SELECT x FROM Customer x 
+            WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id')
+            AND x.deleted = FALSE )
             """)
     Optional<Customer> findByEmail(@Param("id") String id, @Param("email") String email);
 

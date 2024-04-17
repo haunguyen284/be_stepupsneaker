@@ -32,7 +32,7 @@ public class Customer extends PrimaryEntity implements UserDetails {
     @Nationalized
     private String fullName;
 
-    @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false, unique = true)
+    @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false)
     private String email;
 
     @Column(name = "date_of_birth")

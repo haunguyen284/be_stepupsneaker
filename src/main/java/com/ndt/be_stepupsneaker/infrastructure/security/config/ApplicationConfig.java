@@ -36,8 +36,8 @@ public class ApplicationConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            Optional<Employee> employee = adminEmployeeRepository.findByEmail(username);
-            Optional<Customer> customer = clientCustomerRepository.findByEmail(username);
+            Optional<Employee> employee = adminEmployeeRepository.findByEmailAndDeleted(username,false);
+            Optional<Customer> customer = clientCustomerRepository.findByEmailAndDeleted(username,false);
             if (employee.isPresent()) {
                 return employee.get();
             } else if (customer.isPresent()) {

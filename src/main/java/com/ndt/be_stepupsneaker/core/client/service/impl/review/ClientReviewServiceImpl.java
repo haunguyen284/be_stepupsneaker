@@ -16,6 +16,7 @@ import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.review.Review;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReviewStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -115,18 +116,26 @@ public class ClientReviewServiceImpl implements ClientReviewService {
             Order constOrder = null;
             if (request.getOrder() == null || request.getOrder().equals("")) {
                 for (Order order : orders) {
-                    List<OrderDetail> orderDetails = order.getOrderDetails();
-                    for (OrderDetail orderDetail : orderDetails) {
-                        productDetails.add(orderDetail.getProductDetail());
+                    if (order.getStatus() == OrderStatus.COMPLETED) {
+                        List<OrderDetail> orderDetails = order.getOrderDetails();
+                        for (OrderDetail orderDetail : orderDetails) {
+                            productDetails.add(orderDetail.getProductDetail());
+                        }
+                    } else {
+                        throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
                     }
                 }
                 if (!productDetails.contains(productDetail)) {
                     throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
                 }
+
                 constOrder = null;
             } else {
                 constOrder = clientOrderRepository.findById(request.getOrder())
-                        .orElseThrow(() ->new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+            }
+            if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
             }
             if (request.getUrlImage() != null) {
                 request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));

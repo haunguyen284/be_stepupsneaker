@@ -59,7 +59,6 @@ import java.util.stream.Collectors;
 public class ClientOrderServiceImpl implements ClientOrderService {
 
     private final ClientOrderRepository clientOrderRepository;
-    private final ClientOrderHistoryRepository clientOrderHistoryRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final ClientAddressRepository clientAddressRepository;
     private final ClientVoucherRepository clientVoucherRepository;
@@ -290,7 +289,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     // Thông tin người dùng và nhân viên set vào order
     private Customer setOrderInfo(ClientOrderRequest orderRequest) {
         if (orderRequest.getCustomer() == null) {
-            Customer customer = clientCustomerRepository.findByEmail(orderRequest.getEmail()).orElse(null);
+            Customer customer = clientCustomerRepository.findByEmailAndDeleted(orderRequest.getEmail(),false).orElse(null);
             return customer;
         }
         ClientCustomerResponse clientCustomerResponse = mySessionInfo.getCurrentCustomer();
