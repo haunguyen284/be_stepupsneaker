@@ -292,6 +292,12 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         if (orderOptional.isEmpty()) {
             throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
-        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(orderOptional.get());
+        Order order = orderOptional.get();;
+        Instant createdAtInstant = Instant.ofEpochMilli(order.getCreatedAt());
+        Duration duration = Duration.between(createdAtInstant, Instant.now());
+        if (duration.toDays() > 7) {
+            throw new ApiException(messageUtil.getMessage("return_form.order.expired"));
+        }
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
     }
 }
