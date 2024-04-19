@@ -46,5 +46,18 @@ public class AdminVoucherRequest extends PageableRequest {
 
     private List<String> customers;
 
+//    filter
+
+    private String quantityMin;
+
+    private String quantityMax;
+
+    private  String priceMin;
+
+    private  String priceMax;
+
+    private String constraintMin;
+
+    private String constraintMax;
 
 }
