@@ -61,9 +61,9 @@ public class AdminProductDetailRequest extends PageableRequest {
     @Min(value = 1, message = "{product_detail.quantity.min}")
     private int quantity;
 
-    private String minQuantity;
+    private String quantityMin;
 
-    private String maxQuantity;
+    private String quantityMax;
 
     private ProductStatus status;
 

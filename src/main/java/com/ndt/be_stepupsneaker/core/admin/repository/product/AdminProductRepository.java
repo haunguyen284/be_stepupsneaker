@@ -52,13 +52,17 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     (:#{#request.soles} IS NULL OR :#{#request.soles == null ? true : #request.soles.empty} = true OR x.id IN (SELECT pd.product.id FROM ProductDetail pd WHERE pd.sole.id IN :#{#request.soles} GROUP BY pd.product.id)) 
     AND 
-    (:#{#request.minQuantity} IS NULL OR :#{#request.minQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) >= CAST(:#{#request.minQuantity} AS int)))
+    (:#{#request.quantityMin} IS NULL OR :#{#request.quantityMin} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) >= CAST(:#{#request.quantityMin} AS int)))
     AND 
-    (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.maxQuantity} AS int))) 
+    (:#{#request.quantityMax} IS NULL OR :#{#request.quantityMax} ILIKE '' OR x.id IN (SELECT pd.product.id FROM ProductDetail pd GROUP BY pd.product.id HAVING SUM(pd.quantity) <= CAST(:#{#request.quantityMax} AS int))) 
     AND 
     (:#{#request.start} IS NULL OR :#{#request.start} ILIKE '' OR x.createdAt >= CAST(:#{#request.start} as long)) 
     AND 
     (:#{#request.end} IS NULL OR :#{#request.end} ILIKE '' OR x.createdAt <= CAST(:#{#request.end} as long)) 
+    AND 
+    (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE '' OR :#{#request.priceMin} <= (SELECT MIN(pd.price) FROM ProductDetail  pd WHERE pd.product = x)) 
+    AND 
+    (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} ILIKE '' OR :#{#request.priceMax} >= (SELECT MAX(pd.price) FROM ProductDetail  pd WHERE pd.product = x)) 
     AND 
     x.deleted=false 
     GROUP BY x.id
