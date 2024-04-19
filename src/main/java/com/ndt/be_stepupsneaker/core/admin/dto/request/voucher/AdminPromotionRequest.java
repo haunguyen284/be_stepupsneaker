@@ -41,4 +41,10 @@ public class AdminPromotionRequest extends PageableRequest {
     private String image;
 
     private List<String> productDetailIds;
+
+//    filter
+    private String priceMin;
+
+    private String priceMax;
+
 }

@@ -23,7 +23,7 @@ public interface AdminPaymentRepository extends PaymentRepository {
                 WHERE 
                     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.order.code ILIKE CONCAT('%', :#{#request.q}, '%') 
                     OR 
-                    x.totalMoney =  :#{#request.q} OR x.order.employee.fullName ILIKE CONCAT('%', :#{#request.q}, '%') 
+                    x.order.employee.fullName ILIKE CONCAT('%', :#{#request.q}, '%') 
                     OR
                     x.transactionCode ILIKE CONCAT('%', :#{#request.q}, '%') OR x.order.employee.email ILIKE CONCAT('%', :#{#request.q}, '%')
                     OR
@@ -31,7 +31,7 @@ public interface AdminPaymentRepository extends PaymentRepository {
                     OR
                     x.order.customer.fullName ILIKE CONCAT('%', :#{#request.q}, '%') OR x.order.fullName ILIKE CONCAT('%', :#{#request.q}, '%')) 
                     AND
-                    (:#{#request.priceMin} IS NULL OR :#{#request.priceMax} IS NULL OR :#{#request.priceMin} = 0 OR :#{#request.priceMax} = 0 
+                    (:#{#request.priceMin} IS NULL OR :#{#request.priceMax} IS NULL OR :#{#request.priceMin}  ILIKE '' OR :#{#request.priceMax} ILIKE ''
                     OR 
                     x.totalMoney BETWEEN :#{#request.priceMin} AND :#{#request.priceMax})
                     AND

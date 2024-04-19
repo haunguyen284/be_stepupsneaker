@@ -298,6 +298,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 adminVoucherRepository.save(voucher);
             }
             orderUtil.revertQuantityProductDetailWhenCancelOrder(orderSave);
+            List<Payment> newPayments = new ArrayList<>();
+            List<Payment> payments = orderSave.getPayments();
+            for (Payment payment:payments){
+                payment.setTransactionCode("Đã hủy");
+                newPayments.add(payment);
+            }
+            adminPaymentRepository.saveAll(newPayments);
         }
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
             Payment payment = orderSave.getPayments().get(0);

@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.service.impl.voucher;
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
+import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminPromotionMapper;
 import com.ndt.be_stepupsneaker.core.admin.mapper.voucher.AdminVoucherMapper;
 import com.ndt.be_stepupsneaker.core.admin.repository.customer.AdminCustomerRepository;
 import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminCustomerVoucherRepository;
@@ -9,7 +10,9 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherReposi
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Customer;
+import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ApiException;
@@ -39,8 +42,6 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     private final CloudinaryUpload cloudinaryUpload;
     private final MessageUtil messageUtil;
     private final AdminCustomerRepository adminCustomerRepository;
-    private final AdminCustomerVoucherRepository adminCustomerVoucherRepository;
-    private final EmailService emailService;
     private final EntityUtil entityUtil;
 
     @Override
@@ -79,12 +80,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         if (optionalVoucher.isPresent()) {
             throw new ApiException(messageUtil.getMessage("voucher.code.exist"));
         }
-
-        optionalVoucher = adminVoucherRepository.findById(voucherRequest.getId());
-        if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
-        }
-        Voucher newVoucher = optionalVoucher.get();
+        Voucher newVoucher = getVoucher(voucherRequest.getId());
         newVoucher.setName(voucherRequest.getName());
         newVoucher.setCode(voucherRequest.getCode());
         newVoucher.setConstraint(voucherRequest.getConstraint());
@@ -104,21 +100,13 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
 
     @Override
     public AdminVoucherResponse findById(String id) {
-        Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
-        if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
-        }
-
-        return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(optionalVoucher.get());
+         Voucher voucher = getVoucher(id);
+        return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(voucher);
     }
 
     @Override
     public Boolean delete(String id) {
-        Optional<Voucher> optionalVoucher = adminVoucherRepository.findById(id);
-        if (optionalVoucher.isEmpty()) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound"));
-        }
-        Voucher newVoucher = optionalVoucher.get();
+        Voucher newVoucher = getVoucher(id);
         newVoucher.setDeleted(true);
         adminVoucherRepository.save(newVoucher);
         return true;
@@ -131,6 +119,19 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         Page<Voucher> resp = adminVoucherRepository.findAllVoucher(voucherReq, pageable, voucherReq.getStatus(), voucherReq.getType(), customerId, noCustomerId);
         Page<AdminVoucherResponse> adminVoucherResponsePage = resp.map(AdminVoucherMapper.INSTANCE::voucherToAdminVoucherResponse);
         return new PageableObject<>(adminVoucherResponsePage);
+    }
+
+    @Override
+    public AdminVoucherResponse deactivateDiscount(String id) {
+        Voucher voucher = getVoucher(id);
+        voucher.setStatus(VoucherStatus.IN_ACTIVE);
+        return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(adminVoucherRepository.save(voucher));
+    }
+
+    private Voucher getVoucher(String id) {
+        Voucher voucher = adminVoucherRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("voucher.notfound")));
+        return voucher;
     }
 
 }
