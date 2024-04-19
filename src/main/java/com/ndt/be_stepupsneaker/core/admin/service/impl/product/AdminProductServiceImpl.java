@@ -133,7 +133,7 @@ public class AdminProductServiceImpl implements AdminProductService {
     public AdminProductResponse findByCode(String code) {
         Optional<Product> productOptional = adminProductRepository.findByCode(code);
         if (productOptional.isEmpty()){
-            throw new RuntimeException(messageUtil.getMessage("product.notfound"));
+            throw new ResourceNotFoundException(messageUtil.getMessage("product.notfound"));
         }
         return AdminProductMapper.INSTANCE.productToAdminProductResponse(productOptional.get());
     }
