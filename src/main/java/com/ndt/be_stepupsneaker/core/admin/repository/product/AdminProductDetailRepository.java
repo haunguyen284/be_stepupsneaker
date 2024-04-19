@@ -45,9 +45,9 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND 
-    (:#{#request.minQuantity} IS NULL OR :#{#request.minQuantity} ILIKE '' OR x.quantity >= CAST(:#{#request.minQuantity} AS int)) 
+    (:#{#request.quantityMin} IS NULL OR :#{#request.quantityMin} ILIKE '' OR x.quantity >= CAST(:#{#request.quantityMin} AS int)) 
     AND 
-    (:#{#request.maxQuantity} IS NULL OR :#{#request.maxQuantity} ILIKE '' OR x.quantity <= CAST(:#{#request.maxQuantity} AS int)) 
+    (:#{#request.quantityMax} IS NULL OR :#{#request.quantityMax} ILIKE '' OR x.quantity <= CAST(:#{#request.quantityMax} AS int)) 
     AND 
     (
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.product.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
