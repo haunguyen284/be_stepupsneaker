@@ -25,5 +25,7 @@ public class AdminOrderHistoryResponse {
     private String orderCode;
 
     private Long createdAt;
+    
+    private String createdBy;
 
 }
