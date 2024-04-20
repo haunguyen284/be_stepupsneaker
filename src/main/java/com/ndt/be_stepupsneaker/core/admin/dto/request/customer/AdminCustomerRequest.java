@@ -48,4 +48,8 @@ public class AdminCustomerRequest extends PageableRequest {
     private String image;
 
     private AdminAddressRequest address;
+
+    private Long startDate;
+
+    private Long endDate;
 }

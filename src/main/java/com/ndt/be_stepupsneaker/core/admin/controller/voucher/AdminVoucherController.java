@@ -2,6 +2,7 @@ package com.ndt.be_stepupsneaker.core.admin.controller.voucher;
 
 
 import com.ndt.be_stepupsneaker.core.admin.dto.request.voucher.AdminVoucherRequest;
+import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminPromotionResponse;
 import com.ndt.be_stepupsneaker.core.admin.dto.response.voucher.AdminVoucherResponse;
 import com.ndt.be_stepupsneaker.core.admin.service.voucher.AdminVoucherService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
@@ -48,6 +49,13 @@ public class AdminVoucherController {
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminVoucherService.update(voucherRequest), HttpStatus.OK);
+    }
+
+
+    @PutMapping("/deactivate-discount/{id}")
+    public Object deactivateDiscount(@PathVariable("id") String id) {
+        AdminVoucherResponse response = adminVoucherService.deactivateDiscount(id);
+        return ResponseHelper.getResponse(response, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
