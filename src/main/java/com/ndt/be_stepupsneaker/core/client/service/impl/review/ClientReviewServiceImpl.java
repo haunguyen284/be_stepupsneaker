@@ -112,30 +112,39 @@ public class ClientReviewServiceImpl implements ClientReviewService {
             ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
             List<Order> orders = customer.getOrders();
-            List<ProductDetail> productDetails = new ArrayList<>();
             Order constOrder = null;
             if (request.getOrder() == null || request.getOrder().equals("")) {
+                boolean isCheck = false;
                 for (Order order : orders) {
-                    if (order.getStatus() == OrderStatus.COMPLETED) {
-                        List<OrderDetail> orderDetails = order.getOrderDetails();
-                        for (OrderDetail orderDetail : orderDetails) {
-                            productDetails.add(orderDetail.getProductDetail());
+                    List<OrderDetail> orderDetails = order.getOrderDetails();
+                    for (OrderDetail orderDetail : orderDetails) {
+                        if (orderDetail.getProductDetail() == productDetail) {
+                            isCheck = true;
+                            constOrder = order;
+                            break;
                         }
-                    } else {
-                        throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+                    }
+                    if (isCheck) {
+                        break;
                     }
                 }
-                if (!productDetails.contains(productDetail)) {
+                if (isCheck) {
+                    if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                        throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+
+                    }
+                } else {
                     throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
+
                 }
 
                 constOrder = null;
             } else {
                 constOrder = clientOrderRepository.findById(request.getOrder())
                         .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
-            }
-            if (constOrder.getStatus() != OrderStatus.COMPLETED) {
-                throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+                if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                    throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+                }
             }
             if (request.getUrlImage() != null) {
                 request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
