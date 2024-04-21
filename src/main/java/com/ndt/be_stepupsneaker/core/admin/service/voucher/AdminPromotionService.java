@@ -9,4 +9,5 @@ import java.util.UUID;
 
 public interface AdminPromotionService extends BaseService<AdminPromotionResponse,String,AdminPromotionRequest> {
     PageableObject<AdminPromotionResponse> findAllPromotion(AdminPromotionRequest request, String productDetail, String noProductDetail);
+    AdminPromotionResponse deactivateDiscount(String id);
 }

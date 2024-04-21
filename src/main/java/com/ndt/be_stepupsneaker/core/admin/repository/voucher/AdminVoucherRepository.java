@@ -26,15 +26,21 @@ public interface AdminVoucherRepository extends VoucherRepository, BaseUtilRepos
                 WHERE 
                     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.code ILIKE CONCAT('%', :#{#request.q}, '%')) 
                     AND
-                    (:status IS NULL OR x.status = :status)
+                    (:status IS NULL OR x.status = :status) AND (:type IS NULL OR x.type = :type)
                     AND
-                    (:type IS NULL OR x.type = :type)
+                    (:#{#request.quantityMin} IS NULL OR :#{#request.quantityMin} ILIKE ''  OR :#{#request.quantityMax} IS NULL
+                    OR 
+                    :#{#request.quantityMax} ILIKE '' OR x.quantity BETWEEN :#{#request.quantityMin} AND :#{#request.quantityMax})
                     AND
-                    (:#{#request.quantity} = 0 OR x.quantity = :#{#request.quantity})
+                    (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE ''  OR :#{#request.priceMax} IS NULL
+                    OR 
+                    :#{#request.priceMax} ILIKE '' OR x.value BETWEEN :#{#request.priceMin} AND :#{#request.priceMax})
                     AND
-                    (:#{#request.startDate} IS NULL OR :#{#request.startDate} BETWEEN x.startDate AND x.endDate)
+                    (:#{#request.constraintMin} IS NULL OR :#{#request.constraintMin} ILIKE ''  OR :#{#request.constraintMax} IS NULL
+                    OR 
+                    :#{#request.constraintMax} ILIKE '' OR x.constraint BETWEEN :#{#request.constraintMin} AND :#{#request.constraintMax})
                     AND
-                    (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
+                    (:#{#request.startDate} IS NULL OR :#{#request.endDate} IS NULL OR (x.startDate >= :#{#request.startDate} AND x.endDate <= :#{#request.endDate}))
                     AND
                     (:customer IS NULL OR :customer ILIKE '' OR x.id IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :customer))
                     AND

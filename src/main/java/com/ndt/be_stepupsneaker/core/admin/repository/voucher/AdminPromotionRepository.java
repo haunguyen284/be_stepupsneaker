@@ -25,9 +25,11 @@ public interface AdminPromotionRepository extends PromotionRepository, BaseUtilR
                 WHERE
                     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.code ILIKE CONCAT('%', :#{#request.q}, '%'))
                     AND
-                    (:#{#request.startDate} IS NULL OR :#{#request.startDate} BETWEEN x.startDate AND x.endDate)
-                    AND
-                    (:#{#request.endDate} IS NULL OR :#{#request.endDate} BETWEEN x.startDate AND x.endDate)
+                    (:#{#request.startDate} IS NULL OR :#{#request.endDate} IS NULL OR (x.startDate >= :#{#request.startDate} AND x.endDate <= :#{#request.endDate}))
+                    AND            
+                    (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE ''  OR :#{#request.priceMax} IS NULL
+                    OR 
+                    :#{#request.priceMax} ILIKE '' OR x.value BETWEEN :#{#request.priceMin} AND :#{#request.priceMax})
                     AND
                     (:productDetail IS NULL OR :productDetail ILIKE '' OR x.id IN (SELECT y.promotion.id FROM PromotionProductDetail y WHERE y.productDetail.id = :productDetail))
                     AND

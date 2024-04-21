@@ -16,6 +16,7 @@ import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.review.Review;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReviewStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -64,37 +65,7 @@ public class ClientReviewServiceImpl implements ClientReviewService {
 
     @Override
     public Object create(ClientReviewRequest request) {
-        Customer customer = getCustomer();
-        ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail())
-                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
-        List<Order> orders = customer.getOrders();
-        List<ProductDetail> productDetails = new ArrayList<>();
-        Order constOrder = null;
-        if (request.getOrder() == null || request.getOrder().equals("")) {
-            for (Order order : orders) {
-                List<OrderDetail> orderDetails = order.getOrderDetails();
-                for (OrderDetail orderDetail : orderDetails) {
-                    productDetails.add(orderDetail.getProductDetail());
-                }
-            }
-            if (!productDetails.contains(productDetail)) {
-                throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
-            }
-            constOrder = null;
-        } else {
-            constOrder = clientOrderRepository.findById(request.getOrder())
-                    .orElseThrow(() ->new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
-        }
-        if (request.getUrlImage() != null) {
-            request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
-        }
-        Review review = ClientReviewMapper.INSTANCE.clientReviewRequestToReview(request);
-        review.setOrder(constOrder);
-        review.setCustomer(customer);
-        review.setProductDetail(productDetail);
-        review.setStatus(ReviewStatus.WAITING);
-        return ClientReviewMapper.INSTANCE.reviewToClientReviewResponse(clientReviewRepository.save(review));
-
+        throw new ResourceNotFoundException("API not support");
     }
 
     @Override
@@ -132,6 +103,65 @@ public class ClientReviewServiceImpl implements ClientReviewService {
         return true;
     }
 
+
+    @Override
+    public List<ClientReviewResponse> create(List<ClientReviewRequest> reviewRequests) {
+        List<Review> reviews = new ArrayList<>();
+        for (ClientReviewRequest request : reviewRequests) {
+            Customer customer = getCustomer();
+            ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
+            List<Order> orders = customer.getOrders();
+            Order constOrder = null;
+            if (request.getOrder() == null || request.getOrder().equals("")) {
+                boolean isCheck = false;
+                for (Order order : orders) {
+                    List<OrderDetail> orderDetails = order.getOrderDetails();
+                    for (OrderDetail orderDetail : orderDetails) {
+                        if (orderDetail.getProductDetail() == productDetail) {
+                            isCheck = true;
+                            constOrder = order;
+                            break;
+                        }
+                    }
+                    if (isCheck) {
+                        break;
+                    }
+                }
+                if (isCheck) {
+                    if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                        throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+
+                    }
+                } else {
+                    throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
+
+                }
+
+                constOrder = null;
+            } else {
+                constOrder = clientOrderRepository.findById(request.getOrder())
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+                if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                    throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+                }
+            }
+            if (request.getUrlImage() != null) {
+                request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
+            }
+            Review review = ClientReviewMapper.INSTANCE.clientReviewRequestToReview(request);
+            review.setOrder(constOrder);
+            review.setCustomer(customer);
+            review.setProductDetail(productDetail);
+            review.setStatus(ReviewStatus.WAITING);
+            reviews.add(review);
+        }
+        return clientReviewRepository.saveAll(reviews)
+                .stream()
+                .map(ClientReviewMapper.INSTANCE::reviewToClientReviewResponse)
+                .collect(Collectors.toList());
+    }
+
     private Customer getCustomer() {
         ClientCustomerResponse customerResponse = mySessionInfo.getCurrentCustomer();
         if (customerResponse == null) {
@@ -150,46 +180,5 @@ public class ClientReviewServiceImpl implements ClientReviewService {
         Customer customer = clientCustomerRepository.findById(customerResponse.getId())
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
         return customer;
-    }
-
-    @Override
-    public List<ClientReviewResponse> create(List<ClientReviewRequest> reviewRequests) {
-        List<Review> reviews = new ArrayList<>();
-        for (ClientReviewRequest request : reviewRequests) {
-            Customer customer = getCustomer();
-            ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail())
-                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
-            List<Order> orders = customer.getOrders();
-            List<ProductDetail> productDetails = new ArrayList<>();
-            Order constOrder = null;
-            if (request.getOrder() == null || request.getOrder().equals("")) {
-                for (Order order : orders) {
-                    List<OrderDetail> orderDetails = order.getOrderDetails();
-                    for (OrderDetail orderDetail : orderDetails) {
-                        productDetails.add(orderDetail.getProductDetail());
-                    }
-                }
-                if (!productDetails.contains(productDetail)) {
-                    throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
-                }
-                constOrder = null;
-            } else {
-                constOrder = clientOrderRepository.findById(request.getOrder())
-                        .orElseThrow(() ->new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
-            }
-            if (request.getUrlImage() != null) {
-                request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
-            }
-            Review review = ClientReviewMapper.INSTANCE.clientReviewRequestToReview(request);
-            review.setOrder(constOrder);
-            review.setCustomer(customer);
-            review.setProductDetail(productDetail);
-            review.setStatus(ReviewStatus.WAITING);
-            reviews.add(review);
-        }
-        return clientReviewRepository.saveAll(reviews)
-                .stream()
-                .map(ClientReviewMapper.INSTANCE::reviewToClientReviewResponse)
-                .collect(Collectors.toList());
     }
 }
