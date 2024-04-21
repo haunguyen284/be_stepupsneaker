@@ -124,7 +124,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     @Override
     public AdminVoucherResponse deactivateDiscount(String id) {
         Voucher voucher = getVoucher(id);
-        voucher.setStatus(VoucherStatus.IN_ACTIVE);
+        voucher.setStatus(VoucherStatus.CANCELLED);
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(adminVoucherRepository.save(voucher));
     }
 

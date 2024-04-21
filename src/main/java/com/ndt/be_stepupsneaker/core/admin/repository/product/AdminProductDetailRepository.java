@@ -67,6 +67,12 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.tradeMark.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
     ) 
     AND 
+    (
+    (:#{#request.hasPromotion} IS NULL OR :#{#request.hasPromotion} ILIKE '' OR (:#{#request.hasPromotion} = 'true' AND x.id IN (SELECT pp.productDetail.id FROM PromotionProductDetail pp WHERE pp.promotion.status = 0))) 
+    OR 
+    (:#{#request.hasPromotion} IS NULL OR :#{#request.hasPromotion} ILIKE '' OR (:#{#request.hasPromotion} = 'false' AND x.id NOT IN (SELECT pp.productDetail.id FROM PromotionProductDetail pp WHERE pp.promotion.status = 0)))
+    ) 
+    AND 
     x.deleted=false 
     ) 
     """)

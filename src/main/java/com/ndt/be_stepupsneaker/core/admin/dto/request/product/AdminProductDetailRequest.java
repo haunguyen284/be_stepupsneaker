@@ -49,7 +49,7 @@ public class AdminProductDetailRequest extends PageableRequest {
 
     private int isInPromotion=1;
 
-    private boolean hasPromotion;
+    private String hasPromotion;
 
     private String image;
 

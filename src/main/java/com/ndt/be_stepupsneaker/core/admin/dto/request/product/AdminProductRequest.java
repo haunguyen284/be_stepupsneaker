@@ -66,7 +66,7 @@ public class AdminProductRequest extends PageableRequest {
 
     private String end;
 
-    private boolean hasPromotion;
+    private String hasPromotion;
 
     private List<String> tradeMarks;
 

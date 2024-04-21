@@ -64,6 +64,12 @@ public interface AdminProductRepository extends ProductRepository {
     AND 
     (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} ILIKE '' OR :#{#request.priceMax} >= (SELECT MAX(pd.price) FROM ProductDetail  pd WHERE pd.product = x)) 
     AND 
+    (
+    (:#{#request.hasPromotion} IS NULL OR :#{#request.hasPromotion} ILIKE '' OR (:#{#request.hasPromotion} = 'true' AND x.id IN (SELECT pp.productDetail.product.id FROM PromotionProductDetail pp WHERE pp.promotion.status = 0))) 
+    OR 
+    (:#{#request.hasPromotion} IS NULL OR :#{#request.hasPromotion} ILIKE '' OR (:#{#request.hasPromotion} = 'false' AND x.id NOT IN (SELECT pp.productDetail.product.id FROM PromotionProductDetail pp WHERE pp.promotion.status = 0)))
+    ) 
+    AND 
     x.deleted=false 
     GROUP BY x.id
     """)
