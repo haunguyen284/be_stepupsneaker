@@ -18,14 +18,22 @@ public interface AdminEmployeeRepository extends EmployeeRepository {
     @Query("""
                 SELECT x FROM Employee x 
                 WHERE
-                (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')OR x.email ILIKE CONCAT('%', :#{#request.q}, '%')OR x.address ILIKE CONCAT('%', :#{#request.q}, '%')OR x.gender ILIKE CONCAT('%', :#{#request.q}, '%')OR x.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%'))
+                 (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
+                OR 
+                 x.email ILIKE CONCAT('%', :#{#request.q}, '%') OR x.address ILIKE CONCAT('%', :#{#request.q}, '%')
+                OR
+                 x.gender ILIKE CONCAT('%', :#{#request.q}, '%') OR x.phoneNumber ILIKE CONCAT('%', :#{#request.q}, '%'))
                 AND
-                (:status IS NULL OR x.status = :status)
-                AND(x.deleted=FALSE)
+                 (:#{#request.gender} IS NULL OR :#{#request.gender} ILIKE '' OR x.gender = :#{#request.gender})
+                AND
+                 (:#{#request.role} IS NULL OR :#{#request.role} ILIKE '' OR x.role.id = :#{#request.role})
+                AND
+                 (:status IS NULL OR x.status = :status) AND (x.deleted=FALSE)
             """)
-    Page<Employee> findAllEmployee(@Param("request") AdminEmployeeRequest request, @Param("status") EmployeeStatus status, Pageable pageable);
+    Page<Employee> findAllEmployee(@Param("request") AdminEmployeeRequest request,
+                                   @Param("status") EmployeeStatus status, Pageable pageable);
 
-    Optional<Employee> findByEmail(String email);
+    Optional<Employee> findByEmailAndDeleted(String email, Boolean deleted);
 
     Optional<Employee> findByPhoneNumber(String phoneNumber);
 
@@ -35,7 +43,8 @@ public interface AdminEmployeeRepository extends EmployeeRepository {
     Optional<Employee> findByPhoneNumber(@Param("id") String id, @Param("phoneNumber") String phoneNumber);
 
     @Query("""
-            SELECT x FROM Employee x WHERE (x.email = :email AND :email IN (SELECT y.email FROM Employee y WHERE y.id != :id))
-    """)
+                    SELECT x FROM Employee x 
+                    WHERE (x.email = :email AND :email IN (SELECT y.email FROM Employee y WHERE y.id != :id))
+            """)
     Optional<Employee> findByEmail(@Param("id") String id, @Param("email") String email);
 }

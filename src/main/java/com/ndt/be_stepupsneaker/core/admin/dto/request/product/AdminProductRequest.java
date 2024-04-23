@@ -36,11 +36,14 @@ public class AdminProductRequest extends PageableRequest {
 
     private String image;
 
-    private String minQuantity;
+    private String quantityMin;
 
-    private String maxQuantity;
+    private String quantityMax;
 
-    @NotNull(message = "Status must be not null")
+    private String priceMin;
+
+    private String priceMax;
+
     private ProductStatus status;
 
     private String tradeMark;
@@ -62,6 +65,8 @@ public class AdminProductRequest extends PageableRequest {
     private String start;
 
     private String end;
+
+    private String hasPromotion;
 
     private List<String> tradeMarks;
 

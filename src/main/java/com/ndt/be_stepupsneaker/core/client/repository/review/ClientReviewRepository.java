@@ -34,4 +34,5 @@ public interface ClientReviewRepository extends ReviewRepository {
                                                   @Param("customer") String customer);
 
     Optional<Review> findByCustomerAndId(Customer customer, String id);
+
 }

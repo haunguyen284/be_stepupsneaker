@@ -326,7 +326,7 @@ public class OrderUtil {
             return adminCustomerRepository.findById(request.getCustomer())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
         } else if (request.getCustomer() == null && request.getEmail() != null) {
-            return adminCustomerRepository.findByEmail(request.getEmail())
+            return adminCustomerRepository.findByEmailAndDeleted(request.getEmail(),false)
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("customer.notfound")));
         } else {
             return null;

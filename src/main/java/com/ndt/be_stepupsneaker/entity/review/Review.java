@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
 
 @Getter
@@ -29,6 +30,10 @@ public class Review extends PrimaryEntity {
     @JoinColumn(name = "customer_id", referencedColumnName = "id")
     @ManyToOne(fetch = FetchType.LAZY)
     private Customer customer;
+
+    @JoinColumn(name = "shop_order_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Order order;
 
     @Column(name = "comment", length = EntityProperties.LENGTH_DESCRIPTION)
     private String comment;

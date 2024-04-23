@@ -55,7 +55,7 @@ public interface ClientCustomerRepository extends CustomerRepository {
 //            "AND (v.status <> 4) AND (v.status <> 1) AND (v.quantity > 0) AND (v.deleted = FALSE )")
 //    Optional<Customer> findCustomerWithActiveVouchers(@Param("email") String email);
 
-    Optional<Customer> findByEmail(String email);
+    Optional<Customer> findByEmailAndDeleted(String email,Boolean deleted);
 
 
     @Query("""

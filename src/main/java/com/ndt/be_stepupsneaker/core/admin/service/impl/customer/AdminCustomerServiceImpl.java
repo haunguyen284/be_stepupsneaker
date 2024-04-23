@@ -81,8 +81,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     public Object create(AdminCustomerRequest customerDTO) {
         List<Address> addressList = new ArrayList<>();
-        Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getEmail());
-        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
+        Optional<Customer> customerOptional = adminCustomerRepository.findByEmailAndDeleted(customerDTO.getEmail(),false);
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmailAndDeleted(customerDTO.getEmail(),false);
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
@@ -107,7 +107,7 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     public AdminCustomerResponse update(AdminCustomerRequest customerDTO) {
 
         Optional<Customer> customerOptional = adminCustomerRepository.findByEmail(customerDTO.getId(), customerDTO.getEmail());
-        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmail(customerDTO.getEmail());
+        Optional<Employee> employeeOptional = adminEmployeeRepository.findByEmailAndDeleted(customerDTO.getEmail(),false);
         if (customerOptional.isPresent() || employeeOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }
@@ -117,7 +117,6 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
         }
         Customer customer = customerOptional.get();
         customer.setFullName(customerDTO.getFullName());
-        customer.setStatus(customerDTO.getStatus());
         customer.setGender(customerDTO.getGender());
         customer.setDateOfBirth(customerDTO.getDateOfBirth());
         customer.setEmail(customerDTO.getEmail());

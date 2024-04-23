@@ -33,9 +33,8 @@ public class AdminPaymentController {
     }
 
     @GetMapping("")
-    public Object findAllColor(AdminPaymentRequest adminPaymentRequest){
+    public Object findAllPayment(AdminPaymentRequest adminPaymentRequest){
         PageableObject<AdminPaymentResponse> listPayment = adminPaymentService.findAllEntity(adminPaymentRequest);
-
         return ResponseHelper.getResponse(listPayment, HttpStatus.OK);
     }
 

@@ -66,4 +66,10 @@ public class AdminReturnFormController {
         return ResponseHelper.getResponse(response, HttpStatus.OK);
     }
 
+    @GetMapping("/tracking/{order_code}")
+    public Object findOrderByOrderCode(@PathVariable("order_code") String code) {
+        AdminOrderResponse response = adminReturnFormService.findByCode(code);
+        return ResponseHelper.getResponse(response, HttpStatus.OK);
+    }
+
 }

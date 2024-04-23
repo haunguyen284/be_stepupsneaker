@@ -63,7 +63,6 @@ public class AdminSizeServiceImpl implements AdminSizeService {
         }
         Size newSize = optionalSize.get();
         newSize.setName(adminSizeRequest.getName());
-        newSize.setStatus(adminSizeRequest.getStatus());
         return AdminSizeMapper.INSTANCE.sizeToAdminSizeResponse(adminSizeRepository.save(newSize));
     }
 

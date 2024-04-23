@@ -1,4 +1,5 @@
 package com.ndt.be_stepupsneaker.core.client.controller.review;
+import com.ndt.be_stepupsneaker.core.admin.dto.request.order.AdminOrderDetailRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.product.ClientBrandRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.product.ClientSoleRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.request.review.ClientReviewRequest;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,12 +41,14 @@ public class ClientReviewController {
     }
 
     @PostMapping("")
-    public Object create(@RequestBody @Valid ClientReviewRequest clientReviewRequest, BindingResult bindingResult){
+    public Object create(@RequestBody List<@Valid ClientReviewRequest> reviewRequests, BindingResult bindingResult){
+
         if (bindingResult.hasErrors())
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
 
-        return ResponseHelper.getResponse(clientReviewService.create(clientReviewRequest), HttpStatus.OK);
+        return ResponseHelper.getResponse(clientReviewService.create(reviewRequests), HttpStatus.OK);
     }
+
 
     @PutMapping("/{id}")
     public Object update(@PathVariable("id")String id, @RequestBody @Valid ClientReviewRequest clientReviewRequest, BindingResult bindingResult){

@@ -182,7 +182,7 @@ public class VNPayServiceImpl implements VNPayService {
             clientPaymentRepository.save(payment);
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
-            orderUtil.createOrderHistory(order, OrderStatus.WAIT_FOR_DELIVERY, "Wai for delivery");
+            orderUtil.createOrderHistory(order, OrderStatus.WAIT_FOR_DELIVERY, messageUtil.getMessage("order.wai.for.delivery"));
             EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
             emailSampleContent.sendMailAutoInfoOrderToClient(ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order), order.getEmail());
             return clientOrderRepository.save(order);

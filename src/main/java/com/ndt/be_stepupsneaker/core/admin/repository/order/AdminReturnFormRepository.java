@@ -24,17 +24,22 @@ public interface AdminReturnFormRepository extends ReturnFormRepository {
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR rf.order.customer.email ILIKE  CONCAT('%', :#{#request.q}, '%')) 
             OR 
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR rf.order.phoneNumber ILIKE  CONCAT('%', :#{#request.q}, '%'))
-            ) 
+            ) AND 
+            (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE '' OR rf.amountToBePaid >= CAST(:#{#request.priceMin} AS int)) 
             AND 
-            ((:#{#request.returnDeliveryStatus} IS NULL) OR (rf.returnDeliveryStatus = :#{#request.returnDeliveryStatus})) 
-            AND 
-            ((:#{#request.refundStatus} IS NULL) OR (rf.refundStatus = :#{#request.refundStatus})) 
+            (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} ILIKE '' OR rf.amountToBePaid <= CAST(:#{#request.priceMax} AS int)) 
             AND 
             ((:#{#request.paymentType} IS NULL) OR (:#{#request.paymentType} ILIKE '') OR (rf.paymentType = :#{#request.paymentType})) 
             AND 
+            (:employeeId IS NULL OR :employeeId ILIKE '' OR rf.employee.id = :employeeId) 
+            AND 
             rf.deleted=false 
             """)
-    Page<ReturnForm> findAllReturnForm(@Param("request") AdminReturnFormRequest request, Pageable pageable);
+    Page<ReturnForm> findAllReturnForm(
+            @Param("request") AdminReturnFormRequest request,
+            @Param("employeeId") String employeeId,
+            Pageable pageable
+    );
 
     @Query("""
     SELECT rf FROM ReturnForm rf WHERE rf.order.id = :orderId

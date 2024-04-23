@@ -36,12 +36,15 @@ public interface AdminOrderRepository extends OrderRepository {
             AND
             (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} = 0 OR o.totalMoney <= :#{#request.priceMax})
             AND
+            (:employee IS NULL OR :employee ILIKE '' OR o.employee.id = :employee OR o.employee IS NULL)
+            AND
             o.deleted=false 
             """)
     Page<Order> findAllOrder(
             @Param("request") AdminOrderRequest request,
             @Param("status") OrderStatus status,
             @Param("type") OrderType type,
+            @Param("employee") String  employee,
             Pageable pageable
     );
 
@@ -58,10 +61,10 @@ public interface AdminOrderRepository extends OrderRepository {
                     extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
                     SUM(total_money) AS value
                 FROM
-                    shop_order
+                    payment
                 WHERE
                     deleted = false AND
-                    status = 4 AND
+                    payment_status = 1 AND
                     created_at >= :start AND
                     created_at <= :end
                 GROUP BY
@@ -93,5 +96,7 @@ public interface AdminOrderRepository extends OrderRepository {
             nativeQuery = true
     )
     List<Statistic> getDailyOrderBetween(@Param("start") Long start, @Param("end") Long end);
+
+    Optional<Order> findByCodeAndStatus(String code, OrderStatus status);
 
 }

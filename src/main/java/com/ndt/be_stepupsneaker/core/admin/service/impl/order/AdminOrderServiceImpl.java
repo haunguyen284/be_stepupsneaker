@@ -60,7 +60,6 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     private final AdminOrderRepository adminOrderRepository;
     private final AdminOrderHistoryRepository adminOrderHistoryRepository;
-    private final AdminCustomerRepository adminCustomerRepository;
     private final AdminAddressRepository adminAddressRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
     private final AdminVoucherRepository adminVoucherRepository;
@@ -78,8 +77,15 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
+        Employee employee = adminEmployeeRepository
+                .findById(mySessionInfo.getCurrentEmployee().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
+        String employeeId = "";
+        if (!employee.getRole().getName().contains(EntityProperties.ADMIN)) {
+            employeeId = employee.getId();
+        }
         Pageable pageable = paginationUtil.pageable(orderRequest);
-        Page<Order> resp = adminOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), orderRequest.getType(), pageable);
+        Page<Order> resp = adminOrderRepository.findAllOrder(orderRequest, orderRequest.getStatus(), orderRequest.getType(), employeeId, pageable);
         Page<AdminOrderResponse> adminPaymentResponses = resp.map(AdminOrderMapper.INSTANCE::orderToAdminOrderResponse);
         return new PageableObject<>(adminPaymentResponses);
     }
@@ -128,8 +134,21 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         List<OrderDetail> orderDetailsRemove = new ArrayList<>();
         for (AdminCartItemRequest cartItemRequest : orderRequest.getCartItems()) {
             Optional<OrderDetail> orderDetailOptional = adminOrderDetailRepository.findById(cartItemRequest.getId());
-            if (orderDetailOptional.isEmpty()) {
+            if (orderDetailOptional.isEmpty() && !cartItemRequest.getId().equals("")) {
                 throw new ResourceNotFoundException(messageUtil.getMessage("order.order_detail.notfound"));
+            }
+            if ((cartItemRequest.getId() == null || cartItemRequest.getId().equals(""))
+                    && cartItemRequest.getProductDetailId() != null) {
+                ProductDetail productDetail = adminProductDetailRepository.findById(cartItemRequest.getProductDetailId())
+                        .orElseThrow(() -> new ResourceNotFoundException("product.product_detail.notfound"));
+                if (cartItemRequest.getQuantity() > productDetail.getQuantity()) {
+                    throw new ApiException(messageUtil.getMessage("order.not_enough_quantity"));
+                }
+                OrderDetail orderDetail = orderUtil.createOrderDetail(productDetail, orderSave, cartItemRequest.getQuantity(), productDetail.getPrice());
+                orderDetailsUpdate.add(orderDetail);
+                productDetail.setQuantity(productDetail.getQuantity() - cartItemRequest.getQuantity());
+                productDetailsUpdate.add(productDetail);
+                continue;
             }
             OrderDetail orderDetailUpdate = orderDetailOptional.get();
             ProductDetail productDetailUpdate = orderDetailUpdate.getProductDetail();
@@ -279,11 +298,18 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 adminVoucherRepository.save(voucher);
             }
             orderUtil.revertQuantityProductDetailWhenCancelOrder(orderSave);
+            List<Payment> newPayments = new ArrayList<>();
+            List<Payment> payments = orderSave.getPayments();
+            for (Payment payment:payments){
+                payment.setTransactionCode("Đã hủy");
+                newPayments.add(payment);
+            }
+            adminPaymentRepository.saveAll(newPayments);
         }
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
             Payment payment = orderSave.getPayments().get(0);
             payment.setPaymentStatus(PaymentStatus.COMPLETED);
-            if(payment.getPaymentMethod().getName().equals("Cash")){
+            if (payment.getPaymentMethod().getName().equals("Cash")) {
                 payment.setTransactionCode("Đã thanh toán");
             }
             adminPaymentRepository.save(payment);
@@ -293,7 +319,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
         EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Đơn hàng của bạn vừa thay đổi trạng thái!";
-        emailSampleContent.sendMailAutoOrder(newOrder, adminOrderResponse.getEmail(),subject);
+        emailSampleContent.sendMailAutoOrder(newOrder, adminOrderResponse.getEmail(), subject);
         return adminOrderResponse;
     }
 
@@ -355,7 +381,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order newOrder = adminOrderRepository.save(orderUpdate);
         newOrder.setStatus(OrderStatus.WAIT_FOR_DELIVERY);
         orderUtil.createVoucherHistory(newOrder);
-        if (orderRequest.isCOD() == true) {
+        if (orderRequest.getIsCOD() == true) {
             PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Cash")
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
             Payment payment = new Payment();
@@ -371,7 +397,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         Optional<OrderHistory> existingOrderHistoryOptional = adminOrderHistoryRepository.findByOrder_IdAndActionStatus(newOrder.getId(), newOrder.getStatus());
         if (existingOrderHistoryOptional.isEmpty()) {
-                orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, "Order was created");
+            orderUtil.createOrderHistory(newOrder, OrderStatus.WAIT_FOR_DELIVERY, messageUtil.getMessage("order.was.created"));
         }
         EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Thông tin đơn hàng của bạn từ Step Up Sneaker";
@@ -432,6 +458,13 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(adminOrderRepository.save(order));
     }
 
+    @Override
+    public AdminOrderResponse findByCode(String code) {
+        Order order = adminOrderRepository.findByCode(code)
+                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+        return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
+    }
+
 
     private List<AdminOrderHistoryResponse> createOrderHistory(Order order, OrderStatus orderStatus, String orderHistoryNote) {
         List<AdminOrderHistoryResponse> clientOrderHistoryResponses = new ArrayList<>();
@@ -483,7 +516,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             Payment payment = new Payment();
             payment.setOrder(order);
             payment.setPaymentMethod(paymentMethod);
-            payment.setTotalMoney(paymentRequest.getTotalMoney());
+            payment.setTotalMoney(order.getTotalMoney());
             if (paymentMethod.getName().equals("Cash")) {
                 payment.setTransactionCode("Cash");
             } else {

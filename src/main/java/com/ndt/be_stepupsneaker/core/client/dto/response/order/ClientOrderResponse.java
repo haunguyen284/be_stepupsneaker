@@ -3,7 +3,10 @@ package com.ndt.be_stepupsneaker.core.client.dto.response.order;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientAddressResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.payment.ClientPaymentResponse;
+import com.ndt.be_stepupsneaker.core.client.dto.response.review.ClientReviewResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.voucher.ClientVoucherResponse;
+import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
+import com.ndt.be_stepupsneaker.entity.review.Review;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderType;
 import lombok.AllArgsConstructor;
@@ -12,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -68,6 +72,10 @@ public class ClientOrderResponse {
     private List<ClientOrderHistoryResponse> orderHistories;
 
     private List<ClientPaymentResponse> payments;
+
+    private List<ClientReviewResponse> reviews;
+
+    private Set<ClientOrderDetailResponse> orderDetailToReview;
 
 
 }

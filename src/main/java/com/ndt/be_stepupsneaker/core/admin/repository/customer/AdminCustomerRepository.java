@@ -35,7 +35,9 @@ public interface AdminCustomerRepository extends CustomerRepository {
                 AND
                 (:status IS NULL OR x.status = :status)
                 AND
-                (:#{#request.dateOfBirth} IS NULL OR x.dateOfBirth = :#{#request.dateOfBirth})
+                (:#{#request.startDate} IS NULL OR :#{#request.endDate} IS NULL OR x.dateOfBirth BETWEEN :#{#request.startDate} AND :#{#request.endDate})
+                AND
+                (:#{#request.gender} IS NULL OR :#{#request.gender} ILIKE '' OR x.gender = :#{#request.gender})
                 AND
                 (:voucher IS NULL OR :voucher ILIKE '' OR x.id IN (SELECT o.customer.id FROM CustomerVoucher o WHERE o.voucher.id = :voucher))
                 AND
@@ -48,10 +50,12 @@ public interface AdminCustomerRepository extends CustomerRepository {
                                    @Param("noVoucher") String noVoucher,
                                    @Param("status") CustomerStatus status, Pageable pageable);
 
-    Optional<Customer> findByEmail(String email);
+    Optional<Customer> findByEmailAndDeleted(String email, Boolean deleted);
 
     @Query("""
-            SELECT x FROM Customer x WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id'))
+            SELECT x FROM Customer x 
+            WHERE (x.email = :email AND :email IN ('SELECT y.email FROM Customer y WHERE y.id != :id')
+            AND x.deleted = FALSE )
             """)
     Optional<Customer> findByEmail(@Param("id") String id, @Param("email") String email);
 

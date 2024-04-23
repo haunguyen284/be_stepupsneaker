@@ -36,7 +36,7 @@ public class MySessionInfo {
         if (customer == null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
-            customer = clientCustomerRepository.findByEmail(userName).orElse(null);
+            customer = clientCustomerRepository.findByEmailAndDeleted(userName,false).orElse(null);
             if (customer != null) {
                 List<CustomerVoucher> validCustomerVouchers = customer.getCustomerVoucherList().stream()
                         .filter(customerVoucher -> {
@@ -61,7 +61,7 @@ public class MySessionInfo {
         if (employee == null) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userName = authentication.getName();
-            employee = adminEmployeeRepository.findByEmail(userName).orElse(null);
+            employee = adminEmployeeRepository.findByEmailAndDeleted(userName,false).orElse(null);
         }
         return AdminEmployeeMapper.INSTANCE.employeeToAdminEmpolyeeResponse(employee);
     }

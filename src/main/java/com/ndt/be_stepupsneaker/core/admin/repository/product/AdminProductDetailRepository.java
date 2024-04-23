@@ -45,6 +45,10 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     AND 
     ((:status IS NULL) OR (x.status = :status)) 
     AND 
+    (:#{#request.quantityMin} IS NULL OR :#{#request.quantityMin} ILIKE '' OR x.quantity >= CAST(:#{#request.quantityMin} AS int)) 
+    AND 
+    (:#{#request.quantityMax} IS NULL OR :#{#request.quantityMax} ILIKE '' OR x.quantity <= CAST(:#{#request.quantityMax} AS int)) 
+    AND 
     (
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.product.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
      OR 
@@ -61,6 +65,12 @@ public interface AdminProductDetailRepository extends ProductDetailRepository {
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.style.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
      OR 
     (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR x.tradeMark.name ILIKE  CONCAT('%', :#{#request.q}, '%'))
+    ) 
+    AND 
+    (
+    (:#{#request.hasPromotion} IS NULL OR :#{#request.hasPromotion} ILIKE '' OR (:#{#request.hasPromotion} = 'true' AND x.id IN (SELECT pp.productDetail.id FROM PromotionProductDetail pp WHERE pp.promotion.status = 0))) 
+    OR 
+    (:#{#request.hasPromotion} IS NULL OR :#{#request.hasPromotion} ILIKE '' OR (:#{#request.hasPromotion} = 'false' AND x.id NOT IN (SELECT pp.productDetail.id FROM PromotionProductDetail pp WHERE pp.promotion.status = 0)))
     ) 
     AND 
     x.deleted=false 

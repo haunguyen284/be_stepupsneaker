@@ -32,6 +32,8 @@ public class AdminReturnFormResponse {
 
     private String code;
 
+    private String email;
+
     private float amountToBePaid;
 
     private ReturnFormType type;

@@ -41,10 +41,15 @@ public class SecurityConfiguration {
                                         "/admin/notifications", "/client/transaction/**", "/client/orders/**",
                                         "/client/return-forms/code/**")
                                 .permitAll()
+                                .requestMatchers(HttpMethod.POST, "/client/return-forms/**")
+                                .permitAll()
                                 .requestMatchers("/admin/customers/**"
                                         , "/admin/orders/**"
-                                        , "/admin/order-details/**", "/admin/statistic/**"
-                                        ,"/admin/return-forms/**")
+                                        , "/admin/order-details/**"
+                                        , "/admin/statistic/**"
+                                        ,"/admin/return-forms/**"
+                                        ,"/admin/notifications/**"
+                                        ,"/admin/addresses/**")
                                 .hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
                                 .requestMatchers(HttpMethod.GET
                                         , "/admin/order-histories/**", "/admin/voucher-histories/**"

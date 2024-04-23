@@ -39,7 +39,7 @@ public class AdminPaymentServiceImpl implements AdminPaymentService {
     @Override
     public PageableObject<AdminPaymentResponse> findAllEntity(AdminPaymentRequest paymentRequest) {
         Pageable pageable = paginationUtil.pageable(paymentRequest);
-        Page<Payment> resp = adminPaymentRepository.findAll(pageable);
+        Page<Payment> resp = adminPaymentRepository.findAllPayment(paymentRequest,paymentRequest.getStatus(),pageable);
         Page<AdminPaymentResponse> adminPaymentResponses = resp.map(AdminPaymentMapper.INSTANCE::paymentToAdminPaymentResponse);
         return new PageableObject<>(adminPaymentResponses);
     }

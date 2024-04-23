@@ -19,20 +19,26 @@ public interface AdminReviewRepository extends ReviewRepository {
     @Query("""
             SELECT x FROM Review x 
             WHERE (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' 
-            OR x.productDetail.product.name ILIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.product.code ILIKE  CONCAT('%', :#{#request.q}, '%') 
-            OR x.productDetail.product.description ILIKE  CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.brand.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.style.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.tradeMark.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.color.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.sole.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.size.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.productDetail.material.name ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.comment ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.fullName ILIKE CONCAT('%', :#{#request.q}, '%')
-            OR x.customer.email ILIKE CONCAT('%', :#{#request.q}, '%'))
-            AND x.status != 2 AND x.deleted = FALSE
+            OR 
+            x.productDetail.product.name ILIKE  CONCAT('%', :#{#request.q}, '%') OR x.productDetail.product.code ILIKE  CONCAT('%', :#{#request.q}, '%') 
+            OR
+            x.productDetail.brand.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.productDetail.style.name ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR
+            x.productDetail.tradeMark.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.productDetail.color.name ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR
+            x.productDetail.sole.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.productDetail.size.name ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR 
+            x.productDetail.material.name ILIKE CONCAT('%', :#{#request.q}, '%') OR x.comment ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR 
+            x.customer.fullName ILIKE CONCAT('%', :#{#request.q}, '%') OR x.customer.email ILIKE CONCAT('%', :#{#request.q}, '%')
+            OR 
+            x.rating = :#{#request.rating}) 
+            AND
+            (:#{#request.rating} IS NULL OR :#{#request.rating} = 0.0 OR x.rating = :#{#request.rating})
+            AND
+            (:#{#request.hasMedia} IS NULL OR (:#{#request.hasMedia} = true AND (x.urlImage IS NOT NULL OR x.urlImage != '' )) OR (:#{#request.hasMedia} = false AND (x.urlImage IS NULL OR x.urlImage = '')))
+            AND
+            x.status != 2 AND x.deleted = FALSE
             """)
     Page<Review> findAllReview(@Param("request") AdminReviewRequest request, Pageable pageable);
 

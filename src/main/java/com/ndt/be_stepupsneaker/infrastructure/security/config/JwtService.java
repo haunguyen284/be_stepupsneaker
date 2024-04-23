@@ -37,8 +37,8 @@ public class JwtService {
     private final MessageUtil messageUtil;
 
     public String generateToken(UserDetails userDetails) {
-        Optional<Employee> optionalEmployee = adminEmployeeRepository.findByEmail(userDetails.getUsername());
-        Optional<Customer> optionalCustomer = adminCustomerRepository.findByEmail(userDetails.getUsername());
+        Optional<Employee> optionalEmployee = adminEmployeeRepository.findByEmailAndDeleted(userDetails.getUsername(),false);
+        Optional<Customer> optionalCustomer = adminCustomerRepository.findByEmailAndDeleted(userDetails.getUsername(),false);
         Map<String, Object> extraClaims = new HashMap<>();
         if (optionalCustomer.isPresent()) {
             extraClaims.put("id", optionalCustomer.get().getId());

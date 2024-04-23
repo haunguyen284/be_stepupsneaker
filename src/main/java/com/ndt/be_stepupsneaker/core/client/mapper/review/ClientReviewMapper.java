@@ -19,6 +19,7 @@ public interface ClientReviewMapper {
     ClientReviewResponse reviewToClientReviewResponse(Review  review);
 
     @Mapping(target = "productDetail.id", source = "productDetail")
+    @Mapping(target = "order.id", source = "order")
 //    @Mapping(target = "customer.id", source = "customer")
     Review clientReviewRequestToReview(ClientReviewRequest clientReviewRequest);
 }

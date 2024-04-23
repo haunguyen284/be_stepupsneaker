@@ -1,9 +1,12 @@
 package com.ndt.be_stepupsneaker.core.client.service.impl.review;
+
+import com.ndt.be_stepupsneaker.core.admin.mapper.order.AdminOrderDetailMapper;
 import com.ndt.be_stepupsneaker.core.client.dto.request.review.ClientReviewRequest;
 import com.ndt.be_stepupsneaker.core.client.dto.response.customer.ClientCustomerResponse;
 import com.ndt.be_stepupsneaker.core.client.dto.response.review.ClientReviewResponse;
 import com.ndt.be_stepupsneaker.core.client.mapper.review.ClientReviewMapper;
 import com.ndt.be_stepupsneaker.core.client.repository.customer.ClientCustomerRepository;
+import com.ndt.be_stepupsneaker.core.client.repository.order.ClientOrderRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.product.ClientProductDetailRepository;
 import com.ndt.be_stepupsneaker.core.client.repository.review.ClientReviewRepository;
 import com.ndt.be_stepupsneaker.core.client.service.review.ClientReviewService;
@@ -13,6 +16,7 @@ import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.review.Review;
+import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReviewStatus;
 import com.ndt.be_stepupsneaker.infrastructure.exception.ResourceNotFoundException;
 import com.ndt.be_stepupsneaker.infrastructure.security.session.MySessionInfo;
@@ -24,8 +28,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +40,7 @@ public class ClientReviewServiceImpl implements ClientReviewService {
     private final ClientReviewRepository clientReviewRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final ClientProductDetailRepository clientProductDetailRepository;
+    private final ClientOrderRepository clientOrderRepository;
     private final CloudinaryUpload cloudinaryUpload;
     private final MySessionInfo mySessionInfo;
     private final PaginationUtil paginationUtil;
@@ -58,30 +65,7 @@ public class ClientReviewServiceImpl implements ClientReviewService {
 
     @Override
     public Object create(ClientReviewRequest request) {
-        Customer customer = getCustomer();
-        ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail())
-                .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
-        List<Order> orders = customer.getOrders();
-        List<ProductDetail> productDetails = new ArrayList<>();
-
-        for (Order order : orders) {
-            List<OrderDetail> orderDetails = order.getOrderDetails();
-            for (OrderDetail orderDetail : orderDetails) {
-                productDetails.add(orderDetail.getProductDetail());
-            }
-        }
-        if (!productDetails.contains(productDetail)) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
-        }
-        if (request.getUrlImage() != null) {
-            request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
-        }
-        Review review = ClientReviewMapper.INSTANCE.clientReviewRequestToReview(request);
-        review.setCustomer(customer);
-        review.setProductDetail(productDetail);
-        review.setStatus(ReviewStatus.WAITING);
-        return ClientReviewMapper.INSTANCE.reviewToClientReviewResponse(clientReviewRepository.save(review));
-
+        throw new ResourceNotFoundException("API not support");
     }
 
     @Override
@@ -117,6 +101,65 @@ public class ClientReviewServiceImpl implements ClientReviewService {
         review.setDeleted(true);
         clientReviewRepository.save(review);
         return true;
+    }
+
+
+    @Override
+    public List<ClientReviewResponse> create(List<ClientReviewRequest> reviewRequests) {
+        List<Review> reviews = new ArrayList<>();
+        for (ClientReviewRequest request : reviewRequests) {
+            Customer customer = getCustomer();
+            ProductDetail productDetail = clientProductDetailRepository.findById(request.getProductDetail())
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("product.product_detail.notfound")));
+            List<Order> orders = customer.getOrders();
+            Order constOrder = null;
+            if (request.getOrder() == null || request.getOrder().equals("")) {
+                boolean isCheck = false;
+                for (Order order : orders) {
+                    List<OrderDetail> orderDetails = order.getOrderDetails();
+                    for (OrderDetail orderDetail : orderDetails) {
+                        if (orderDetail.getProductDetail() == productDetail) {
+                            isCheck = true;
+                            constOrder = order;
+                            break;
+                        }
+                    }
+                    if (isCheck) {
+                        break;
+                    }
+                }
+                if (isCheck) {
+                    if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                        throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+
+                    }
+                } else {
+                    throw new ResourceNotFoundException(messageUtil.getMessage("review_message"));
+
+                }
+
+                constOrder = null;
+            } else {
+                constOrder = clientOrderRepository.findById(request.getOrder())
+                        .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
+                if (constOrder.getStatus() != OrderStatus.COMPLETED) {
+                    throw new ResourceNotFoundException(messageUtil.getMessage("review.status.not.completed"));
+                }
+            }
+            if (request.getUrlImage() != null) {
+                request.setUrlImage(cloudinaryUpload.upload(request.getUrlImage()));
+            }
+            Review review = ClientReviewMapper.INSTANCE.clientReviewRequestToReview(request);
+            review.setOrder(constOrder);
+            review.setCustomer(customer);
+            review.setProductDetail(productDetail);
+            review.setStatus(ReviewStatus.WAITING);
+            reviews.add(review);
+        }
+        return clientReviewRepository.saveAll(reviews)
+                .stream()
+                .map(ClientReviewMapper.INSTANCE::reviewToClientReviewResponse)
+                .collect(Collectors.toList());
     }
 
     private Customer getCustomer() {

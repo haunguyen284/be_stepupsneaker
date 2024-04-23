@@ -51,6 +51,13 @@ public class AdminProductController {
         return ResponseHelper.getResponse(adminProductResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/code/{code}")
+    public Object findByCode(@PathVariable("code")String code){
+        AdminProductResponse adminProductResponse = adminProductService.findByCode(code);
+
+        return ResponseHelper.getResponse(adminProductResponse, HttpStatus.OK);
+    }
+
     @PostMapping("")
     public Object create(@RequestBody @Valid AdminProductRequest colorDTO, BindingResult bindingResult) throws IOException {
         if (bindingResult.hasErrors())

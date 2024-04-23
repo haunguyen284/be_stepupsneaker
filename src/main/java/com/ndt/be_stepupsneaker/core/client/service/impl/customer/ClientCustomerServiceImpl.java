@@ -60,7 +60,7 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
 
     @Override
     public Object create(ClientCustomerRequest customerDTO) {
-        Optional<Customer> customerOptional = clientCustomerRepository.findByEmail(customerDTO.getEmail());
+        Optional<Customer> customerOptional = clientCustomerRepository.findByEmailAndDeleted(customerDTO.getEmail(),false);
         if (customerOptional.isPresent()) {
             throw new ApiException(messageUtil.getMessage("address.email.exist"));
         }

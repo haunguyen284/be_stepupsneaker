@@ -48,6 +48,12 @@ public class AdminPromotionController {
         return ResponseHelper.getResponse(adminPromotionService.update(request), HttpStatus.OK);
     }
 
+    @PutMapping("/deactivate-discount/{id}")
+    public Object deactivateDiscount(@PathVariable("id") String id) {
+        AdminPromotionResponse adminPromotionResponse = adminPromotionService.deactivateDiscount(id);
+        return ResponseHelper.getResponse(adminPromotionResponse, HttpStatus.OK);
+    }
+
     @DeleteMapping("/{id}")
     public Object delete(@PathVariable("id") String id) {
         return ResponseHelper.getResponse(adminPromotionService.delete(id), HttpStatus.OK);

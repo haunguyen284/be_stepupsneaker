@@ -31,11 +31,11 @@ public class Employee extends PrimaryEntity implements UserDetails {
     @ManyToOne(fetch = FetchType.EAGER)
     private Role role;
 
-    @Column(name = "full_name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
+    @Column(name = "full_name", length = EntityProperties.LENGTH_NAME, nullable = false)
     @Nationalized
     private String fullName;
 
-    @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false, unique = true)
+    @Column(name = "email", length = EntityProperties.LENGTH_EMAIL, nullable = false)
     private String email;
 
     @Column(name = "password", length = EntityProperties.LENGTH_PASSWORD, nullable = false)

@@ -11,6 +11,8 @@ public class AdminCartItemRequest {
     @NotNull(message = "{cart_item.id.not_null}")
     private String id;
 
+    private String productDetailId;
+
     @NotNull(message = "{cart_item.quantity.not_null}")
     private int quantity;
 }

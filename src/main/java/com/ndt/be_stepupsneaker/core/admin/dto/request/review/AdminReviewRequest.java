@@ -24,4 +24,6 @@ public class AdminReviewRequest extends PageableRequest {
     //filter
     private String product;
 
+    private Boolean hasMedia;
+
 }
