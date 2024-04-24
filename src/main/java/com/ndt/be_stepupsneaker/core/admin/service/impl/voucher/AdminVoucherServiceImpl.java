@@ -124,7 +124,16 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     @Override
     public AdminVoucherResponse deactivateDiscount(String id) {
         Voucher voucher = getVoucher(id);
-        voucher.setStatus(VoucherStatus.CANCELLED);
+        if (voucher.getStatus() == VoucherStatus.EXPIRED
+                || voucher.getStatus() == VoucherStatus.IN_ACTIVE
+                || voucher.getStatus() == VoucherStatus.UP_COMING) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.status"));
+        }
+        if (voucher.getStatus() == VoucherStatus.ACTIVE) {
+            voucher.setStatus(VoucherStatus.CANCELLED);
+        } else {
+            voucher.setStatus(VoucherStatus.ACTIVE);
+        }
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(adminVoucherRepository.save(voucher));
     }
 

@@ -52,9 +52,18 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     }
 
     @Override
-    public AdminPromotionResponse deactivateDiscount(String  id) {
+    public AdminPromotionResponse deactivateDiscount(String id) {
         Promotion promotion = getPromotion(id);
-        promotion.setStatus(VoucherStatus.CANCELLED);
+        if (promotion.getStatus() == VoucherStatus.EXPIRED
+                || promotion.getStatus() == VoucherStatus.IN_ACTIVE
+                || promotion.getStatus() == VoucherStatus.UP_COMING) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.status"));
+        }
+        if (promotion.getStatus() == VoucherStatus.ACTIVE) {
+            promotion.setStatus(VoucherStatus.CANCELLED);
+        } else {
+            promotion.setStatus(VoucherStatus.ACTIVE);
+        }
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(promotion));
     }
 
