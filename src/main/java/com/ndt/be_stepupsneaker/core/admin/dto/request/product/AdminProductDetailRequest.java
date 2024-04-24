@@ -49,6 +49,8 @@ public class AdminProductDetailRequest extends PageableRequest {
 
     private int isInPromotion=1;
 
+    private String hasPromotion;
+
     private String image;
 
     @Min(value = 1, message = "{product_detail.price.min}")

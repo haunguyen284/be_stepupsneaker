@@ -54,7 +54,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     @Override
     public AdminPromotionResponse deactivateDiscount(String  id) {
         Promotion promotion = getPromotion(id);
-        promotion.setStatus(VoucherStatus.IN_ACTIVE);
+        promotion.setStatus(VoucherStatus.CANCELLED);
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(promotion));
     }
 
