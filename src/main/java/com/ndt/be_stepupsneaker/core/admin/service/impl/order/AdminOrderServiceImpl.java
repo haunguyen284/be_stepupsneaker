@@ -47,6 +47,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -292,28 +293,36 @@ public class AdminOrderServiceImpl implements AdminOrderService {
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("employee.notfound")));
         orderSave.setEmployee(employee);
         Voucher voucher = orderSave.getVoucher();
+        List<Payment> newPayments = new ArrayList<>();
+        List<Payment> payments = orderSave.getPayments();
         if (orderSave.getStatus() == OrderStatus.CANCELED) {
             if (voucher != null) {
                 voucher.setQuantity(voucher.getQuantity() + 1);
                 adminVoucherRepository.save(voucher);
             }
             orderUtil.revertQuantityProductDetailWhenCancelOrder(orderSave);
-            List<Payment> newPayments = new ArrayList<>();
-            List<Payment> payments = orderSave.getPayments();
-            for (Payment payment:payments){
-                payment.setTransactionCode("Đã hủy");
-                newPayments.add(payment);
+            for (Payment payment : payments) {
+                if (payment.getPaymentStatus() == PaymentStatus.COMPLETED && (!payment.getTransactionCode().equals("Change")||!payment.getTransactionCode().equals("Tiền thừa"))) {
+                    PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Transfer")
+                            .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
+                    Payment cancelPayment = new Payment();
+                    cancelPayment.setOrder(orderSave);
+                    cancelPayment.setPaymentStatus(PaymentStatus.COMPLETED);
+                    cancelPayment.setPaymentMethod(paymentMethod);
+                    cancelPayment.setTransactionCode(adminOrderRequest.getOrderHistoryNote());
+                    cancelPayment.setTotalMoney(-(orderSave.getTotalMoney()));
+                    newPayments.add(cancelPayment);
+                    break;
+                }
             }
-            adminPaymentRepository.saveAll(newPayments);
         }
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
-            Payment payment = orderSave.getPayments().get(0);
-            payment.setPaymentStatus(PaymentStatus.COMPLETED);
-            if (payment.getPaymentMethod().getName().equals("Cash")) {
-                payment.setTransactionCode("Đã thanh toán");
+            for (Payment paymentCompleted : payments) {
+                paymentCompleted.setPaymentStatus(PaymentStatus.COMPLETED);
+                newPayments.add(paymentCompleted);
             }
-            adminPaymentRepository.save(payment);
         }
+        adminPaymentRepository.saveAll(newPayments);
         Order newOrder = adminOrderRepository.save(orderSave);
         createOrderHistory(newOrder, adminOrderRequest.getStatus(), adminOrderRequest.getOrderHistoryNote());
         AdminOrderResponse adminOrderResponse = AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(newOrder);
@@ -389,7 +398,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             payment.setPaymentMethod(paymentMethod);
             payment.setDescription(newOrder.getNote());
             payment.setTotalMoney(newOrder.getTotalMoney());
-            payment.setTransactionCode("Cash");
+            payment.setTransactionCode(messageUtil.getMessage("payment.method.cash"));
             payment.setPaymentStatus(PaymentStatus.PENDING);
             adminPaymentRepository.save(payment);
         } else {
@@ -510,20 +519,33 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     private List<AdminPaymentResponse> createPayment(Order order, AdminOrderRequest orderRequest) {
         List<Payment> payments = new ArrayList<>();
+        float totalPayment = 0.0f;
         for (AdminPaymentRequest paymentRequest : orderRequest.getPayments()) {
             PaymentMethod paymentMethod = adminPaymentMethodRepository.findById(paymentRequest.getPaymentMethod())
                     .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
             Payment payment = new Payment();
             payment.setOrder(order);
             payment.setPaymentMethod(paymentMethod);
-            payment.setTotalMoney(order.getTotalMoney());
+            payment.setTotalMoney(paymentRequest.getTotalMoney());
             if (paymentMethod.getName().equals("Cash")) {
-                payment.setTransactionCode("Cash");
+                payment.setTransactionCode(messageUtil.getMessage("payment.method.cash"));
             } else {
                 payment.setTransactionCode(paymentRequest.getTransactionCode());
             }
             payment.setPaymentStatus(PaymentStatus.COMPLETED);
             payment.setDescription(order.getNote());
+            totalPayment += payment.getTotalMoney();
+            payments.add(payment);
+        }
+        if (totalPayment > order.getTotalMoney()) {
+            PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Transfer")
+                    .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
+            Payment payment = new Payment();
+            payment.setOrder(order);
+            payment.setPaymentMethod(paymentMethod);
+            payment.setTransactionCode(messageUtil.getMessage("money.change"));
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+            payment.setTotalMoney(-(totalPayment - order.getTotalMoney()));
             payments.add(payment);
         }
         List<AdminPaymentResponse> adminPaymentResponses = adminPaymentRepository.saveAll(payments)
