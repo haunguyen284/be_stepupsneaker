@@ -56,12 +56,12 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse deactivateDiscount(String id) {
         Promotion promotion = getPromotion(id);
         VoucherStatus status = promotion.getStatus();
-        if (status== VoucherStatus.EXPIRED
+        if (status == VoucherStatus.EXPIRED
                 || status == VoucherStatus.IN_ACTIVE
                 || status == VoucherStatus.UP_COMING) {
             throw new ResourceNotFoundException(messageUtil.getMessage("voucher.status"));
         }
-        if (status== VoucherStatus.ACTIVE) {
+        if (status == VoucherStatus.ACTIVE) {
             promotion.setStatus(VoucherStatus.CANCELLED);
         } else {
             promotion.setStatus(VoucherStatus.ACTIVE);
