@@ -8,7 +8,7 @@ services:
       - "8080:8080"
     container_name: sus_be
     environment:
-      - SPRING_DATASOURCE_URl=jdbc:postgresql://db:5432/datn_step_up_sneaker
+      - SPRING_DATASOURCE_URl=jdbc:postgresql://209.97.162.87:5432/datn_step_up_sneaker
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=100301
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
