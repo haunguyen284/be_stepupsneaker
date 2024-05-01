@@ -36,9 +36,13 @@ public class AdminProductRequest extends PageableRequest {
 
     private String image;
 
-    private String minQuantity;
+    private String quantityMin;
 
-    private String maxQuantity;
+    private String quantityMax;
+
+    private String priceMin;
+
+    private String priceMax;
 
     private ProductStatus status;
 
@@ -61,6 +65,8 @@ public class AdminProductRequest extends PageableRequest {
     private String start;
 
     private String end;
+
+    private String hasPromotion;
 
     private List<String> tradeMarks;
 

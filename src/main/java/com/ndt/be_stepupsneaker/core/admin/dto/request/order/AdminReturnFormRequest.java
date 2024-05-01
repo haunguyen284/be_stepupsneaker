@@ -33,6 +33,10 @@ public class AdminReturnFormRequest extends PageableRequest {
 
     private Set<AdminReturnFormDetailRequest> returnFormDetails;
 
+    private String priceMin;
+
+    private String priceMax;
+
     private String note;
 
 }

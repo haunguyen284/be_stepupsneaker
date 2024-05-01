@@ -12,6 +12,7 @@ import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Promotion;
 import com.ndt.be_stepupsneaker.entity.voucher.PromotionProductDetail;
+import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherStatus;
 import com.ndt.be_stepupsneaker.infrastructure.scheduled.ScheduledService;
@@ -52,9 +53,19 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     }
 
     @Override
-    public AdminPromotionResponse deactivateDiscount(String  id) {
+    public AdminPromotionResponse deactivateDiscount(String id) {
         Promotion promotion = getPromotion(id);
-        promotion.setStatus(VoucherStatus.IN_ACTIVE);
+        VoucherStatus status = promotion.getStatus();
+        if (status == VoucherStatus.EXPIRED
+                || status == VoucherStatus.IN_ACTIVE
+                || status == VoucherStatus.UP_COMING) {
+            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.status"));
+        }
+        if (status == VoucherStatus.ACTIVE) {
+            promotion.setStatus(VoucherStatus.CANCELLED);
+        } else {
+            promotion.setStatus(VoucherStatus.ACTIVE);
+        }
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(promotion));
     }
 

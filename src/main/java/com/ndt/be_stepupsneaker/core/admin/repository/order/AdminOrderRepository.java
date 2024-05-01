@@ -61,10 +61,10 @@ public interface AdminOrderRepository extends OrderRepository {
                     extract(epoch from date_trunc('day', to_timestamp(created_at/1000))) AS date,
                     SUM(total_money) AS value
                 FROM
-                    shop_order
+                    payment
                 WHERE
                     deleted = false AND
-                    status = 4 AND
+                    payment_status = 1 AND
                     created_at >= :start AND
                     created_at <= :end
                 GROUP BY

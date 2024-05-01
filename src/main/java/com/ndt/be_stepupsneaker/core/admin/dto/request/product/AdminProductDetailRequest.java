@@ -49,6 +49,8 @@ public class AdminProductDetailRequest extends PageableRequest {
 
     private int isInPromotion=1;
 
+    private String hasPromotion;
+
     private String image;
 
     @Min(value = 1, message = "{product_detail.price.min}")
@@ -61,9 +63,9 @@ public class AdminProductDetailRequest extends PageableRequest {
     @Min(value = 1, message = "{product_detail.quantity.min}")
     private int quantity;
 
-    private String minQuantity;
+    private String quantityMin;
 
-    private String maxQuantity;
+    private String quantityMax;
 
     private ProductStatus status;
 
