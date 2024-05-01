@@ -7,20 +7,8 @@ services:
     ports:
       - "8080:8080"
     container_name: sus_be
-    depends_on:
-      - db
     environment:
       - SPRING_DATASOURCE_URl=jdbc:postgresql://db:5432/datn_step_up_sneaker
       - SPRING_DATASOURCE_USERNAME=admin
       - SPRING_DATASOURCE_PASSWORD=100301
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-
-  db:
-    image: 'postgres:13.1-alpine'
-    ports:
-      - "5432:5432"
-    container_name: sus_database
-    environment:
-      - POSTGRES_DB=datn_step_up_sneaker
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=100301
