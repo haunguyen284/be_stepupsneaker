@@ -95,6 +95,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
             }
         }
         newVoucher.setValue(voucherRequest.getValue());
+        adminVoucherRepository.updateStatusBasedOnTime(newVoucher.getId(), newVoucher.getStartDate(), newVoucher.getEndDate());
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(adminVoucherRepository.save(newVoucher));
     }
 
@@ -124,16 +125,15 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
     @Override
     public AdminVoucherResponse deactivateDiscount(String id) {
         Voucher voucher = getVoucher(id);
-        if (voucher.getStatus() == VoucherStatus.EXPIRED
-                || voucher.getStatus() == VoucherStatus.IN_ACTIVE
-                || voucher.getStatus() == VoucherStatus.UP_COMING) {
+        if (voucher.getStatus() == VoucherStatus.EXPIRED || voucher.getStatus() == VoucherStatus.IN_ACTIVE) {
             throw new ApiException(messageUtil.getMessage("voucher.status"));
         }
-        if (voucher.getStatus() == VoucherStatus.ACTIVE) {
+        if (voucher.getStatus() == VoucherStatus.ACTIVE||voucher.getStatus()== VoucherStatus.UP_COMING) {
             voucher.setStatus(VoucherStatus.CANCELLED);
         } else {
             voucher.setStatus(VoucherStatus.ACTIVE);
         }
+        adminVoucherRepository.updateStatusBasedOnTime(voucher.getId(), voucher.getStartDate(), voucher.getEndDate());
         return AdminVoucherMapper.INSTANCE.voucherToAdminVoucherResponse(adminVoucherRepository.save(voucher));
     }
 
