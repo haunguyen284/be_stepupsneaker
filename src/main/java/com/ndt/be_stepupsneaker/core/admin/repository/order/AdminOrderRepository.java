@@ -52,7 +52,7 @@ public interface AdminOrderRepository extends OrderRepository {
 
     List<Order> findAllByStatusAndCreatedAtBeforeAndType(OrderStatus status, Long cutoffTime,OrderType orderType);
 
-    Integer countAllByStatus(OrderStatus status);
+    Integer countAllByStatusAndType(OrderStatus status,OrderType orderType);
 
 
     @Query(
