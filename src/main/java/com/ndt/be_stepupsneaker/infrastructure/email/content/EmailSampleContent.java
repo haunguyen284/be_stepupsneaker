@@ -32,12 +32,12 @@ import java.util.List;
 public class EmailSampleContent {
     private EmailService emailService;
 
-    @Autowired
     private DeployConfig deployConfig;
 
     @Autowired
-    public EmailSampleContent(EmailService emailService) {
+    public EmailSampleContent(EmailService emailService, DeployConfig deployConfig) {
         this.emailService = emailService;
+        this.deployConfig = deployConfig;
     }
 
 
