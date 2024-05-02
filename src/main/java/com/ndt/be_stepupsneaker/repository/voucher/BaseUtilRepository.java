@@ -34,7 +34,7 @@ public interface BaseUtilRepository<T> extends JpaRepository<T, String> {
             "       WHEN (:startDate > CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP < :endDate) THEN 3 " +
             "       ELSE 1 " +
             "   END "+
-            "WHERE x.id = :id")
+            "WHERE x.id = :id AND x.status != 4")
     void updateStatusBasedOnTime(@Param("id") String id,
                                  @Param("startDate") Long startDate,
                                  @Param("endDate") Long endDate);
