@@ -42,9 +42,9 @@ public class ClientVNPayController {
     public Object getApiSuccess(HttpServletRequest request) {
         Order order = vnPayService.authenticateVnPay(request);
         if (order != null) {
-            return new RedirectView("http://localhost:5173/success/" + order.getId());
+            return new RedirectView("https://stepupsneaker.pro/success/" + order.getId());
         }
-        return new RedirectView("http://localhost:5173/pages/checkout");
+        return new RedirectView("https://stepupsneaker.pro/pages/checkout");
     }
 
 }
