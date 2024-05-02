@@ -12,6 +12,7 @@ import com.ndt.be_stepupsneaker.entity.order.ReturnFormDetail;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
+import com.ndt.be_stepupsneaker.infrastructure.config.DeployConfig;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
@@ -30,6 +31,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmailSampleContent {
     private EmailService emailService;
+
+    @Autowired
+    private DeployConfig deployConfig;
 
     @Autowired
     public EmailSampleContent(EmailService emailService) {
@@ -136,7 +140,7 @@ public class EmailSampleContent {
                 + clientOrderResponse.getAddress().getDistrictName() + ", "
                 + clientOrderResponse.getAddress().getProvinceName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn:</span><a href='" + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn:</span><a href='" + deployConfig.getPortDeployFe() + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<tr><td><strong>Tiền vận chuyển :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(clientOrderResponse.getShippingMoney()) + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Tiền được giảm       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(totalVoucher) + "</strong></td></tr>";
@@ -215,7 +219,7 @@ public class EmailSampleContent {
                 + clientOrderResponse.getAddress().getDistrictName() + ", "
                 + clientOrderResponse.getAddress().getProvinceName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + clientOrderResponse.getAddress().getPhoneNumber() + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + deployConfig.getPortDeployFe() + EntityProperties.URL_FE_TRACKING + clientOrderResponse.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<p>Nếu bạn gặp sự cố khi thanh toán, vui lòng nhấp vào liên kết bên dưới để thanh toán lại đơn hàng! Liên kết này sẽ có hiệu lực 15 phút kể từ lúc bắt đầu gửi mail.</p>"
                 + "<p><a href=\"" + urlVnPay + "\">Thanh toán lại</a></p>"
@@ -283,7 +287,7 @@ public class EmailSampleContent {
                 + order.getAddress().getDistrictName() + ", "
                 + order.getAddress().getProvinceName() + "</td></tr>";
         emailBody += "<tr><td colspan='4'><strong>Số điện thoại:</strong> " + order.getAddress().getPhoneNumber() + "</td></tr>";
-        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + EntityProperties.URL_FE_TRACKING + order.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
+        emailBody += "<tr><td colspan='4'><span style='font-size: 12px;margin-right:10px;'>Bấm vào đây để theo dõi đơn hàng của bạn :</span><a href='" + deployConfig.getPortDeployFe() + EntityProperties.URL_FE_TRACKING + order.getCode() + "' style='background-color: #4CAF50; color: white; padding: 5px 10px; text-decoration: none; border-radius: 3px; font-size: 12px;'>Theo dõi</a></td></tr>";
         emailBody += "<tr><td colspan='4'>&nbsp;</td></tr>";
         emailBody += "<tr><td><strong>Phí vận chuyển :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getShippingMoney()) + "</strong></td></tr>";
         emailBody += "<tr><td><strong>Tiền được giảm       :</strong></td><td colspan='3' style='text-align: right;'><strong>" + ConvertUtil.convertFloatToVnd(order.getReduceMoney()) + "</strong></td></tr>";

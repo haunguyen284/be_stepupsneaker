@@ -1,6 +1,10 @@
 package com.ndt.be_stepupsneaker.infrastructure.constant;
 
+import com.ndt.be_stepupsneaker.infrastructure.config.DeployConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+
 public final class EntityProperties {
+
     private EntityProperties() {
     }
 
@@ -36,9 +40,9 @@ public final class EntityProperties {
     public static final String ADMIN = "ADMIN";
     public static final String STAFF = "STAFF";
     public static final String CUSTOMER = "CUSTOMER";
-    public static final String URL_RESET = "http://localhost:5173/reset-password?token=";
-    public static final String URL_FE_TRACKING = "http://localhost:5173/tracking/";
-    public static final String URL_FE_RETURN = "http://localhost:5173/return-tracking/";
+    public static final String URL_RESET = "reset-password?token=";
+    public static final String URL_FE_TRACKING = "tracking/";
+    public static final String URL_FE_RETURN = "return-tracking/";
     public static final String GHN_API_FEE_URL = "https://online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
 
 }
