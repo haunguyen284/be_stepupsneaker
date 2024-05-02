@@ -15,7 +15,7 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "brand")
 @Entity
 public class Brand extends PrimaryEntity {
-    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
+    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false)
     @Nationalized
     private String name;
 

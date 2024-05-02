@@ -17,7 +17,7 @@ import org.hibernate.annotations.Nationalized;
 @Entity
 @DynamicUpdate
 public class Size extends PrimaryEntity {
-    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
+    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false)
     @Nationalized
     private String name;
 

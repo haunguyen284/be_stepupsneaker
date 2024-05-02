@@ -28,10 +28,13 @@ public interface AdminMaterialRepository extends MaterialRepository {
     """)
     Page<Material> findAllMaterial(@Param("request") AdminMaterialRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM Material x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Material> findByName(String name);
 
     @Query("""
-    SELECT x FROM Material x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Material y WHERE y.id != :id))
+    SELECT x FROM Material x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Material y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Material> findByName(@Param("id")String id, @Param("name") String name);
 
