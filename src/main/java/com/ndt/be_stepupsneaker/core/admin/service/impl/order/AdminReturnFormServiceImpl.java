@@ -33,6 +33,7 @@ import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormStatus;
@@ -220,6 +221,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         } else {
             payment.setTransactionCode("---");
         }
+        payment.setPaymentStatus(PaymentStatus.COMPLETED);
         adminPaymentRepository.save(payment);
 
         // save ReturnForm
