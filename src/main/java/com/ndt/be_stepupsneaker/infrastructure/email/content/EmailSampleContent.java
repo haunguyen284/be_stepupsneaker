@@ -14,15 +14,12 @@ import com.ndt.be_stepupsneaker.entity.voucher.CustomerVoucher;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.infrastructure.config.DeployConfig;
 import com.ndt.be_stepupsneaker.infrastructure.constant.EntityProperties;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
-import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormType;
 import com.ndt.be_stepupsneaker.infrastructure.constant.VoucherType;
 import com.ndt.be_stepupsneaker.infrastructure.email.model.Email;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.util.ConvertUtil;
-import com.ndt.be_stepupsneaker.util.OrderUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,16 +27,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EmailSampleContent {
-    private EmailService emailService;
-
-    private DeployConfig deployConfig;
-
-    @Autowired
-    public EmailSampleContent(EmailService emailService, DeployConfig deployConfig) {
-        this.emailService = emailService;
-        this.deployConfig = deployConfig;
-    }
-
+    private final EmailService emailService;
+    private final DeployConfig deployConfig;
 
     public void sendMailAutoPassWord(Customer customer, String passWord, Employee employee) {
         String[] toEmail = new String[1];
