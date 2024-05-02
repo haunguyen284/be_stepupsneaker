@@ -22,7 +22,7 @@ public class VNPayUtil {
 
     public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
-    public static String vnp_Returnurl = "http://localhost:8080/client/transaction/authenticate";
+    public static String vnp_Returnurl = "https://stepupsneaker.pro/client/transaction/authenticate";
 
     public static String vnp_TmnCode = "6ATWTPCI";
 
