@@ -318,6 +318,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
             for (Payment paymentCompleted : payments) {
+                if(paymentCompleted.getTransactionCode().equals("PENDING")){
+                    paymentCompleted.setTransactionCode("Hoàn thành");
+                }
                 paymentCompleted.setPaymentStatus(PaymentStatus.COMPLETED);
                 newPayments.add(paymentCompleted);
             }
