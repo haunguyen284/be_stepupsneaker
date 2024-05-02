@@ -28,17 +28,17 @@ public interface AdminVoucherRepository extends VoucherRepository, BaseUtilRepos
                     AND
                     (:status IS NULL OR x.status = :status) AND (:type IS NULL OR x.type = :type)
                     AND
-                    (:#{#request.quantityMin} IS NULL OR :#{#request.quantityMin} ILIKE ''  OR :#{#request.quantityMax} IS NULL
-                    OR 
-                    :#{#request.quantityMax} ILIKE '' OR x.quantity BETWEEN :#{#request.quantityMin} AND :#{#request.quantityMax})
+                    (:#{#request.quantityMin} IS NULL OR :#{#request.quantityMin} = '' OR :#{#request.quantityMin} <= x.quantity)
+                    AND
+                    (:#{#request.quantityMax} IS NULL OR :#{#request.quantityMax} = '' OR :#{#request.quantityMax} >= x.quantity)
                     AND
                     (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE ''  OR :#{#request.priceMax} IS NULL
                     OR 
                     :#{#request.priceMax} ILIKE '' OR x.value BETWEEN :#{#request.priceMin} AND :#{#request.priceMax})
                     AND
-                    (:#{#request.constraintMin} IS NULL OR :#{#request.constraintMin} ILIKE ''  OR :#{#request.constraintMax} IS NULL
-                    OR 
-                    :#{#request.constraintMax} ILIKE '' OR x.constraint BETWEEN :#{#request.constraintMin} AND :#{#request.constraintMax})
+                    (:#{#request.constraintMin} IS NULL OR :#{#request.constraintMin} = '' OR :#{#request.constraintMin} <= x.constraint)
+                    AND
+                    (:#{#request.constraintMax} IS NULL OR :#{#request.constraintMax} = '' OR :#{#request.constraintMax} >= x.constraint)
                     AND
                     (:#{#request.startDate} IS NULL OR :#{#request.endDate} IS NULL OR (x.startDate >= :#{#request.startDate} AND x.endDate <= :#{#request.endDate}))
                     AND
@@ -46,7 +46,7 @@ public interface AdminVoucherRepository extends VoucherRepository, BaseUtilRepos
                     AND
                     (:noCustomer IS NULL OR :noCustomer ILIKE '' OR x.id NOT IN (SELECT z.voucher.id FROM CustomerVoucher z WHERE z.customer.id = :noCustomer))
                     AND
-                    (x.deleted = false)
+                    (x.deleted = FALSE)
             """)
     Page<Voucher> findAllVoucher(@Param("request") AdminVoucherRequest request, Pageable pageable,
                                  @Param("status") VoucherStatus voucherStatus,

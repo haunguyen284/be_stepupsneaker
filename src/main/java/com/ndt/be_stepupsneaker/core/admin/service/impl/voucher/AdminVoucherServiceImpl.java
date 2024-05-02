@@ -127,7 +127,7 @@ public class AdminVoucherServiceImpl implements AdminVoucherService {
         if (voucher.getStatus() == VoucherStatus.EXPIRED
                 || voucher.getStatus() == VoucherStatus.IN_ACTIVE
                 || voucher.getStatus() == VoucherStatus.UP_COMING) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.status"));
+            throw new ApiException(messageUtil.getMessage("voucher.status"));
         }
         if (voucher.getStatus() == VoucherStatus.ACTIVE) {
             voucher.setStatus(VoucherStatus.CANCELLED);
