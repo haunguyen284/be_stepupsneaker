@@ -28,7 +28,7 @@ import java.util.Set;
 @Entity
 @Audited
 public class Voucher extends PrimaryEntity {
-    @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false, unique = true)
+    @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false)
     private String code;
 
     @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false)

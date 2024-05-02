@@ -28,10 +28,13 @@ public interface AdminSizeRepository extends SizeRepository {
     Page<Size> findAllSize(@Param("request") AdminSizeRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
     @Query("""
-            SELECT x FROM Size x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Color y WHERE y.id != :id))
+            SELECT x FROM Size x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Color y WHERE y.id != :id)) AND x.deleted=false
             """)
     Optional<Size> findByName(@Param("id") String id, @Param("name") String name);
 
+    @Query("""
+    SELECT x FROM Size x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Size> findByName(String name);
 
 }

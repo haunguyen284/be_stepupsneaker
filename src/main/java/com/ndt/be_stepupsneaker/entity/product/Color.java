@@ -15,10 +15,10 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "color")
 @Entity
 public class Color extends PrimaryEntity {
-    @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false, unique = true)
+    @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false)
     private String code;
 
-    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
+    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false)
     @Nationalized
     private String name;
 

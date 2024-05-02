@@ -15,7 +15,7 @@ import org.hibernate.annotations.Nationalized;
 @Table(name = "trade_mark")
 @Entity
 public class TradeMark extends PrimaryEntity {
-    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false, unique = true)
+    @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false)
     @Nationalized
     private String name;
 

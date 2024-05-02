@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "promotion")
 @Entity
 public class Promotion extends PrimaryEntity {
-    @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false, unique = true)
+    @Column(name = "code", length = EntityProperties.LENGTH_CODE, nullable = false)
     private String code;
 
     @Column(name = "name", length = EntityProperties.LENGTH_NAME, nullable = false)
