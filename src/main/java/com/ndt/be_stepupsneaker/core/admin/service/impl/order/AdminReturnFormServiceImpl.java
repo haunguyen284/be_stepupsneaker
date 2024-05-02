@@ -169,7 +169,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
 
             // lưu số lượng trả lại sản phẩm chi tiết
             ProductDetail productDetail = orderDetail.getProductDetail();
-            productDetail.setReturnQuantity(productDetail.getQuantity() + returnFormDetail.getQuantity());
+            productDetail.setReturnQuantity(productDetail.getReturnQuantity() + returnFormDetail.getQuantity());
             adminProductDetailRepository.save(productDetail);
 
             int remainQuantity = orderDetail.getQuantity() - returnFormDetailRequest.getQuantity();
