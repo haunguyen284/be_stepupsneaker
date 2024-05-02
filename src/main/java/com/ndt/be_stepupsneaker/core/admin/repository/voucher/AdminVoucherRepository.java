@@ -57,10 +57,13 @@ public interface AdminVoucherRepository extends VoucherRepository, BaseUtilRepos
 
     @Query("""
             SELECT x FROM Voucher x 
-            WHERE x.code = :code AND :code IN (SELECT y.code FROM Voucher y WHERE y.id != :id)
+            WHERE (x.code = :code AND :code IN (SELECT y.code FROM Voucher y WHERE y.id != :id)) AND x.deleted=false
             """)
     Optional<Voucher> findByCode(@Param("id") String id, @Param("code") String code);
 
+    @Query("""
+    SELECT x FROM Voucher x WHERE x.code = :code AND x.deleted=false
+    """)
     Optional<Voucher> findByCode(String code);
 
     @Query("""
