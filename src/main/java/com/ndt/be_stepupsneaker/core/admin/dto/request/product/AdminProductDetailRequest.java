@@ -56,9 +56,9 @@ public class AdminProductDetailRequest extends PageableRequest {
     @Min(value = 1, message = "{product_detail.price.min}")
     private float price;
 
-    private float priceMin;
+    private String priceMin;
 
-    private float priceMax;
+    private String priceMax;
 
     @Min(value = 1, message = "{product_detail.quantity.min}")
     private int quantity;
