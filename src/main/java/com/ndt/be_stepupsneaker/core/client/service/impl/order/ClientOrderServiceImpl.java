@@ -347,7 +347,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
         payment.setPaymentMethod(paymentMethod);
         payment.setTotalMoney(order.getTotalMoney());
         if (orderRequest.getTransactionInfo() == null) {
-            payment.setTransactionCode("PENDING");
+            payment.setTransactionCode(messageUtil.getMessage("payment.transaction_code"));
             payment.setPaymentStatus(PaymentStatus.PENDING);
         } else {
             payment.setTransactionCode(orderRequest.getTransactionInfo().getTransactionCode());
