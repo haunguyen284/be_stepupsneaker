@@ -34,9 +34,9 @@ public class PasswordResetTokenService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final ClientCustomerRepository clientCustomerRepository;
     private final AdminEmployeeRepository adminEmployeeRepository;
-    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final MessageUtil messageUtil;
+    private final EmailSampleContent emailSampleContent;
     private boolean isEmailSending = false;
     private long timeRemaining = 0;
 
@@ -82,7 +82,6 @@ public class PasswordResetTokenService {
     }
 
     public boolean sendMailUrl(Customer customer, Employee employee, String token) {
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         PasswordResetToken resetToken = createPasswordResetToken(customer, employee, token);
         String resetLink = deployConfig.getPortDeployFe() + EntityProperties.URL_RESET + resetToken.getToken();
         if (customer != null) {

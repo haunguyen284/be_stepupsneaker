@@ -52,6 +52,8 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
 
     private final EntityUtil entityUtil;
 
+    private final EmailSampleContent emailSampleContent;
+
     @Override
     public PageableObject<AdminCustomerResponse> findAllCustomer(AdminCustomerRequest customerRequest, String voucher, String noVoucher) {
         Pageable pageable = paginationUtil.pageable(customerRequest);
@@ -98,7 +100,6 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             addressList.add(address);
         }
         customer.setAddressList(addressList);
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         emailSampleContent.sendMailAutoPassWord(customer, passWordRandom, null);
         return AdminCustomerMapper.INSTANCE.customerToAdminCustomerResponse(customer);
     }

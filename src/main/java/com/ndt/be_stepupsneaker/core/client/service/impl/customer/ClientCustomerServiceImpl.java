@@ -35,9 +35,8 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
 
     private final PaginationUtil paginationUtil;
 
-    private final EmailService emailService;
-
     private final PasswordEncoder passwordEncoder;
+    private final EmailSampleContent emailSampleContent;
 
     @Autowired
     private MessageUtil messageUtil;
@@ -68,7 +67,6 @@ public class ClientCustomerServiceImpl implements ClientCustomerService {
         customerDTO.setPassword(passwordEncoder.encode(passWordRandom));
         customerDTO.setImage(cloudinaryUpload.upload(customerDTO.getImage()));
         Customer customer = clientCustomerRepository.save(ClientCustomerMapper.INSTANCE.clientCustomerRequestToCustomer(customerDTO));
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         emailSampleContent.sendMailAutoPassWord(customer,passWordRandom,null);
         return ClientCustomerMapper.INSTANCE.customerToClientCustomerResponse(customer);
     }

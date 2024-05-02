@@ -28,6 +28,7 @@ public class EntityUtil {
     private final AdminCustomerVoucherRepository adminCustomerVoucherRepository;
     private final AdminCustomerRepository adminCustomerRepository;
     private final EmailService emailService;
+    private final EmailSampleContent emailSampleContent;
 
     public Address updateAddress(Address address, AdminAddressRequest addressRequest) {
         if (addressRequest.getProvinceName() == null || addressRequest.getProvinceName().equals("")) {
@@ -67,7 +68,6 @@ public class EntityUtil {
                 customerVouchers.add(customerVoucher);
             }
             voucher.setCustomerVoucherList(customerVouchers);
-            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
             emailSampleContent.sendMailAutoVoucherToCustomer(customerVouchers);
             return adminCustomerVoucherRepository.saveAll(customerVouchers);
 

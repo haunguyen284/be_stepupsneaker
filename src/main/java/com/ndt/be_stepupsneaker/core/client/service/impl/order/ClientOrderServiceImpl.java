@@ -73,6 +73,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
     private final EmailService emailService;
     private final MessageUtil messageUtil;
     private final OrderUtil orderUtil;
+    private final EmailSampleContent emailSampleContent;
 
     @Override
     public PageableObject<ClientOrderResponse> findAllEntity(ClientOrderRequest orderRequest) {
@@ -120,7 +121,7 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
             float totalVnPay = totalVnPay(clientOrderRequest.getVoucher(), totalMoney, newOrder.getShippingMoney());
             String urlVnPay = vnPayService.createOrder((int) totalVnPay, newOrder.getId());
-            EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
+
             emailSampleContent.sendMailAutoCheckoutVnPay(clientOrderResponse, clientOrderRequest.getEmail(), urlVnPay);
             notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
             return urlVnPay;
@@ -132,7 +133,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             clientOrderResponse.setPayments(clientPaymentResponse);
         }
         clientOrderResponse.setOrderDetails(clientOrderDetailResponses);
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         emailSampleContent.sendMailAutoInfoOrderToClient(clientOrderResponse, clientOrderRequest.getEmail());
         notificationOrder(newOrder, NotificationEmployeeType.ORDER_PLACED);
         return clientOrderResponse;
@@ -241,7 +241,6 @@ public class ClientOrderServiceImpl implements ClientOrderService {
             orderUtil.updatePayment(order);
         }
         ClientOrderResponse clientOrderResponse = ClientOrderMapper.INSTANCE.orderToClientOrderResponse(order);
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
         String subject = "Đơn hàng của bạn vừa được cập nhật!";
         emailSampleContent.sendMailAutoOrder(order, orderRequest.getEmail(), subject);
         notificationOrder(order, NotificationEmployeeType.ORDER_CHANGED);
