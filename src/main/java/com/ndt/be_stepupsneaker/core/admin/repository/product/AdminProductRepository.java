@@ -75,18 +75,24 @@ public interface AdminProductRepository extends ProductRepository {
     """)
     Page<Object[]> findAllProduct(@Param("request") AdminProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM Product x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Product> findByName(String name);
 
     @Query("""
-    SELECT x FROM Product x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Product y WHERE y.id != :id))
+    SELECT x FROM Product x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Product y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Product> findByName(@Param("id") String id, @Param("name") String name);
 
     @Query("""
-    SELECT x FROM Product x WHERE x.code = :code AND :code IN (SELECT y.code FROM Product y WHERE y.id != :id)
+    SELECT x FROM Product x WHERE (x.code = :code AND :code IN (SELECT y.code FROM Product y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Product> findByCode(@Param("id")String id, @Param("code") String code);
-    
+
+    @Query("""
+    SELECT x FROM Product x WHERE x.code = :code AND x.deleted=false
+    """)
     Optional<Product> findByCode(String code);
 
 

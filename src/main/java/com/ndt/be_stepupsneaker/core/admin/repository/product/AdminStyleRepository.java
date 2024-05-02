@@ -27,10 +27,13 @@ public interface AdminStyleRepository extends StyleRepository {
     """)
     Page<Style> findAllStyle(@Param("request") AdminStyleRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM Style x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Style> findByName(String name);
 
     @Query("""
-    SELECT x FROM Style x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Style y WHERE y.id != :id))
+    SELECT x FROM Style x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Style y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Style> findByName(@Param("id") String id, @Param("name") String name);
 
