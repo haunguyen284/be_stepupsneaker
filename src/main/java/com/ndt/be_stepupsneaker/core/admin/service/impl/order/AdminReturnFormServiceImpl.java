@@ -33,6 +33,7 @@ import com.ndt.be_stepupsneaker.entity.payment.Payment;
 import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.infrastructure.constant.OrderStatus;
+import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.RefundStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnDeliveryStatus;
 import com.ndt.be_stepupsneaker.infrastructure.constant.ReturnFormStatus;
@@ -220,6 +221,7 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         } else {
             payment.setTransactionCode("---");
         }
+        payment.setPaymentStatus(PaymentStatus.COMPLETED);
         adminPaymentRepository.save(payment);
 
         // save ReturnForm
@@ -245,10 +247,6 @@ public class AdminReturnFormServiceImpl implements AdminReturnFormService {
         List<ReturnFormDetail> saveReturnFormDetails = adminReturnFormDetailRepository.saveAll(returnFormDetails);
         ReturnForm returnFormSuccess = adminReturnFormRepository.findById(returnFormSave.getId()).orElseThrow();
         returnFormSuccess.setReturnFormDetails(saveReturnFormDetails);
-
-        EmailSampleContent emailSampleContent = new EmailSampleContent(emailService);
-        String subject = "Thông tin phiếu trả hàng của bạn từ Step Up Sneaker";
-        emailSampleContent.sendMailAutoReturnOrder(returnFormSuccess, subject);
 
         return AdminReturnFormMapper.INSTANCE.returnFormToAdminReturnFormResponse(returnFormSuccess);
     }
