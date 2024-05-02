@@ -59,7 +59,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         if (status == VoucherStatus.EXPIRED
                 || status == VoucherStatus.IN_ACTIVE
                 || status == VoucherStatus.UP_COMING) {
-            throw new ResourceNotFoundException(messageUtil.getMessage("voucher.status"));
+            throw new ApiException(messageUtil.getMessage("voucher.status"));
         }
         if (status == VoucherStatus.ACTIVE) {
             promotion.setStatus(VoucherStatus.CANCELLED);
