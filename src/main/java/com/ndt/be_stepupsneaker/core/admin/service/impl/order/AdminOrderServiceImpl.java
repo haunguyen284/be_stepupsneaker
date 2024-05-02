@@ -284,7 +284,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             throw new ResourceNotFoundException(messageUtil.getMessage("order.notfound"));
         }
         Order orderSave = orderOptional.get();
-        if (orderSave.getStatus() == OrderStatus.COMPLETED || orderSave.getStatus() == OrderStatus.CANCELED) {
+        if (orderSave.getStatus() == OrderStatus.COMPLETED
+                || orderSave.getStatus() == OrderStatus.CANCELED
+                || orderSave.getStatus() == OrderStatus.PENDING) {
             throw new ApiException(messageUtil.getMessage("order.can_not_update"));
         }
 
@@ -302,7 +304,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             }
             orderUtil.revertQuantityProductDetailWhenCancelOrder(orderSave);
             for (Payment payment : payments) {
-                if (payment.getPaymentStatus() == PaymentStatus.COMPLETED && (!payment.getTransactionCode().equals("Change")||!payment.getTransactionCode().equals("Tiền thừa"))) {
+                if (payment.getPaymentStatus() == PaymentStatus.COMPLETED && (!payment.getTransactionCode().equals("Change") || !payment.getTransactionCode().equals("Tiền thừa"))) {
                     PaymentMethod paymentMethod = adminPaymentMethodRepository.findByName("Transfer")
                             .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("payment.method.notfound")));
                     Payment cancelPayment = new Payment();
@@ -318,7 +320,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         }
         if (orderSave.getStatus() == OrderStatus.COMPLETED && orderSave.getPayments() != null) {
             for (Payment paymentCompleted : payments) {
-                if(paymentCompleted.getTransactionCode().equals("PENDING")){
+                if (paymentCompleted.getTransactionCode().equals("PENDING")) {
                     paymentCompleted.setTransactionCode("Hoàn thành");
                 }
                 paymentCompleted.setPaymentStatus(PaymentStatus.COMPLETED);
