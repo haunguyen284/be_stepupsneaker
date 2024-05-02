@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         req -> req
                                 .requestMatchers("/", "/error/**", "/auth/**", "/client/products/**",
-                                        "/client/product-details/**", "/admin/notifications/sse/**","/client/product/**",
+                                        "/client/product-details/**", "/admin/notifications/sse/**", "/client/product/**",
                                         "/admin/notifications", "/client/transaction/**", "/client/orders/**",
                                         "/client/return-forms/code/**")
                                 .permitAll()
@@ -47,16 +47,17 @@ public class SecurityConfiguration {
                                         , "/admin/orders/**"
                                         , "/admin/order-details/**"
                                         , "/admin/statistic/**"
-                                        ,"/admin/return-forms/**"
-                                        ,"/admin/notifications/**"
-                                        ,"/admin/addresses/**")
+                                        , "/admin/return-forms/**"
+                                        , "/admin/notifications/**"
+                                        , "/admin/addresses/**")
                                 .hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
                                 .requestMatchers(HttpMethod.GET
                                         , "/admin/order-histories/**", "/admin/voucher-histories/**"
                                         , "/admin/product-details/**", "/admin/trade-marks/**", "/admin/products/**"
                                         , "/admin/payments/**", "/admin/payment-methods/**", "/admin/colors/**"
                                         , "/admin/brands/**", "/admin/styles/**", "/admin/soles/**", "/admin/vouchers/**"
-                                        , "/admin/sizes/**", "/admin/materials/**", "/admin/product/reviews/**")
+                                        , "/admin/sizes/**", "/admin/materials/**", "/admin/product/reviews/**"
+                                        , "/admin/promotions/**")
                                 .hasAnyRole(EntityProperties.STAFF, EntityProperties.ADMIN)
                                 .requestMatchers("/admin/**").hasRole(EntityProperties.ADMIN)
                                 .requestMatchers("/client/**").hasAnyRole(EntityProperties.CUSTOMER)
