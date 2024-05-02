@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Setter
 @MappedSuperclass
-@EntityListeners(AuditEntityListener.class)
+//@EntityListeners(AuditEntityListener.class)
 @RequiredArgsConstructor
 public abstract class AuditEntity {
     @Column(name = "created_at", updatable = false)

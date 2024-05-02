@@ -28,6 +28,7 @@ import com.ndt.be_stepupsneaker.core.admin.repository.voucher.AdminVoucherReposi
 import com.ndt.be_stepupsneaker.core.admin.service.order.AdminOrderService;
 import com.ndt.be_stepupsneaker.core.common.base.PageableObject;
 import com.ndt.be_stepupsneaker.entity.customer.Address;
+import com.ndt.be_stepupsneaker.entity.customer.Customer;
 import com.ndt.be_stepupsneaker.entity.employee.Employee;
 import com.ndt.be_stepupsneaker.entity.order.Order;
 import com.ndt.be_stepupsneaker.entity.order.OrderDetail;
@@ -51,8 +52,10 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,6 +78,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
     private final EntityUtil entityUtil;
     private final AdminPaymentRepository adminPaymentRepository;
     private final AdminVoucherHistoryRepository adminVoucherHistoryRepository;
+    private final AdminCustomerRepository adminCustomerRepository;
 
     @Override
     public PageableObject<AdminOrderResponse> findAllEntity(AdminOrderRequest orderRequest) {
@@ -477,6 +481,74 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         Order order = adminOrderRepository.findByCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException(messageUtil.getMessage("order.notfound")));
         return AdminOrderMapper.INSTANCE.orderToAdminOrderResponse(order);
+    }
+
+    @Override
+    public void randomOrderData() {
+        Random random = new Random();
+
+        List<Order> orders = adminOrderRepository.findAll();
+        List<Customer> customers = adminCustomerRepository.findAll();
+        List<Address> addresses = adminAddressRepository.findAll();
+        List<ProductDetail> productDetails = adminProductDetailRepository.findAll();
+        List<PaymentMethod> paymentMethods = adminPaymentMethodRepository.findAll();
+
+        for (int i = 0; i < 1000; i++) {
+            Customer customer = customers.get(random.nextInt(customers.size()));
+            Order order = orders.get(random.nextInt(orders.size()));
+            Address address = addresses.get(random.nextInt(addresses.size()));
+            ProductDetail productDetail = productDetails.get(random.nextInt(productDetails.size()));
+            PaymentMethod paymentMethod = paymentMethods.get(random.nextInt(paymentMethods.size()));
+
+            Order newOrder = new Order();
+            newOrder.setCustomer(customer);
+            newOrder.setEmployee(order.getEmployee());
+            newOrder.setVoucher(order.getVoucher());
+            newOrder.setAddress(address);
+            newOrder.setPhoneNumber(order.getPhoneNumber());
+            newOrder.setFullName(order.getFullName());
+            newOrder.setEmail(order.getEmail());
+            newOrder.setOriginMoney(order.getOriginMoney());
+            newOrder.setReduceMoney(order.getReduceMoney());
+            newOrder.setTotalMoney(order.getTotalMoney());
+            newOrder.setShippingMoney(order.getShippingMoney());
+            newOrder.setType(order.getType());
+            newOrder.setNote(order.getNote());
+            newOrder.setStatus(OrderStatus.COMPLETED);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.MONTH, Calendar.JANUARY);
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
+            long startOfYear = calendar.getTimeInMillis();
+            long now = System.currentTimeMillis();
+
+            long randomTime = startOfYear + (long) (random.nextDouble() * (now - startOfYear));
+            newOrder.setCreatedAt(randomTime);
+            newOrder.setUpdatedAt(randomTime);
+
+            Order saveOrder = adminOrderRepository.save(newOrder);
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setProductDetail(productDetail);
+            orderDetail.setOrder(saveOrder);
+            orderDetail.setQuantity(1);
+            orderDetail.setPrice(productDetail.getPrice());
+            orderDetail.setTotalPrice(productDetail.getPrice());
+            orderDetail.setStatus(OrderStatus.COMPLETED);
+            adminOrderDetailRepository.save(orderDetail);
+
+            Payment payment = new Payment();
+            payment.setTransactionCode("Hoàn thành");
+            payment.setOrder(saveOrder);
+            payment.setTotalMoney(productDetail.getPrice());
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
+            payment.setPaymentMethod(paymentMethod);
+            adminPaymentRepository.save(payment);
+        }
+
     }
 
 

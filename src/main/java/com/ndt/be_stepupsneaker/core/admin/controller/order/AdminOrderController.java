@@ -136,4 +136,10 @@ public class AdminOrderController {
             return ResponseHelper.getErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         return ResponseHelper.getResponse(adminOrderService.applyNoteToOrder(orderRequest), HttpStatus.OK);
     }
+
+    @GetMapping("/random")
+    public Object randomDataOrder() {
+        adminOrderService.randomOrderData();
+        return ResponseHelper.getResponse("", HttpStatus.OK);
+    }
 }

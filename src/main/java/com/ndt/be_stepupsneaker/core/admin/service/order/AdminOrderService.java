@@ -37,4 +37,6 @@ public interface AdminOrderService extends BaseService<AdminOrderResponse, Strin
 
     AdminOrderResponse findByCode(String code);
 
+    void randomOrderData();
+
 }
