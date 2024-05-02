@@ -538,6 +538,9 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             orderDetail.setPrice(productDetail.getPrice());
             orderDetail.setTotalPrice(productDetail.getPrice());
             orderDetail.setStatus(OrderStatus.COMPLETED);
+            orderDetail.setCreatedAt(randomTime);
+            orderDetail.setUpdatedAt(randomTime);
+
             adminOrderDetailRepository.save(orderDetail);
 
             Payment payment = new Payment();
@@ -546,6 +549,8 @@ public class AdminOrderServiceImpl implements AdminOrderService {
             payment.setTotalMoney(productDetail.getPrice());
             payment.setPaymentStatus(PaymentStatus.COMPLETED);
             payment.setPaymentMethod(paymentMethod);
+            payment.setCreatedAt(randomTime);
+            payment.setUpdatedAt(randomTime);
             adminPaymentRepository.save(payment);
         }
 
