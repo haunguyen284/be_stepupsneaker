@@ -31,11 +31,9 @@ public interface AdminPaymentRepository extends PaymentRepository {
                         x.transactionCode ILIKE CONCAT('%', :#{#request.q}, '%') OR x.description ILIKE CONCAT('%', :#{#request.q}, '%')
                     )
                     AND
-                    (
-                        :#{#request.priceMin} IS NULL OR :#{#request.priceMax} IS NULL OR :#{#request.priceMin} = '' OR :#{#request.priceMax} = '' 
-                        OR
-                        x.totalMoney BETWEEN :#{#request.priceMin} AND :#{#request.priceMax}
-                    )
+                    (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} = '' OR :#{#request.priceMin} <= x.totalMoney)
+                    AND
+                    (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} = '' OR :#{#request.priceMax} >= x.totalMoney)
                     AND 
                     (:#{#request.paymentMethod} IS NULL OR :#{#request.paymentMethod} = '' OR x.paymentMethod.id = :#{#request.paymentMethod})
                     AND 
