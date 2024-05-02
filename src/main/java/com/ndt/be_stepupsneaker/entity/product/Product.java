@@ -12,7 +12,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -38,5 +40,14 @@ public class Product extends PrimaryEntity {
 
     @OneToMany(mappedBy="product")
     private Set<ProductDetail> productDetails;
+
+    public Set<ProductDetail> getProductDetails() {
+        if (productDetails == null) {
+            return new HashSet<>();
+        }
+        return productDetails.stream()
+                .filter(productDetail -> !productDetail.getDeleted())
+                .collect(Collectors.toSet());
+    }
 }
 
