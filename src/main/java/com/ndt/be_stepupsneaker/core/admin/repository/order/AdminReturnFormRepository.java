@@ -23,9 +23,9 @@ public interface AdminReturnFormRepository extends ReturnFormRepository {
             OR 
             (:#{#request.q} IS NULL OR :#{#request.q} ILIKE '' OR rf.order.phoneNumber ILIKE  CONCAT('%', :#{#request.q}, '%'))
             ) AND 
-            (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE '' OR rf.amountToBePaid >= CAST(:#{#request.priceMin} AS float)) 
+            (:#{#request.priceMin} IS NULL OR :#{#request.priceMin} ILIKE '' OR rf.amountToBePaid >= :#{#request.priceMin}) 
             AND 
-            (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} ILIKE '' OR rf.amountToBePaid <= CAST(:#{#request.priceMax} AS float)) 
+            (:#{#request.priceMax} IS NULL OR :#{#request.priceMax} ILIKE '' OR rf.amountToBePaid <= :#{#request.priceMax}) 
             AND 
             ((:#{#request.paymentType} IS NULL) OR (:#{#request.paymentType} ILIKE '') OR (rf.paymentType = :#{#request.paymentType})) 
             AND 
