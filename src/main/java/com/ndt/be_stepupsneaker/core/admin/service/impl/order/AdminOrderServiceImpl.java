@@ -93,7 +93,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
 
     @Override
     public Object create(AdminOrderRequest orderRequest) {
-        Integer pendingOrder = adminOrderRepository.countAllByStatus(OrderStatus.PENDING);
+        Integer pendingOrder = adminOrderRepository.countAllByStatusAndType(OrderStatus.PENDING,OrderType.OFFLINE);
         if (pendingOrder >= EntityProperties.LENGTH_PENDING_ORDER) {
             throw new ApiException(messageUtil.getMessage("order.create_max"));
         }

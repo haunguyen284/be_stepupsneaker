@@ -26,11 +26,14 @@ public interface AdminBrandRepository extends BrandRepository {
      x.deleted=false
     """)
     Page<Brand> findAllBrand(@Param("request") AdminBrandRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
+
+    @Query("""
+    SELECT x FROM Brand x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Brand> findByName(String name);
 
     @Query("""
-    SELECT x FROM Brand x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Brand y WHERE y.id != :id))
-    
+    SELECT x FROM Brand x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Brand y WHERE y.id != :id AND y.deleted=false))
     """)
     Optional<Brand> findByName(@Param("id") String id, @Param("name") String name);
 }

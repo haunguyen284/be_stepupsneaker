@@ -45,10 +45,13 @@ public interface AdminPromotionRepository extends PromotionRepository, BaseUtilR
 
     @Query("""
             SELECT x FROM Promotion x 
-            WHERE x.code = :code AND :code IN (SELECT y.code FROM Promotion y WHERE y.id != :id)
+            WHERE (x.code = :code AND :code IN (SELECT y.code FROM Promotion y WHERE y.id != :id)) AND x.deleted=false
             """)
     Optional<Promotion> findByCode(@Param("id") String id, @Param("code") String code);
 
+    @Query("""
+    SELECT x FROM Promotion x WHERE x.code = :code AND x.deleted=false
+    """)
     Optional<Promotion> findByCode(String code);
 
 

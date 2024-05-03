@@ -56,16 +56,15 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
     public AdminPromotionResponse deactivateDiscount(String id) {
         Promotion promotion = getPromotion(id);
         VoucherStatus status = promotion.getStatus();
-        if (status == VoucherStatus.EXPIRED
-                || status == VoucherStatus.IN_ACTIVE
-                || status == VoucherStatus.UP_COMING) {
+        if (status == VoucherStatus.EXPIRED || status == VoucherStatus.IN_ACTIVE) {
             throw new ApiException(messageUtil.getMessage("voucher.status"));
         }
-        if (status == VoucherStatus.ACTIVE) {
+        if (status == VoucherStatus.ACTIVE || status == VoucherStatus.UP_COMING) {
             promotion.setStatus(VoucherStatus.CANCELLED);
         } else {
             promotion.setStatus(VoucherStatus.ACTIVE);
         }
+        adminPromotionRepository.updateStatusBasedOnTime(promotion.getId(), promotion.getStartDate(), promotion.getEndDate());
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(promotion));
     }
 
@@ -97,6 +96,7 @@ public class AdminPromotionServiceImpl implements AdminPromotionService {
         newPromotion.setEndDate(request.getEndDate());
         newPromotion.setStartDate(request.getStartDate());
         newPromotion.setValue(request.getValue());
+        adminPromotionRepository.updateStatusBasedOnTime(newPromotion.getId(), newPromotion.getStartDate(), newPromotion.getEndDate());
         return AdminPromotionMapper.INSTANCE.promotionToAdminPromotionResponse(adminPromotionRepository.save(newPromotion));
     }
 

@@ -29,10 +29,13 @@ public interface AdminSoleRepository extends SoleRepository {
     """)
     Page<Sole> findAllSole(@Param("request") AdminSoleRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM Sole x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Sole> findByName(String name);
 
     @Query("""
-    SELECT x FROM Sole x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Sole y WHERE y.id != :id))
+    SELECT x FROM Sole x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Sole y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Sole> findByName(@Param("id") String id, @Param("name") String name);
 
