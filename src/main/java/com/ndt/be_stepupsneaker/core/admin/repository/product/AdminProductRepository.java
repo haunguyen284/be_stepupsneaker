@@ -23,7 +23,7 @@ public interface AdminProductRepository extends ProductRepository {
     SELECT x, 
     COALESCE(SUM(od.quantity), 0) AS saleCount,
     (SELECT MIN(pd.price) FROM ProductDetail  pd WHERE pd.product = x) as price, 
-    (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x) AS quantity
+    (SELECT COALESCE(SUM(pd.quantity), 0) FROM ProductDetail pd WHERE pd.product = x AND pd.deleted=false) AS quantity
     FROM Product x 
     LEFT JOIN x.productDetails pd 
     LEFT JOIN OrderDetail od ON pd.id = od.productDetail.id
@@ -75,18 +75,24 @@ public interface AdminProductRepository extends ProductRepository {
     """)
     Page<Object[]> findAllProduct(@Param("request") AdminProductRequest request, @Param("status") ProductStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM Product x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Product> findByName(String name);
 
     @Query("""
-    SELECT x FROM Product x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Product y WHERE y.id != :id))
+    SELECT x FROM Product x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Product y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Product> findByName(@Param("id") String id, @Param("name") String name);
 
     @Query("""
-    SELECT x FROM Product x WHERE x.code = :code AND :code IN (SELECT y.code FROM Product y WHERE y.id != :id)
+    SELECT x FROM Product x WHERE (x.code = :code AND :code IN (SELECT y.code FROM Product y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Product> findByCode(@Param("id")String id, @Param("code") String code);
-    
+
+    @Query("""
+    SELECT x FROM Product x WHERE x.code = :code AND x.deleted=false
+    """)
     Optional<Product> findByCode(String code);
 
 

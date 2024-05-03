@@ -46,9 +46,9 @@ public class ClientProductServiceImpl implements ClientProductService {
         for (Object[] result : resp) {
             Product product = (Product) result[0];
             ClientProductResponse clientProductResponse = ClientProductMapper.INSTANCE.productToClientProductResponse(product);
-            clientProductResponse.setSaleCount((Long) result[1]);
-            clientProductResponse.setPrice((Float) result[2]);
-            clientProductResponse.setQuantity((Long) result[3]);
+            clientProductResponse.setSaleCount(result[1] != null ? (Long) result[1] : 0);
+            clientProductResponse.setPrice(result[2] != null ? (Float) result[2] : 0);
+            clientProductResponse.setQuantity(result[3] != null ? (Long) result[3] : 0);
             clientProductResponse.setAverageRating((Double) result[4]);
             clientProductResponses.add(clientProductResponse);
         }

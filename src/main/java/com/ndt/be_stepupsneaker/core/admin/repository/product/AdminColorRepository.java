@@ -32,17 +32,24 @@ public interface AdminColorRepository extends ColorRepository {
     """)
     Page<Color> findAllColor(@Param("request") AdminColorRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM Color x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<Color> findByName(String name);
+
+    @Query("""
+    SELECT x FROM Color x WHERE x.code = :code AND x.deleted=false
+    """)
     Optional<Color> findByCode(String code);
 
 
     @Query("""
-    SELECT x FROM Color x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Color y WHERE y.id != :id))
+    SELECT x FROM Color x WHERE (x.name = :name AND :name IN (SELECT y.name FROM Color y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<Color> findByName(@Param("id")String id, @Param("name") String name);
 
     @Query("""
-    SELECT x FROM Color x WHERE x.code = :code AND :code IN (SELECT y.code FROM Color y WHERE y.id != :id)
+    SELECT x FROM Color x WHERE x.code = :code AND :code IN (SELECT y.code FROM Color y WHERE y.id != :id) AND x.deleted=false
     """)
     Optional<Color> findByCode(@Param("id")String id, @Param("code") String code);
 

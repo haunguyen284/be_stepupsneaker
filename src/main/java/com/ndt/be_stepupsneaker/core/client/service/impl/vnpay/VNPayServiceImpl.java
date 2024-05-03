@@ -19,6 +19,7 @@ import com.ndt.be_stepupsneaker.entity.payment.PaymentMethod;
 import com.ndt.be_stepupsneaker.entity.product.ProductDetail;
 import com.ndt.be_stepupsneaker.entity.voucher.Voucher;
 import com.ndt.be_stepupsneaker.entity.voucher.VoucherHistory;
+import com.ndt.be_stepupsneaker.infrastructure.constant.PaymentStatus;
 import com.ndt.be_stepupsneaker.infrastructure.email.service.EmailService;
 import com.ndt.be_stepupsneaker.infrastructure.email.content.EmailSampleContent;
 import com.ndt.be_stepupsneaker.util.MessageUtil;
@@ -54,7 +55,6 @@ public class VNPayServiceImpl implements VNPayService {
 
     @Override
     public String createOrder(int total, String orderInfor) {
-        System.out.println("Đã chạy ========================");
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String vnp_TxnRef = VNPayUtil.getRandomNumber(8);
@@ -179,6 +179,7 @@ public class VNPayServiceImpl implements VNPayService {
             payment.setDescription(orderOptional.get().getNote());
             payment.setTotalMoney(orderOptional.get().getTotalMoney());
             payment.setTransactionCode(transactionInfo.getTransactionCode());
+            payment.setPaymentStatus(PaymentStatus.COMPLETED);
             clientPaymentRepository.save(payment);
             Order order = orderOptional.get();
             order.setStatus(OrderStatus.WAIT_FOR_DELIVERY);

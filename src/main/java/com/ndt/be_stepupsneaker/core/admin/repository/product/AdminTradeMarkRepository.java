@@ -28,10 +28,13 @@ public interface AdminTradeMarkRepository extends TradeMarkRepository {
     """)
     Page<TradeMark> findAllTradeMark(@Param("request") AdminTradeMarkRequest request, @Param("status") ProductPropertiesStatus status, Pageable pageable);
 
+    @Query("""
+    SELECT x FROM TradeMark x WHERE x.name = :name AND x.deleted=false
+    """)
     Optional<TradeMark> findByName(String name);
 
     @Query("""
-    SELECT x FROM TradeMark x WHERE (x.name = :name AND :name IN (SELECT y.name FROM TradeMark y WHERE y.id != :id))
+    SELECT x FROM TradeMark x WHERE (x.name = :name AND :name IN (SELECT y.name FROM TradeMark y WHERE y.id != :id)) AND x.deleted=false
     """)
     Optional<TradeMark> findByName(@Param("id") String id, @Param("name") String name);
 
